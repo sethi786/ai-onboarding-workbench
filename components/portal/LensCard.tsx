@@ -5,7 +5,6 @@ import { ChevronRight } from 'lucide-react';
 import type { TeamLens, TeamAssessment, TeamScore, Decision } from '@/workbench/types';
 import { SCORE_LABELS, DECISION_OPTIONS } from '@/workbench/data/constants';
 import {
-  toggleFlag,
   updateAssessment,
   addEvidenceLink,
   removeEvidenceLink,
@@ -36,13 +35,17 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
   const controlsDone = lens.requiredControls.filter((c) => a.checkedControls[c.id]).length;
   const evidenceDone = lens.evidenceRequired.filter((e) => a.checkedEvidence[e.id]).length;
 
-  const doToggle = (field: 'checked_controls' | 'checked_evidence' | 'active_blockers', key: string) => {
+  // Persist the FULL map on each toggle (not a server-side read-modify-write),
+  // so rapid successive toggles can't clobber each other's keys.
+  const doToggle = (
+    localField: 'checkedControls' | 'checkedEvidence' | 'activeBlockers',
+    key: string,
+  ) => {
     if (!canEdit) return;
-    const localField =
-      field === 'checked_controls' ? 'checkedControls' : field === 'checked_evidence' ? 'checkedEvidence' : 'activeBlockers';
-    setA((prev) => ({ ...prev, [localField]: { ...prev[localField], [key]: !prev[localField][key] } }));
+    const nextMap = { ...a[localField], [key]: !a[localField][key] };
+    setA((prev) => ({ ...prev, [localField]: nextMap }));
     startTransition(() => {
-      toggleFlag(evalId, orgId, orgSlug, lens.id, field, key);
+      updateAssessment(evalId, orgId, orgSlug, lens.id, { [localField]: nextMap });
     });
   };
 
@@ -116,7 +119,7 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
                 <span className="text-xs text-muted-foreground">{controlsDone}/{lens.requiredControls.length}</span>
               </div>
               {lens.requiredControls.map((c) => (
-                <CheckRow key={c.id} checked={!!a.checkedControls[c.id]} onChange={() => doToggle('checked_controls', c.id)} disabled={!canEdit}>
+                <CheckRow key={c.id} checked={!!a.checkedControls[c.id]} onChange={() => doToggle('checkedControls', c.id)} disabled={!canEdit}>
                   {c.label}{c.critical && <CriticalTag />}
                 </CheckRow>
               ))}
@@ -127,7 +130,7 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
                 <span className="text-xs text-muted-foreground">{evidenceDone}/{lens.evidenceRequired.length}</span>
               </div>
               {lens.evidenceRequired.map((e) => (
-                <CheckRow key={e.id} checked={!!a.checkedEvidence[e.id]} onChange={() => doToggle('checked_evidence', e.id)} disabled={!canEdit}>
+                <CheckRow key={e.id} checked={!!a.checkedEvidence[e.id]} onChange={() => doToggle('checkedEvidence', e.id)} disabled={!canEdit}>
                   {e.label}
                 </CheckRow>
               ))}
@@ -138,7 +141,7 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
             <SectionLabel>Blockers / No-Go criteria</SectionLabel>
             <div className="mt-1">
               {lens.blockers.map((b) => (
-                <CheckRow key={b.id} checked={!!a.activeBlockers[b.id]} onChange={() => doToggle('active_blockers', b.id)} disabled={!canEdit}>
+                <CheckRow key={b.id} checked={!!a.activeBlockers[b.id]} onChange={() => doToggle('activeBlockers', b.id)} disabled={!canEdit}>
                   {b.label}{b.critical && <CriticalTag />}
                 </CheckRow>
               ))}

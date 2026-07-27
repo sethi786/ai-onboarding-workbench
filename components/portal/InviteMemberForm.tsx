@@ -15,7 +15,11 @@ export function InviteMemberForm({ orgId }: { orgId: string }) {
         startTransition(async () => {
           setMsg(null);
           const res = await inviteMember(orgId, fd);
-          setMsg(res?.error ? res.error : 'Invitation created.');
+          setMsg(
+            res?.error
+              ? res.error
+              : 'Invitation recorded. Email delivery + acceptance flow ship in the next phase.',
+          );
         })
       }
       className="flex flex-wrap items-end gap-2"

@@ -4,12 +4,13 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { safeNext } from '@/lib/auth/safe-redirect';
 import { AuthInput, AuthLabel, AuthError, AuthSubmit } from '@/components/auth/auth-ui';
 
 function LoginInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get('next') ?? '/portal';
+  const next = safeNext(params.get('next'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(

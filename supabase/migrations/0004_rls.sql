@@ -44,8 +44,11 @@ create policy eval_select on evaluations
   for select using (org_id in (select auth_org_ids()));
 create policy eval_insert on evaluations
   for insert with check (has_org_role(org_id, array['owner','admin','member']::org_role[]));
+-- USING requires edit rights on the existing row (a viewer cannot target it),
+-- WITH CHECK requires edit rights on the resulting row (can't move it into an
+-- org where you lack edit rights).
 create policy eval_update on evaluations
-  for update using (org_id in (select auth_org_ids()))
+  for update using (has_org_role(org_id, array['owner','admin','member']::org_role[]))
   with check (has_org_role(org_id, array['owner','admin','member']::org_role[]));
 create policy eval_delete on evaluations
   for delete using (has_org_role(org_id, array['owner','admin']::org_role[]));

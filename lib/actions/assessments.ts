@@ -32,38 +32,6 @@ export async function updateAssessment(
   return {};
 }
 
-/** Toggle a key inside one of the jsonb maps (controls/evidence/blockers). */
-export async function toggleFlag(
-  evalId: string,
-  orgId: string,
-  orgSlug: string,
-  teamId: TeamId,
-  field: 'checked_controls' | 'checked_evidence' | 'active_blockers',
-  key: string,
-): Promise<{ error?: string }> {
-  await requireUser();
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('team_assessments')
-    .select('checked_controls, checked_evidence, active_blockers')
-    .eq('evaluation_id', evalId)
-    .eq('team_id', teamId)
-    .maybeSingle();
-
-  const existing = (data?.[field] as Record<string, boolean> | undefined) ?? {};
-  const nextMap = { ...existing, [key]: !existing[key] };
-
-  const { error } = await supabase
-    .from('team_assessments')
-    .upsert(
-      { org_id: orgId, evaluation_id: evalId, team_id: teamId, [field]: nextMap },
-      { onConflict: 'evaluation_id,team_id' },
-    );
-  if (error) return { error: error.message };
-  revalidatePath(`/portal/${orgSlug}/evaluations/${evalId}`, 'layout');
-  return {};
-}
-
 export async function addEvidenceLink(
   evalId: string,
   orgId: string,

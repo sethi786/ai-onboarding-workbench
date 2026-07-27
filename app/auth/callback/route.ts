@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { safeNext } from '@/lib/auth/safe-redirect';
 
 /** Handles magic-link, email-confirmation, OAuth, and recovery code exchange. */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/portal';
+  const next = safeNext(searchParams.get('next'));
 
   if (code) {
     const supabase = await createClient();
