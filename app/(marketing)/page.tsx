@@ -45,16 +45,16 @@ export default function HomePage() {
               Claude, AI agents, RAG apps, and connectors — preparing architecture, security, privacy,
               legal, risk, and go/no-go evidence <em>before</em> formal review.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="/signup"
-                className="glow-electric inline-flex h-11 items-center gap-2 rounded-md bg-electric px-6 text-[15px] font-medium text-white transition-opacity hover:opacity-90"
+                className="glow-electric inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-electric px-6 text-[15px] font-medium text-white transition-opacity hover:opacity-90 sm:w-auto"
               >
                 Start a readiness evaluation <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href="/assessment"
-                className="inline-flex h-11 items-center rounded-md border border-white/15 bg-white/5 px-6 text-[15px] font-medium text-white transition-colors hover:bg-white/10"
+                className="inline-flex h-11 w-full items-center justify-center rounded-md border border-white/15 bg-white/5 px-6 text-[15px] font-medium text-white transition-colors hover:bg-white/10 sm:w-auto"
               >
                 See the 20 review lenses
               </Link>

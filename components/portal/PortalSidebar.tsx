@@ -2,41 +2,25 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  ClipboardList,
-  Boxes,
-  Grid3x3,
-  Settings,
-} from 'lucide-react';
 import { ShieldLogo } from '@/components/brand/ShieldLogo';
 import type { OrgRole } from '@/lib/db/types';
 import { cn } from '@/lib/utils';
-
-const icons = { LayoutDashboard, ClipboardList, Boxes, Grid3x3, Settings };
+import { portalNav } from './nav';
 
 export function PortalSidebar({ orgSlug, role }: { orgSlug: string; role: OrgRole }) {
   const pathname = usePathname();
-  const base = `/portal/${orgSlug}`;
-
-  const nav: { href: string; label: string; icon: keyof typeof icons }[] = [
-    { href: `${base}/dashboard`, label: 'Dashboard', icon: 'LayoutDashboard' },
-    { href: `${base}/evaluations`, label: 'Evaluations', icon: 'ClipboardList' },
-    { href: `${base}/library`, label: 'Tool Library', icon: 'Boxes' },
-    { href: `${base}/matrix`, label: 'Platform Matrix', icon: 'Grid3x3' },
-    { href: `${base}/settings/organization`, label: 'Settings', icon: 'Settings' },
-  ];
+  const nav = portalNav(orgSlug);
 
   return (
     <aside className="flex flex-col border-r border-border bg-navy-deep text-slate-300 max-md:hidden">
       <div className="border-b border-white/10 px-5 py-4">
-        <Link href={`${base}/dashboard`}>
+        <Link href={`/portal/${orgSlug}/dashboard`}>
           <ShieldLogo tone="light" />
         </Link>
       </div>
       <nav className="flex-1 space-y-1 p-3">
         {nav.map((n) => {
-          const Icon = icons[n.icon];
+          const Icon = n.icon;
           const active = pathname === n.href || pathname.startsWith(n.href + '/');
           return (
             <Link

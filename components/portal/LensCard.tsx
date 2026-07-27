@@ -64,14 +64,14 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
     <div className="rounded-lg border border-border bg-card">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-3 p-4 text-left"
+        className="flex w-full flex-wrap items-center gap-2 p-4 text-left sm:gap-3"
       >
-        <ChevronRight className={cn('h-4 w-4 text-muted-foreground transition-transform', open && 'rotate-90')} />
+        <ChevronRight className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', open && 'rotate-90')} />
         <span className="text-lg">{lens.icon}</span>
         <span className="font-semibold">{lens.title}</span>
         {!teamScore.required && <Badge tone="neutral">Not required</Badge>}
         {teamScore.escalated && <Badge tone="electric">Escalated</Badge>}
-        <div className="ml-auto flex items-center gap-3">
+        <div className="flex items-center gap-2 max-sm:mt-1 max-sm:w-full max-sm:justify-between sm:ml-auto sm:gap-3">
           <span className="text-xs text-muted-foreground">
             {a.score < 0 ? 'Not scored' : `${a.score}/5`}
           </span>

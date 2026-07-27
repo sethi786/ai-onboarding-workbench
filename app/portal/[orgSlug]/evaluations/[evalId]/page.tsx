@@ -61,8 +61,8 @@ export default async function EvaluationOverview({
           {Object.values(score.perTeam)
             .filter((t) => t.required)
             .map((t) => (
-              <div key={t.teamId} className="flex items-center gap-4 px-4 py-2.5">
-                <span className="w-52 shrink-0 text-sm">
+              <div key={t.teamId} className="flex items-center gap-3 px-4 py-2.5 sm:gap-4">
+                <span className="w-36 shrink-0 truncate text-sm sm:w-52">
                   {LENS_BY_ID[t.teamId]?.icon} {LENS_BY_ID[t.teamId]?.title}
                 </span>
                 <div className="flex-1">

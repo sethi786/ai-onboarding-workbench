@@ -71,13 +71,13 @@ export default async function DashboardPage({
               <Link
                 key={r.id}
                 href={`/portal/${orgSlug}/evaluations/${r.id}`}
-                className="flex items-center gap-4 px-4 py-3 hover:bg-muted/40"
+                className="flex flex-wrap items-center gap-3 px-4 py-3 hover:bg-muted/40 sm:gap-4"
               >
-                <div className="w-56 shrink-0">
-                  <div className="text-sm font-medium">{r.name}</div>
+                <div className="w-full min-w-0 sm:w-56 sm:shrink-0">
+                  <div className="truncate text-sm font-medium">{r.name}</div>
                   <div className="text-xs text-muted-foreground">{r.platform || '—'} · {r.environment}</div>
                 </div>
-                <div className="flex-1"><Progress value={s.readiness} showLabel /></div>
+                <div className="min-w-[120px] flex-1"><Progress value={s.readiness} showLabel /></div>
                 <Badge tone={riskTone(s.risk)}>{s.risk}</Badge>
                 <Badge tone={recommendationTone(s.recommendation)}>{s.recommendation}</Badge>
               </Link>

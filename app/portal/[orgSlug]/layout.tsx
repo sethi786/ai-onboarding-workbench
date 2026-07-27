@@ -24,9 +24,11 @@ export default async function OrgLayout({
           <PortalHeader
             orgs={orgs.map((o) => ({ slug: o.org.slug, name: o.org.name }))}
             activeSlug={org.slug}
+            orgName={org.name}
+            role={role}
             userEmail={user.email ?? ''}
           />
-          <main className="flex-1 p-6">{children}</main>
+          <main className="flex-1 p-4 sm:p-6">{children}</main>
         </div>
       </div>
     </OrgProvider>

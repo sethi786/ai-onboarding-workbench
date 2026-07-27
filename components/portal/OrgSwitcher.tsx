@@ -23,7 +23,7 @@ export function OrgSwitcher({
           if (e.target.value === '__new__') router.push('/portal/onboarding');
           else router.push(`/portal/${e.target.value}/dashboard`);
         }}
-        className="h-9 min-w-[200px] appearance-none rounded-md border border-border bg-background pl-8 pr-7 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+        className="h-9 w-[150px] appearance-none truncate rounded-md border border-border bg-background pl-8 pr-7 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring sm:w-[220px]"
       >
         {orgs.map((o) => (
           <option key={o.slug} value={o.slug}>
