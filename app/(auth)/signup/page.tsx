@@ -44,9 +44,9 @@ export default function SignupPage() {
   if (needsConfirm) {
     return (
       <div>
-        <h1 className="text-lg font-semibold text-white">Check your email</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          We sent a confirmation link to <span className="text-white">{email}</span>. Click it to
+        <h1 className="text-lg font-semibold text-foreground">Check your email</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          We sent a confirmation link to <span className="text-foreground">{email}</span>. Click it to
           activate your account, then log in.
         </p>
         <Link href="/login" className="mt-6 block text-center text-sm text-electric hover:underline">
@@ -58,8 +58,8 @@ export default function SignupPage() {
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-white">Create your account</h1>
-      <p className="mt-1 text-sm text-slate-400">Start clearing AI tools for the enterprise.</p>
+      <h1 className="text-lg font-semibold text-foreground">Create your account</h1>
+      <p className="mt-1 text-sm text-muted-foreground">Start clearing AI tools for the enterprise.</p>
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <AuthError message={error} />
         <div>
@@ -69,11 +69,11 @@ export default function SignupPage() {
         <div>
           <AuthLabel htmlFor="password">Password</AuthLabel>
           <AuthInput id="password" type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
-          <p className="mt-1 text-xs text-slate-500">At least 8 characters.</p>
+          <p className="mt-1 text-xs text-muted-foreground">At least 8 characters.</p>
         </div>
         <AuthSubmit disabled={loading}>{loading ? 'Creating…' : 'Create account'}</AuthSubmit>
       </form>
-      <p className="mt-5 text-center text-sm text-slate-400">
+      <p className="mt-5 text-center text-sm text-muted-foreground">
         Already have an account?{' '}
         <Link href="/login" className="text-electric hover:underline">
           Log in

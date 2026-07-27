@@ -27,8 +27,8 @@ export default function ForgotPasswordPage() {
   if (sent) {
     return (
       <div>
-        <h1 className="text-lg font-semibold text-white">Check your email</h1>
-        <p className="mt-2 text-sm text-slate-400">
+        <h1 className="text-lg font-semibold text-foreground">Check your email</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           If an account exists for {email}, a password reset link is on its way.
         </p>
         <Link href="/login" className="mt-6 block text-center text-sm text-electric hover:underline">
@@ -40,8 +40,8 @@ export default function ForgotPasswordPage() {
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-white">Reset your password</h1>
-      <p className="mt-1 text-sm text-slate-400">We’ll email you a reset link.</p>
+      <h1 className="text-lg font-semibold text-foreground">Reset your password</h1>
+      <p className="mt-1 text-sm text-muted-foreground">We’ll email you a reset link.</p>
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <AuthError message={error} />
         <div>
@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
         </div>
         <AuthSubmit disabled={loading}>{loading ? 'Sending…' : 'Send reset link'}</AuthSubmit>
       </form>
-      <Link href="/login" className="mt-5 block text-center text-sm text-slate-400 hover:text-white">
+      <Link href="/login" className="mt-5 block text-center text-sm text-muted-foreground hover:text-foreground">
         Back to log in
       </Link>
     </div>

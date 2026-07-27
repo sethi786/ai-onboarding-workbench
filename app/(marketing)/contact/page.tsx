@@ -10,16 +10,20 @@ export default function ContactPage() {
 
   return (
     <>
-      <PageHero eyebrow="Contact" title="Talk to us about AI onboarding" />
-      <section className="mx-auto max-w-xl px-6 py-16">
+      <PageHero
+        eyebrow="Contact"
+        title="Talk to us about AI onboarding"
+        subtitle="Tell us about your AI stack and governance goals — we’ll get back within one business day."
+      />
+      <section className="mx-auto max-w-xl px-4 py-20 sm:px-6">
         {sent ? (
-          <div className="rounded-lg border border-trust/30 bg-trust/10 p-6 text-sm">
+          <div className="rounded-2xl border border-trust/30 bg-trust/10 p-6 text-sm">
             Thanks — your message has been noted. We’ll be in touch. (Foundation build: wire this form
             to your CRM/email provider before launch.)
           </div>
         ) : (
           <form
-            className="space-y-4"
+            className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8"
             onSubmit={(e) => {
               e.preventDefault();
               setSent(true);

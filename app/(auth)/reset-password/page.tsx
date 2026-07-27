@@ -28,8 +28,8 @@ export default function ResetPasswordPage() {
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-white">Set a new password</h1>
-      <p className="mt-1 text-sm text-slate-400">Choose a strong password to finish.</p>
+      <h1 className="text-lg font-semibold text-foreground">Set a new password</h1>
+      <p className="mt-1 text-sm text-muted-foreground">Choose a strong password to finish.</p>
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <AuthError message={error} />
         <div>

@@ -15,15 +15,15 @@ export default function BookPage() {
         title="See Aegis on your AI stack"
         subtitle="A 30-minute walkthrough of the readiness workflow, control tower, and evidence factory."
       />
-      <section className="mx-auto max-w-xl px-6 py-16">
+      <section className="mx-auto max-w-xl px-4 py-20 sm:px-6">
         {sent ? (
-          <div className="rounded-lg border border-trust/30 bg-trust/10 p-6 text-sm">
+          <div className="rounded-2xl border border-trust/30 bg-trust/10 p-6 text-sm">
             Thanks — we’ll reach out to schedule. (Foundation build: connect this to your scheduling
             provider, e.g. Cal.com, before launch.)
           </div>
         ) : (
           <form
-            className="space-y-4"
+            className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8"
             onSubmit={(e) => {
               e.preventDefault();
               setSent(true);

@@ -35,8 +35,8 @@ function LoginInner() {
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-white">Log in to Aegis</h1>
-      <p className="mt-1 text-sm text-slate-400">Welcome back.</p>
+      <h1 className="text-lg font-semibold text-foreground">Log in to Aegis</h1>
+      <p className="mt-1 text-sm text-muted-foreground">Welcome back.</p>
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <AuthError message={error} />
         <div>
@@ -54,7 +54,7 @@ function LoginInner() {
         </div>
         <AuthSubmit disabled={loading}>{loading ? 'Signing in…' : 'Log in'}</AuthSubmit>
       </form>
-      <p className="mt-5 text-center text-sm text-slate-400">
+      <p className="mt-5 text-center text-sm text-muted-foreground">
         No account?{' '}
         <Link href="/signup" className="text-electric hover:underline">
           Start free
