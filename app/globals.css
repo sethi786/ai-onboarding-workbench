@@ -1,0 +1,102 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Clearance AI — design system (ported control-tower brand)
+   Tailwind v4 @theme tokens. Dark-navy base, electric-blue accent, trust green.
+   ========================================================================== */
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Brand */
+  --color-navy-deep: oklch(0.18 0.04 260);
+  --color-navy: oklch(0.24 0.05 260);
+  --color-electric: oklch(0.65 0.2 250);
+  --color-electric-soft: oklch(0.78 0.12 245);
+  --color-trust: oklch(0.72 0.14 165);
+  --color-surface: oklch(0.985 0.003 250);
+
+  /* Semantic (light) */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.18 0.04 260);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.18 0.04 260);
+  --color-muted: oklch(0.96 0.008 250);
+  --color-muted-foreground: oklch(0.5 0.03 258);
+  --color-primary: oklch(0.24 0.05 260);
+  --color-primary-foreground: oklch(0.985 0.003 250);
+  --color-accent: oklch(0.65 0.2 250);
+  --color-accent-foreground: oklch(0.985 0.003 250);
+  --color-border: oklch(0.92 0.01 255);
+  --color-input: oklch(0.92 0.01 255);
+  --color-ring: oklch(0.65 0.2 250);
+
+  /* Status */
+  --color-success: oklch(0.62 0.15 155);
+  --color-warning: oklch(0.75 0.15 80);
+  --color-danger: oklch(0.6 0.22 27);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+}
+
+/* Decorative governance grid + glow utilities (ported) */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+.bg-grid-light {
+  background-image:
+    linear-gradient(to right, oklch(0.18 0.04 260 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.18 0.04 260 / 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+.radial-fade {
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+}
+.glow-electric {
+  box-shadow:
+    0 0 0 1px oklch(0.65 0.2 250 / 0.4),
+    0 10px 40px -10px oklch(0.65 0.2 250 / 0.5);
+}
+.text-gradient {
+  background: linear-gradient(135deg, oklch(0.97 0.003 250) 0%, oklch(0.78 0.12 245) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-gradient-dark {
+  background: linear-gradient(135deg, oklch(0.24 0.05 260) 0%, oklch(0.55 0.16 250) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

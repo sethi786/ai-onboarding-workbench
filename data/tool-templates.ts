@@ -1,0 +1,360 @@
+import type { Profile, TeamId, TeamAssessment } from '@/workbench/types';
+
+/**
+ * Prefilled AI-tool library. Canonical source of truth (also seeded into the
+ * `tool_templates` table via scripts/seed-templates.ts). `defaults` pre-sets
+ * capability flags that drive review intensity; `suggested` seeds starter notes
+ * on key lenses when a template is instantiated into an org.
+ */
+export interface ToolTemplate {
+  id: string;
+  name: string;
+  vendor: string;
+  platform: string;
+  toolType: Profile['toolType'];
+  category: string;
+  summary: string;
+  defaults: Partial<Profile>;
+  suggested: Partial<Record<TeamId, Partial<TeamAssessment>>>;
+  sortOrder: number;
+}
+
+const note = (notes: string): Partial<TeamAssessment> => ({ notes });
+
+export const TOOL_TEMPLATES: ToolTemplate[] = [
+  {
+    id: 'chatgpt-enterprise',
+    name: 'ChatGPT Enterprise',
+    vendor: 'OpenAI',
+    platform: 'ChatGPT Enterprise',
+    toolType: 'Enterprise SaaS AI platform',
+    category: 'Assistant',
+    summary: 'General-purpose enterprise assistant with SSO/SCIM, no training on your data, connectors and custom GPTs.',
+    defaults: {
+      model: 'GPT-4o',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      ragEnabled: true,
+      connectorEnabled: true,
+      externalVendor: true,
+      pii: true,
+    },
+    suggested: {
+      'vendor-risk': note('Confirm SOC 2 Type II, DPA, and no-training-on-data terms for the Enterprise tier.'),
+      'privacy-pia': note('Prompts may contain PII from pasted content; confirm retention and residency.'),
+      'security-sar': note('Enforce SSO + SCIM; scope connectors; validate DLP on uploads.'),
+    },
+    sortOrder: 1,
+  },
+  {
+    id: 'm365-copilot',
+    name: 'Microsoft 365 Copilot',
+    vendor: 'Microsoft',
+    platform: 'Microsoft 365 Copilot',
+    toolType: 'Internal productivity assistant',
+    category: 'Assistant',
+    summary: 'Graph-grounded productivity across Word, Excel, Outlook, Teams. Respects existing M365 permissions.',
+    defaults: {
+      model: 'GPT-4o (Copilot)',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      ragEnabled: true,
+      connectorEnabled: true,
+      externalVendor: true,
+      pii: true,
+    },
+    suggested: {
+      'data-governance': note('Oversharing risk via Graph — run a permissions/sensitivity-label review before rollout.'),
+      'privacy-pia': note('Copilot can surface personal data in mail/docs; validate scope and retention.'),
+      'iam': note('Confirm Entra ID conditional access and license assignment governance.'),
+    },
+    sortOrder: 2,
+  },
+  {
+    id: 'copilot-studio',
+    name: 'Copilot Studio Agent',
+    vendor: 'Microsoft',
+    platform: 'Copilot Studio',
+    toolType: 'Copilot Studio agent',
+    category: 'Agent',
+    summary: 'Low-code custom agents with connectors, knowledge sources, and actions across Power Platform.',
+    defaults: {
+      model: 'GPT-4o (Copilot)',
+      dataClassification: 'Confidential',
+      environment: 'UAT',
+      agentEnabled: true,
+      connectorEnabled: true,
+      ragEnabled: true,
+      externalVendor: true,
+      pii: true,
+    },
+    suggested: {
+      'agent-governance': note('Register the agent; define owner, tool/action allowlist, human approval, and a kill switch.'),
+      'connector-governance': note('Review each connector’s OAuth scopes, credential storage, and DLP policy.'),
+      'security-sar': note('Test prompt injection via connected knowledge sources.'),
+    },
+    sortOrder: 3,
+  },
+  {
+    id: 'gemini-enterprise',
+    name: 'Gemini Enterprise',
+    vendor: 'Google',
+    platform: 'Gemini Enterprise',
+    toolType: 'Enterprise SaaS AI platform',
+    category: 'Assistant',
+    summary: 'Google Workspace-grounded assistant with enterprise controls and connectors.',
+    defaults: {
+      model: 'Gemini 2.5 Pro',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      ragEnabled: true,
+      externalVendor: true,
+      pii: true,
+    },
+    suggested: {
+      'privacy-pia': note('Confirm data residency and Workspace grounding permission scope.'),
+      'vendor-risk': note('Obtain Google Cloud DPA and security documentation.'),
+    },
+    sortOrder: 4,
+  },
+  {
+    id: 'claude-enterprise',
+    name: 'Claude Enterprise',
+    vendor: 'Anthropic',
+    platform: 'Claude Enterprise',
+    toolType: 'Enterprise SaaS AI platform',
+    category: 'Assistant',
+    summary: 'Long-context reasoning and analysis with SSO/SCIM, Projects, and no training on your data.',
+    defaults: {
+      model: 'Claude',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      ragEnabled: true,
+      externalVendor: true,
+    },
+    suggested: {
+      'vendor-risk': note('Confirm SOC 2, DPA, and data-retention/no-training terms.'),
+      'ai-engineering': note('Define prompt versioning and evaluation for Projects used in workflows.'),
+    },
+    sortOrder: 5,
+  },
+  {
+    id: 'azure-ai-foundry',
+    name: 'Azure AI Foundry RAG Assistant',
+    vendor: 'Microsoft',
+    platform: 'Azure AI Foundry',
+    toolType: 'RAG assistant',
+    category: 'RAG',
+    summary: 'Custom RAG apps on your Azure tenant with private networking and managed identities.',
+    defaults: {
+      model: 'GPT-4o (Azure)',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      ragEnabled: true,
+      connectorEnabled: true,
+      externalVendor: true,
+      clientData: true,
+    },
+    suggested: {
+      'data-governance': note('Prove permission trimming and vector lifecycle (deletes propagate to the index).'),
+      'security-sar': note('Private endpoints, Key Vault secrets, and prompt-injection tests on retrieved content.'),
+      'platform-cloud': note('Confirm approved region, environment separation, and cost controls.'),
+    },
+    sortOrder: 6,
+  },
+  {
+    id: 'vertex-ai',
+    name: 'Vertex AI Knowledge Search',
+    vendor: 'Google',
+    platform: 'Google Vertex AI',
+    toolType: 'Knowledge search platform',
+    category: 'RAG',
+    summary: 'Enterprise knowledge search / GenAI apps on GCP with VPC-SC and org policy.',
+    defaults: {
+      model: 'Gemini 2.5 (Vertex)',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      ragEnabled: true,
+      externalVendor: true,
+    },
+    suggested: {
+      'data-governance': note('Document sources, owners, classification, and citation/grounding design.'),
+      'platform-cloud': note('Confirm region, VPC-SC perimeter, and quotas.'),
+    },
+    sortOrder: 7,
+  },
+  {
+    id: 'aws-bedrock',
+    name: 'AWS Bedrock Case Assistant',
+    vendor: 'AWS',
+    platform: 'AWS Bedrock',
+    toolType: 'Client-facing AI app',
+    category: 'RAG',
+    summary: 'Model-choice GenAI apps with Knowledge Bases, Agents, and Guardrails on AWS.',
+    defaults: {
+      model: 'Claude on Bedrock',
+      dataClassification: 'Restricted',
+      environment: 'UAT',
+      ragEnabled: true,
+      connectorEnabled: true,
+      externalVendor: true,
+      clientData: true,
+      pii: true,
+    },
+    suggested: {
+      'legal': note('Client-facing + client data — confirm client contract permits AI processing.'),
+      'qrm-risk': note('Client-impacting outputs require human-in-the-loop and residual-risk acceptance.'),
+      'security-sar': note('Configure Bedrock Guardrails; least-privilege IAM; encryption.'),
+    },
+    sortOrder: 8,
+  },
+  {
+    id: 'claude-code-agent',
+    name: 'Claude Code Secure Dev Agent',
+    vendor: 'Anthropic',
+    platform: 'Claude Enterprise',
+    toolType: 'Coding agent',
+    category: 'Agent',
+    summary: 'Repo-aware coding agent for engineering with tool access and optional autonomous actions.',
+    defaults: {
+      model: 'Claude',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      agentEnabled: true,
+      connectorEnabled: true,
+      autonomousActions: true,
+      externalVendor: true,
+    },
+    suggested: {
+      'agent-governance': note('Scope tools to read-only by default; require approval for writes; add a kill switch.'),
+      'secure-sdlc': note('Enforce branch protection, code review, and secret scanning on agent-authored changes.'),
+      'security-sar': note('Restrict repo/token scopes; audit all agent actions.'),
+    },
+    sortOrder: 9,
+  },
+  {
+    id: 'codex-sandbox',
+    name: 'Codex Developer Sandbox',
+    vendor: 'OpenAI',
+    platform: 'Codex',
+    toolType: 'Secure developer sandbox',
+    category: 'Developer',
+    summary: 'Sandboxed code generation for experimentation.',
+    defaults: {
+      model: 'Codex',
+      dataClassification: 'Internal',
+      environment: 'Sandbox',
+      externalVendor: true,
+    },
+    suggested: {
+      'legal': note('Review code IP/licensing terms for generated code.'),
+      'secure-sdlc': note('Keep to non-production; scan generated dependencies.'),
+    },
+    sortOrder: 10,
+  },
+  {
+    id: 'replit-workspace',
+    name: 'Replit DEV Workspace',
+    vendor: 'Replit',
+    platform: 'Replit',
+    toolType: 'AI Lab sandbox',
+    category: 'Developer',
+    summary: 'Cloud dev workspace with AI assistance for prototyping.',
+    defaults: {
+      model: 'Replit AI',
+      dataClassification: 'Internal',
+      environment: 'Sandbox',
+      externalVendor: true,
+    },
+    suggested: {
+      'security-sar': note('No production secrets or sensitive data in sandboxes; SSO on team plan.'),
+    },
+    sortOrder: 11,
+  },
+  {
+    id: 'github-copilot',
+    name: 'GitHub Copilot',
+    vendor: 'GitHub / Microsoft',
+    platform: 'Internal AI App',
+    toolType: 'Coding agent',
+    category: 'Developer',
+    summary: 'In-IDE AI pair programmer for developers.',
+    defaults: {
+      model: 'GPT-4o (Copilot)',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      externalVendor: true,
+    },
+    suggested: {
+      'legal': note('Enable duplication filter; review IP indemnity terms.'),
+      'secure-sdlc': note('Keep secret scanning + review; treat suggestions as untrusted input.'),
+    },
+    sortOrder: 12,
+  },
+  {
+    id: 'glean-assistant',
+    name: 'Glean Work Assistant',
+    vendor: 'Glean',
+    platform: 'Internal AI App',
+    toolType: 'Knowledge search platform',
+    category: 'RAG',
+    summary: 'Enterprise search + assistant over connected SaaS with permission-aware retrieval.',
+    defaults: {
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      ragEnabled: true,
+      connectorEnabled: true,
+      externalVendor: true,
+      pii: true,
+    },
+    suggested: {
+      'connector-governance': note('Inventory every connector and its scope; verify permission-aware results.'),
+      'data-governance': note('Confirm document-level permissions are respected end to end.'),
+    },
+    sortOrder: 13,
+  },
+  {
+    id: 'perplexity-enterprise',
+    name: 'Perplexity Enterprise',
+    vendor: 'Perplexity',
+    platform: 'Internal AI App',
+    toolType: 'Third-party AI tool',
+    category: 'Assistant',
+    summary: 'Answer engine with web + internal file search for research.',
+    defaults: {
+      dataClassification: 'Internal',
+      environment: 'Pilot',
+      ragEnabled: true,
+      externalVendor: true,
+    },
+    suggested: {
+      'vendor-risk': note('Obtain SOC 2 and DPA; confirm data-retention and no-training terms.'),
+      'qrm-risk': note('Cite-your-sources reduces but does not remove hallucination risk; require human review.'),
+    },
+    sortOrder: 14,
+  },
+  {
+    id: 'cursor',
+    name: 'Cursor',
+    vendor: 'Anysphere',
+    platform: 'Internal AI App',
+    toolType: 'Coding agent',
+    category: 'Developer',
+    summary: 'AI-native code editor with agentic edits across a codebase.',
+    defaults: {
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      agentEnabled: true,
+      externalVendor: true,
+    },
+    suggested: {
+      'agent-governance': note('Understand agent autonomy over the codebase; require review of agent edits.'),
+      'security-sar': note('Enable privacy mode; confirm no code retention; scope repo access.'),
+    },
+    sortOrder: 15,
+  },
+];
+
+export const TOOL_TEMPLATE_BY_ID: Record<string, ToolTemplate> = Object.fromEntries(
+  TOOL_TEMPLATES.map((t) => [t.id, t]),
+);
