@@ -63,46 +63,44 @@ export function LiveDemo() {
     .slice(0, 6);
 
   return (
-    <section id="demo" className="relative overflow-hidden bg-navy-deep py-24 text-white sm:py-28">
-      <div className="bg-grid radial-fade absolute inset-0 opacity-[0.15]" />
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+    <section id="demo" className="border-y border-border bg-surface">
+      <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
         <div className="text-center">
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-electric-soft">
+          <span className="inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
+            <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-electric" />
             Live · runs in your browser
           </span>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Try the readiness engine — no signup
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-slate-300">
+          <h2 className="display-lg mt-4">Try the readiness engine. No signup.</h2>
+          <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
             This is the real Aegis scoring engine evaluating a sample AI agent. Change the inputs and
             watch readiness, risk, and the go/no-go call update instantly.
           </p>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.6 }}
-          className="mt-12 grid gap-6 lg:grid-cols-[1fr_1.1fr]"
+          className="mt-14 grid gap-6 lg:grid-cols-[1fr_1.1fr]"
         >
           {/* Controls */}
-          <div className="gradient-border rounded-2xl p-6">
+          <div className="rounded-2xl border border-border bg-card p-7">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <SlidersHorizontal className="h-4 w-4 text-electric" /> {sampleProfile.name}
             </div>
-            <div className="mt-1 flex flex-wrap gap-1.5">
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {['Agent', 'Connector', 'RAG', 'PII', 'Autonomous', 'Vendor'].map((f) => (
-                <span key={f} className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-slate-300">
+                <span key={f} className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                   {f}
                 </span>
               ))}
             </div>
 
-            <div className="mt-6">
+            <div className="mt-7">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-300">Team readiness (all lenses)</span>
-                <span className="font-mono text-electric-soft">{score}/5</span>
+                <span className="text-muted-foreground">Team readiness (all lenses)</span>
+                <span className="font-mono font-medium text-electric">{score}/5</span>
               </div>
               <input
                 type="range"
@@ -110,7 +108,7 @@ export function LiveDemo() {
                 max={5}
                 value={score}
                 onChange={(e) => setScore(Number(e.target.value))}
-                className="mt-2 w-full accent-[oklch(0.65_0.2_250)]"
+                className="mt-2.5 w-full accent-[oklch(0.5_0.088_162)]"
               />
             </div>
 
@@ -134,16 +132,16 @@ export function LiveDemo() {
 
             <Link
               href="/signup"
-              className="mt-8 inline-flex h-11 items-center gap-2 rounded-lg bg-electric px-5 text-sm font-semibold text-white hover:opacity-90"
+              className="mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-paper transition-transform hover:scale-[1.02]"
             >
               Do this for your own AI tools <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
           {/* Result */}
-          <div className="gradient-border rounded-2xl p-6">
+          <div className="rounded-2xl border border-border bg-card p-7">
             <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
-              <ScoreGauge value={result.readiness} onDark size={150} />
+              <ScoreGauge value={result.readiness} size={150} />
               <div className="flex-1 space-y-3">
                 <Row label="Overall risk"><Badge tone={riskTone(result.risk)}>{result.risk}</Badge></Row>
                 <Row label="Recommendation">
@@ -151,7 +149,7 @@ export function LiveDemo() {
                 </Row>
                 <Row label="Evidence complete"><span className="font-semibold">{result.evidenceCompleteness}%</span></Row>
                 <Row label="Active blockers">
-                  <span className={`font-semibold ${result.blockersCount ? 'text-red-400' : ''}`}>{result.blockersCount}</span>
+                  <span className={`font-semibold ${result.blockersCount ? 'text-danger' : ''}`}>{result.blockersCount}</span>
                 </Row>
                 <Row label="Teams ready">
                   <span className="font-semibold">{result.teamsReady}/{result.requiredTeams}</span>
@@ -159,21 +157,21 @@ export function LiveDemo() {
               </div>
             </div>
 
-            <div className="mt-6 space-y-2 border-t border-white/10 pt-4">
+            <div className="mt-6 space-y-2 border-t border-border pt-5">
               {topTeams.map((t) => (
                 <div key={t.teamId} className="flex items-center gap-3">
-                  <span className="flex w-40 shrink-0 items-center gap-2 truncate text-xs text-slate-300">
-                    <LensIcon id={t.teamId} className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                  <span className="flex w-40 shrink-0 items-center gap-2 truncate text-xs text-muted-foreground">
+                    <LensIcon id={t.teamId} className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
                     <span className="truncate">{LENS_BY_ID[t.teamId].title}</span>
                   </span>
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                     <motion.div
                       className="h-full rounded-full bg-electric"
                       animate={{ width: `${t.normalized}%` }}
                       transition={{ duration: 0.6 }}
                     />
                   </div>
-                  <span className="w-8 text-right font-mono text-[11px] text-slate-400">{t.normalized}</span>
+                  <span className="w-8 text-right font-mono text-[11px] text-muted-foreground">{t.normalized}</span>
                 </div>
               ))}
             </div>
@@ -187,7 +185,7 @@ export function LiveDemo() {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-slate-400">{label}</span>
+      <span className="text-sm text-muted-foreground">{label}</span>
       {children}
     </div>
   );
@@ -211,25 +209,25 @@ function Toggle({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${
+      className={`flex w-full items-start gap-3 rounded-xl border p-3.5 text-left transition-colors ${
         on
           ? danger
-            ? 'border-red-500/40 bg-red-500/10'
-            : 'border-electric/40 bg-electric/10'
-          : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.05]'
+            ? 'border-danger/40 bg-danger/8'
+            : 'border-electric/40 bg-electric/8'
+          : 'border-border bg-card hover:bg-muted'
       }`}
     >
-      <span className={`mt-0.5 ${on ? (danger ? 'text-red-400' : 'text-electric') : 'text-slate-400'}`}>{icon}</span>
+      <span className={`mt-0.5 ${on ? (danger ? 'text-danger' : 'text-electric') : 'text-muted-foreground'}`}>{icon}</span>
       <span className="flex-1">
-        <span className="block text-sm font-medium text-white">{label}</span>
-        <span className="block text-xs text-slate-400">{hint}</span>
+        <span className="block text-sm font-medium">{label}</span>
+        <span className="block text-xs text-muted-foreground">{hint}</span>
       </span>
       <span
         className={`mt-1 h-5 w-9 shrink-0 rounded-full p-0.5 transition-colors ${
-          on ? (danger ? 'bg-red-500' : 'bg-electric') : 'bg-white/15'
+          on ? (danger ? 'bg-danger' : 'bg-electric') : 'bg-border'
         }`}
       >
-        <motion.span layout className="block h-4 w-4 rounded-full bg-white" animate={{ x: on ? 16 : 0 }} transition={{ type: 'spring', stiffness: 400, damping: 28 }} />
+        <motion.span layout className="block h-4 w-4 rounded-full bg-white shadow-sm" animate={{ x: on ? 16 : 0 }} transition={{ type: 'spring', stiffness: 400, damping: 28 }} />
       </span>
     </button>
   );

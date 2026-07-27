@@ -15,30 +15,26 @@ export function ShieldLogo({
     <span className={cn('inline-flex items-center gap-2.5', className)}>
       <span
         className={cn(
-          'relative grid h-8 w-8 place-items-center rounded-lg',
-          tone === 'light'
-            ? 'bg-white/5 ring-1 ring-white/10'
-            : 'bg-gradient-to-br from-navy to-navy-deep',
+          'grid h-8 w-8 place-items-center rounded-[0.6rem]',
+          tone === 'light' ? 'bg-white/10 ring-1 ring-white/15' : 'bg-ink',
         )}
       >
-        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden>
+        <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" aria-hidden>
           <path
-            d="M12 3l7 3v5c0 4.2-2.9 7.8-7 8.9C7.9 18.8 5 15.2 5 11V6l7-3z"
-            className="fill-electric/20 stroke-electric"
-            strokeWidth="1.5"
+            d="M12 2.5l7.5 3.2v5.1c0 4.6-3.1 8.4-7.5 9.7-4.4-1.3-7.5-5.1-7.5-9.7V5.7L12 2.5z"
+            className="fill-electric"
           />
           <path
-            d="M8.7 12.1l2.3 2.3 4.3-4.6"
-            className="stroke-electric"
+            d="M8.5 12.2l2.5 2.5 4.6-5"
+            stroke="white"
             strokeWidth="1.9"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
-        <span className="absolute inset-0 rounded-lg ring-1 ring-electric/30" />
       </span>
       {showWord && (
-        <span className={cn('text-[16px] font-semibold tracking-tight', word)}>Aegis</span>
+        <span className={cn('text-[17px] font-semibold tracking-[-0.02em]', word)}>Aegis</span>
       )}
     </span>
   );

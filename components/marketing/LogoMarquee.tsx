@@ -16,14 +16,14 @@ const NAMES = [
 export function LogoMarquee() {
   const row = [...NAMES, ...NAMES];
   return (
-    <section className="border-y border-border bg-muted/30 py-8">
-      <p className="mb-6 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-        Onboard the AI tools your teams already want
+    <section className="bg-paper py-12">
+      <p className="mb-8 text-center text-[12px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">
+        Governs the AI tools your teams already want
       </p>
-      <div className="relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
-        <div className="marquee-track gap-10 whitespace-nowrap">
+      <div className="relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_12%,#000_88%,transparent)]">
+        <div className="marquee-track gap-14 whitespace-nowrap">
           {row.map((n, i) => (
-            <span key={i} className="text-sm font-semibold text-muted-foreground/80">
+            <span key={i} className="text-[15px] font-medium text-foreground/45">
               {n}
             </span>
           ))}

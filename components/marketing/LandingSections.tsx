@@ -15,42 +15,59 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { Reveal } from '@/components/motion/Reveal';
-import { MagneticButton } from '@/components/motion/MagneticButton';
+
+/* --------------------------------------------------------------- Statement band */
+export function StatementBand() {
+  return (
+    <section className="bg-sand">
+      <div className="mx-auto max-w-5xl px-5 py-28 text-center sm:px-8 sm:py-36">
+        <Reveal>
+          <p className="display-lg text-balance">
+            The review teams aren&apos;t the enemy.
+            <span className="text-muted-foreground">
+              {' '}
+              Showing up unprepared is. Aegis gets every AI tool ready before the gates.
+            </span>
+          </p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
 
 /* ---------------------------------------------------------------- Features */
 const FEATURES = [
-  { icon: ScanEye, t: 'Deep-dive review simulator', d: 'Walk all 20 lenses — Security, Privacy, Legal, Risk, Data Gov, Agent & Connector Governance — with the exact controls and evidence each team inspects.' },
+  { icon: ScanEye, t: 'Deep-dive review simulator', d: 'Walk all 20 lenses — Security, Privacy, Legal, Risk, Data Governance, Agent & Connector Governance — with the exact controls and evidence each team inspects.' },
   { icon: GitBranch, t: 'Live readiness scoring', d: 'A weighted engine turns your self-assessment into a 0–100 readiness score, risk grade, and go/no-go call. Critical blockers force it to zero.' },
-  { icon: ShieldCheck, t: 'Agent & connector governance', d: 'Purpose-built controls for autonomy, tool permissions, identity, kill switches, OAuth scopes, and DLP — the things that fail review.' },
+  { icon: ShieldCheck, t: 'Agent & connector governance', d: 'Purpose-built controls for autonomy, tool permissions, identity, kill switches, OAuth scopes, and DLP — the things that actually fail review.' },
   { icon: FileCheck2, t: 'Evidence Factory', d: 'Generate draft SAR, PIA, architecture, and go/no-go packs from your data — walk into real reviews already prepared.' },
-  { icon: Boxes, t: 'Prefilled tool library', d: 'Instantiate the world’s major AI tools as pre-populated evaluations with suggested answers, so you start at 60%, not zero.' },
-  { icon: Users, t: 'Built for every stakeholder', d: 'One control tower for AI Program, Security, Privacy, Legal, Risk, Platform, and leadership — shared readiness, owners, and blockers.' },
+  { icon: Boxes, t: 'Prefilled tool library', d: 'Instantiate the major AI tools as pre-populated evaluations with suggested answers, so you start at 60%, not zero.' },
+  { icon: Users, t: 'One tower for every stakeholder', d: 'AI Program, Security, Privacy, Legal, Risk, Platform, and leadership — shared readiness, owners, and blockers in a single view.' },
 ];
 
 export function FeatureGrid() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-      <Reveal>
-        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-electric">Why Aegis</span>
-        <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-          Everything you need to clear AI for the enterprise
-        </h2>
-      </Reveal>
-      <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map((f, i) => (
-          <Reveal key={f.t} index={i % 3}>
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="h-full rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <div className="grid h-10 w-10 place-items-center rounded-lg bg-electric/10">
-                <f.icon className="h-5 w-5 text-electric" />
+    <section className="bg-paper">
+      <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
+        <Reveal>
+          <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
+            The platform
+          </span>
+          <h2 className="display-lg mt-4 max-w-2xl">Everything a review team asks for, prepared in advance.</h2>
+        </Reveal>
+        <div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f, i) => (
+            <Reveal key={f.t} index={i % 3}>
+              <div className="flex h-full flex-col bg-card p-8">
+                <div className="grid h-11 w-11 place-items-center rounded-xl bg-electric/10">
+                  <f.icon className="h-5 w-5 text-electric" />
+                </div>
+                <h3 className="mt-5 text-[17px] font-semibold tracking-tight">{f.t}</h3>
+                <p className="mt-2.5 text-[14.5px] leading-relaxed text-muted-foreground">{f.d}</p>
               </div>
-              <h3 className="mt-4 font-semibold">{f.t}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{f.d}</p>
-            </motion.div>
-          </Reveal>
-        ))}
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -58,31 +75,63 @@ export function FeatureGrid() {
 
 /* --------------------------------------------------------------- How it works */
 const STEPS = [
-  { n: '01', t: 'Profile the tool', d: 'Capture platform, data, ownership, and capability flags — or instantiate a prefilled template.' },
-  { n: '02', t: 'Self-evaluate', d: 'Walk each lens: controls, evidence, blockers, and a 0–5 readiness score.' },
-  { n: '03', t: 'Score & simulate', d: 'Get readiness, a risk grade, and a go/no-go recommendation with hard blockers.' },
-  { n: '04', t: 'Generate evidence', d: 'Produce draft SAR, PIA, architecture, and go/no-go packs for the real reviews.' },
+  { n: '01', t: 'Profile the tool', d: 'Capture platform, data, ownership, and capability flags — or instantiate a prefilled template in one click.' },
+  { n: '02', t: 'Self-evaluate', d: 'Walk each lens: the controls, the evidence, the blockers, and a 0–5 readiness score per team.' },
+  { n: '03', t: 'Score & simulate', d: 'Get a readiness number, a risk grade, and a go/no-go recommendation — with hard blockers surfaced.' },
+  { n: '04', t: 'Generate evidence', d: 'Produce draft SAR, PIA, architecture, and go/no-go packs for the real reviews. Walk in prepared.' },
 ];
 
 export function HowItWorks() {
   return (
-    <section className="relative overflow-hidden bg-navy-deep py-20 text-white">
-      <div className="bg-grid radial-fade absolute inset-0 opacity-30" />
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+    <section className="bg-sage">
+      <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
         <Reveal>
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-electric-soft">How it works</span>
-          <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            From intake to go/no-go in four moves
-          </h2>
+          <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
+            How it works
+          </span>
+          <h2 className="display-lg mt-4 max-w-2xl">From intake to go/no-go in four moves.</h2>
         </Reveal>
-        <div className="mt-12 grid gap-5 md:grid-cols-4">
+        <div className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2">
           {STEPS.map((s, i) => (
-            <Reveal key={s.n} index={i}>
-              <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-                <div className="font-mono text-sm text-electric">{s.n}</div>
-                <h3 className="mt-3 font-semibold">{s.t}</h3>
-                <p className="mt-2 text-sm text-slate-400">{s.d}</p>
+            <Reveal key={s.n} index={i % 2}>
+              <div className="flex gap-5 border-t border-foreground/10 pt-6">
+                <div className="font-mono text-sm font-medium text-electric">{s.n}</div>
+                <div>
+                  <h3 className="text-xl font-semibold tracking-tight">{s.t}</h3>
+                  <p className="mt-2 max-w-sm text-[15px] leading-relaxed text-foreground/70">{s.d}</p>
+                </div>
               </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ----------------------------------------------------------------- Testimonials */
+const QUOTES = [
+  { q: 'We used to discover Security and Privacy requirements the week before launch. Now every AI tool arrives at review already prepared.', a: 'Director, AI Program', c: 'Global bank' },
+  { q: 'The go/no-go pack alone saved us weeks. Leadership finally has one readiness number they trust.', a: 'CISO', c: 'Health insurer' },
+  { q: 'Agent governance was a black box. Aegis turned it into a checklist our engineers actually follow.', a: 'Head of Platform', c: 'Gov contractor' },
+];
+
+export function Testimonials() {
+  return (
+    <section className="bg-paper">
+      <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
+        <div className="grid gap-12 md:grid-cols-3">
+          {QUOTES.map((t, i) => (
+            <Reveal key={i} index={i}>
+              <figure className="flex h-full flex-col">
+                <blockquote className="text-[19px] font-medium leading-snug tracking-[-0.01em] text-foreground">
+                  “{t.q}”
+                </blockquote>
+                <figcaption className="mt-6 border-t border-border pt-4 text-sm">
+                  <span className="font-semibold">{t.a}</span>
+                  <span className="block text-muted-foreground">{t.c}</span>
+                </figcaption>
+              </figure>
             </Reveal>
           ))}
         </div>
@@ -100,77 +149,52 @@ const PLANS = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-      <Reveal>
-        <div className="text-center">
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-electric">Pricing</span>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Simple, transparent plans</h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">Start free. Upgrade when your AI footprint grows.</p>
-        </div>
-      </Reveal>
-      <div className="mt-12 grid gap-6 md:grid-cols-3">
-        {PLANS.map((p, i) => (
-          <Reveal key={p.name} index={i}>
-            <div
-              className={`flex h-full flex-col rounded-2xl border p-7 ${
-                p.highlight ? 'border-electric bg-card shadow-lg ring-1 ring-electric/20' : 'border-border bg-card'
-              }`}
-            >
-              {p.highlight && (
-                <span className="mb-3 inline-flex w-fit rounded-full bg-electric/10 px-2.5 py-0.5 text-xs font-semibold text-electric">
-                  Most popular
-                </span>
-              )}
-              <h3 className="text-lg font-semibold">{p.name}</h3>
-              <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight">{p.price}</span>
-                <span className="text-sm text-muted-foreground">{p.per}</span>
-              </div>
-              <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
-              <ul className="mt-6 flex-1 space-y-2.5">
-                {p.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-trust" /> {f}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={p.name === 'Enterprise' ? '/contact' : '/signup'}
-                className={`mt-7 inline-flex h-11 items-center justify-center rounded-lg px-5 text-sm font-semibold transition-opacity hover:opacity-90 ${
-                  p.highlight ? 'bg-electric text-white' : 'border border-border bg-background text-foreground'
+    <section id="pricing" className="border-y border-border bg-surface">
+      <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
+        <Reveal>
+          <div className="text-center">
+            <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">Pricing</span>
+            <h2 className="display-lg mt-4">Start free. Grow when you do.</h2>
+          </div>
+        </Reveal>
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
+          {PLANS.map((p, i) => (
+            <Reveal key={p.name} index={i}>
+              <div
+                className={`flex h-full flex-col rounded-2xl p-8 ${
+                  p.highlight
+                    ? 'bg-ink text-white shadow-float'
+                    : 'border border-border bg-card'
                 }`}
               >
-                {p.cta}
-              </Link>
-            </div>
-          </Reveal>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/* ----------------------------------------------------------------- Testimonials */
-const QUOTES = [
-  { q: 'We used to discover Security and Privacy requirements the week before launch. Now every AI tool arrives at review already prepared.', a: 'Director, AI Program', c: 'Global bank' },
-  { q: 'The go/no-go pack alone saved us weeks. Leadership finally has one readiness number they trust.', a: 'CISO', c: 'Health insurer' },
-  { q: 'Agent governance was a black box. Aegis turned it into a checklist our engineers actually follow.', a: 'Head of Platform', c: 'Gov contractor' },
-];
-
-export function Testimonials() {
-  return (
-    <section className="border-y border-border bg-muted/30 py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="grid gap-6 md:grid-cols-3">
-          {QUOTES.map((t, i) => (
-            <Reveal key={i} index={i}>
-              <figure className="h-full rounded-2xl border border-border bg-card p-6">
-                <blockquote className="text-[15px] leading-relaxed">“{t.q}”</blockquote>
-                <figcaption className="mt-4 text-sm">
-                  <span className="font-semibold">{t.a}</span>
-                  <span className="text-muted-foreground"> · {t.c}</span>
-                </figcaption>
-              </figure>
+                {p.highlight && (
+                  <span className="mb-4 inline-flex w-fit rounded-full bg-electric px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+                    Most popular
+                  </span>
+                )}
+                <h3 className={`text-lg font-semibold ${p.highlight ? 'text-white' : ''}`}>{p.name}</h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-5xl font-semibold tracking-[-0.04em]">{p.price}</span>
+                  <span className={p.highlight ? 'text-white/60' : 'text-muted-foreground'}>{p.per}</span>
+                </div>
+                <p className={`mt-3 text-sm ${p.highlight ? 'text-white/70' : 'text-muted-foreground'}`}>{p.desc}</p>
+                <ul className="mt-7 flex-1 space-y-3">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm">
+                      <Check className={`mt-0.5 h-4 w-4 shrink-0 ${p.highlight ? 'text-electric-soft' : 'text-electric'}`} />
+                      <span className={p.highlight ? 'text-white/85' : ''}>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={p.name === 'Enterprise' ? '/contact' : '/signup'}
+                  className={`mt-8 inline-flex h-12 items-center justify-center rounded-full px-5 text-sm font-medium transition-transform hover:scale-[1.02] ${
+                    p.highlight ? 'bg-paper text-ink' : 'bg-ink text-paper'
+                  }`}
+                >
+                  {p.cta}
+                </Link>
+              </div>
             </Reveal>
           ))}
         </div>
@@ -191,35 +215,37 @@ const FAQS = [
 export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6">
-      <Reveal>
-        <h2 className="text-center text-3xl font-semibold tracking-tight sm:text-4xl">Frequently asked</h2>
-      </Reveal>
-      <div className="mt-10 divide-y divide-border rounded-2xl border border-border bg-card">
-        {FAQS.map((f, i) => (
-          <div key={i}>
-            <button
-              onClick={() => setOpen(open === i ? null : i)}
-              className="flex w-full items-center justify-between gap-4 p-5 text-left"
-            >
-              <span className="font-medium">{f.q}</span>
-              <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${open === i ? 'rotate-180' : ''}`} />
-            </button>
-            <AnimatePresence initial={false}>
-              {open === i && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="overflow-hidden"
-                >
-                  <p className="px-5 pb-5 text-sm text-muted-foreground">{f.a}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
+    <section className="bg-paper">
+      <div className="mx-auto max-w-3xl px-5 py-24 sm:px-8 sm:py-32">
+        <Reveal>
+          <h2 className="display-lg text-center">Questions, answered.</h2>
+        </Reveal>
+        <div className="mt-12 divide-y divide-border border-y border-border">
+          {FAQS.map((f, i) => (
+            <div key={i}>
+              <button
+                onClick={() => setOpen(open === i ? null : i)}
+                className="flex w-full items-center justify-between gap-4 py-5 text-left"
+              >
+                <span className="text-[17px] font-medium tracking-tight">{f.q}</span>
+                <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform ${open === i ? 'rotate-180' : ''}`} />
+              </button>
+              <AnimatePresence initial={false}>
+                {open === i && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden"
+                  >
+                    <p className="pb-6 pr-8 text-[15px] leading-relaxed text-muted-foreground">{f.a}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -228,32 +254,26 @@ export function FAQ() {
 /* ------------------------------------------------------------------ Final CTA */
 export function FinalCTA() {
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
-      <div className="relative overflow-hidden rounded-3xl bg-navy-deep px-6 py-20 text-center text-white">
-        <div className="bg-grid radial-fade absolute inset-0 opacity-20" />
-        <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-[600px] -translate-x-1/2 rounded-full bg-electric/20 blur-[100px]" />
-        <div className="relative">
-          <h2 className="mx-auto max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            Bring your AI tools to review already cleared.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-slate-300">
-            Start a readiness evaluation in minutes — from a prefilled library of the world’s major AI
-            tools, or bring your own.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <MagneticButton
-              href="/signup"
-              className="glow-electric inline-flex h-12 items-center gap-2 rounded-lg bg-electric px-7 text-[15px] font-semibold text-white hover:opacity-90"
-            >
-              Start free <ArrowRight className="h-4 w-4" />
-            </MagneticButton>
-            <Link
-              href="/book"
-              className="inline-flex h-12 items-center rounded-lg border border-white/15 bg-white/5 px-7 text-[15px] font-medium text-white hover:bg-white/10"
-            >
-              Book a demo
-            </Link>
-          </div>
+    <section className="bg-ink">
+      <div className="mx-auto max-w-5xl px-5 py-28 text-center sm:px-8 sm:py-36">
+        <h2 className="display-lg text-white">Bring your AI tools to review already cleared.</h2>
+        <p className="mx-auto mt-6 max-w-xl text-lg text-white/65">
+          Start a readiness evaluation in minutes — from a prefilled library of the major AI tools,
+          or bring your own.
+        </p>
+        <div className="mt-10 flex flex-wrap justify-center gap-4">
+          <Link
+            href="/signup"
+            className="inline-flex h-12 items-center gap-2 rounded-full bg-paper px-7 text-[15px] font-medium text-ink transition-transform hover:scale-[1.03]"
+          >
+            Start free <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/book"
+            className="inline-flex h-12 items-center rounded-full border border-white/20 px-7 text-[15px] font-medium text-white transition-colors hover:bg-white/10"
+          >
+            Book a demo
+          </Link>
         </div>
       </div>
     </section>
