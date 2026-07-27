@@ -1,0 +1,42 @@
+/* Print-friendly layout: strip the shell, expand content, avoid page-break
+   splitting of cards. Toggled purely by the browser print dialog. */
+@media print {
+  :root {
+    --sidebar-w: 0;
+  }
+  body {
+    background: #fff;
+  }
+  .app {
+    display: block;
+  }
+  .sidebar,
+  .header,
+  .no-print,
+  .filter-bar {
+    display: none !important;
+  }
+  .content {
+    padding: 0;
+    max-width: 100%;
+  }
+  .card,
+  .stat,
+  .team-card,
+  .table-wrap {
+    box-shadow: none;
+    border-color: #bbb;
+    break-inside: avoid;
+  }
+  .acc__body {
+    display: block !important;
+  }
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+  .pre {
+    max-height: none;
+    overflow: visible;
+  }
+}
