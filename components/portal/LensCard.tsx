@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition, useRef } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Ban } from 'lucide-react';
 import type { TeamLens, TeamAssessment, TeamScore, Decision } from '@/workbench/types';
 import { SCORE_LABELS, DECISION_OPTIONS } from '@/workbench/data/constants';
 import {
@@ -12,6 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input, Label, Select, Textarea } from '@/components/ui/input';
+import { LensIcon } from '@/components/icons/LensIcon';
 import { cn } from '@/lib/utils';
 import { readinessTone, decisionTone } from './status';
 
@@ -70,7 +71,9 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
         className="flex w-full flex-wrap items-center gap-2 p-4 text-left sm:gap-3"
       >
         <ChevronRight className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', open && 'rotate-90')} />
-        <span className="text-lg">{lens.icon}</span>
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-electric/10 text-electric">
+          <LensIcon id={lens.id} className="h-3.5 w-3.5" />
+        </span>
         <span className="font-semibold">{lens.title}</span>
         {!teamScore.required && <Badge tone="neutral">Not required</Badge>}
         {teamScore.escalated && <Badge tone="electric">Escalated</Badge>}
@@ -87,8 +90,8 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
       {open && (
         <div className="space-y-5 border-t border-border p-4">
           {teamScore.hasCriticalBlocker && (
-            <div className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm font-semibold text-danger">
-              ⛔ Blocked until remediated.
+            <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm font-semibold text-danger">
+              <Ban className="h-4 w-4 shrink-0" /> Blocked until remediated.
             </div>
           )}
 

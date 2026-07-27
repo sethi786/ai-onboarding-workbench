@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { TriangleAlert } from 'lucide-react';
 import { download, slug } from '@/workbench/export/download';
 import { saveReport } from '@/lib/actions/reports';
 import { DRAFT_BANNER } from '@/workbench/data/constants';
@@ -35,8 +36,8 @@ export function EvidenceFactoryClient({
 
   return (
     <div>
-      <div className="mb-4 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-[oklch(0.45_0.09_75)]">
-        ⚠️ {DRAFT_BANNER}
+      <div className="mb-4 flex items-center gap-2 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-[oklch(0.45_0.09_75)]">
+        <TriangleAlert className="h-3.5 w-3.5 shrink-0" /> {DRAFT_BANNER}
       </div>
       <div className="grid gap-4 md:grid-cols-[260px_1fr]">
         <div className="rounded-lg border border-border bg-card p-2">

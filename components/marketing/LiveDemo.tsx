@@ -10,6 +10,7 @@ import { makeEmptyAssessment } from '@/workbench/types';
 import type { Profile, TeamAssessment, TeamId } from '@/workbench/types';
 import { ScoreGauge } from '@/components/ui/ScoreGauge';
 import { Badge } from '@/components/ui/badge';
+import { LensIcon } from '@/components/icons/LensIcon';
 import { riskTone, recommendationTone } from '@/components/portal/status';
 
 const sampleProfile: Profile = {
@@ -62,8 +63,8 @@ export function LiveDemo() {
     .slice(0, 6);
 
   return (
-    <section id="demo" className="relative overflow-hidden bg-navy-deep py-20 text-white sm:py-28">
-      <div className="aurora opacity-30" />
+    <section id="demo" className="relative overflow-hidden bg-navy-deep py-24 text-white sm:py-28">
+      <div className="bg-grid radial-fade absolute inset-0 opacity-[0.15]" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="text-center">
           <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-electric-soft">
@@ -161,8 +162,9 @@ export function LiveDemo() {
             <div className="mt-6 space-y-2 border-t border-white/10 pt-4">
               {topTeams.map((t) => (
                 <div key={t.teamId} className="flex items-center gap-3">
-                  <span className="w-40 shrink-0 truncate text-xs text-slate-300">
-                    {LENS_BY_ID[t.teamId].icon} {LENS_BY_ID[t.teamId].title}
+                  <span className="flex w-40 shrink-0 items-center gap-2 truncate text-xs text-slate-300">
+                    <LensIcon id={t.teamId} className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    <span className="truncate">{LENS_BY_ID[t.teamId].title}</span>
                   </span>
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
                     <motion.div

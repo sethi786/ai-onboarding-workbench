@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageHero } from '@/components/marketing/PageHero';
+import { LensIcon } from '@/components/icons/LensIcon';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 
 export const metadata: Metadata = {
@@ -21,7 +22,9 @@ export default function AssessmentPage() {
           {TEAM_LENSES.map((lens) => (
             <div key={lens.id} className="rounded-lg border border-border bg-card p-5">
               <div className="flex items-center gap-3">
-                <span className="text-xl">{lens.icon}</span>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-electric/10 text-electric">
+                  <LensIcon id={lens.id} className="h-4 w-4" />
+                </span>
                 <h3 className="font-semibold">{lens.title}</h3>
                 <span className="ml-auto font-mono text-[11px] text-muted-foreground">
                   {lens.checklist.length} checks · {lens.requiredControls.length} controls

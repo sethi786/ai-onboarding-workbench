@@ -8,6 +8,7 @@ import { updateAssessment } from '@/lib/actions/assessments';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input, Select } from '@/components/ui/input';
+import { LensIcon } from '@/components/icons/LensIcon';
 import { decisionTone } from './status';
 
 export function ApprovalsTable({
@@ -52,7 +53,12 @@ export function ApprovalsTable({
             const a = state[lens.id];
             return (
               <tr key={lens.id} className="border-b border-border last:border-0">
-                <td className="p-2 pl-3 font-medium">{lens.icon} {lens.title}</td>
+                <td className="p-2 pl-3 font-medium">
+                  <span className="flex items-center gap-2">
+                    <LensIcon id={lens.id} className="h-3.5 w-3.5 text-muted-foreground" />
+                    {lens.title}
+                  </span>
+                </td>
                 <td className="p-2">{ts.required ? <Badge tone="electric">Required</Badge> : <span className="text-muted-foreground">—</span>}</td>
                 <td className="p-2"><Progress value={ts.normalized} showLabel /></td>
                 <td className="p-2">

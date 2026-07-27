@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { riskTone, recommendationTone } from '@/components/portal/status';
 import { ScoreGauge } from '@/components/ui/ScoreGauge';
+import { LensIcon } from '@/components/icons/LensIcon';
+import { Ban } from 'lucide-react';
 import { DISCLAIMER } from '@/lib/site';
 
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
@@ -32,8 +34,8 @@ export default async function EvaluationOverview({
   return (
     <div className="space-y-6">
       {score.hasCriticalBlocker && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">
-          ⛔ Blocked until remediated — a critical blocker is active.
+        <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">
+          <Ban className="h-4 w-4 shrink-0" /> Blocked until remediated — a critical blocker is active.
         </div>
       )}
 
@@ -72,8 +74,9 @@ export default async function EvaluationOverview({
             .filter((t) => t.required)
             .map((t) => (
               <div key={t.teamId} className="flex items-center gap-3 px-4 py-2.5 sm:gap-4">
-                <span className="w-36 shrink-0 truncate text-sm sm:w-52">
-                  {LENS_BY_ID[t.teamId]?.icon} {LENS_BY_ID[t.teamId]?.title}
+                <span className="flex w-36 shrink-0 items-center gap-2 truncate text-sm sm:w-52">
+                  <LensIcon id={t.teamId} className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{LENS_BY_ID[t.teamId]?.title}</span>
                 </span>
                 <div className="flex-1">
                   <Progress value={t.normalized} showLabel />

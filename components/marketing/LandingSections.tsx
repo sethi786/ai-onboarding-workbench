@@ -229,8 +229,9 @@ export function FAQ() {
 export function FinalCTA() {
   return (
     <section className="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
-      <div className="relative overflow-hidden rounded-3xl bg-navy-deep px-6 py-16 text-center text-white">
-        <div className="aurora opacity-40" />
+      <div className="relative overflow-hidden rounded-3xl bg-navy-deep px-6 py-20 text-center text-white">
+        <div className="bg-grid radial-fade absolute inset-0 opacity-20" />
+        <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-[600px] -translate-x-1/2 rounded-full bg-electric/20 blur-[100px]" />
         <div className="relative">
           <h2 className="mx-auto max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
             Bring your AI tools to review already cleared.
