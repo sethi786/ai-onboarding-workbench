@@ -55,7 +55,7 @@ export function SiteFooter() {
           />
         </div>
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/5 pt-6 text-xs text-slate-500 md:flex-row md:items-center">
-          <p>© {new Date().getFullYear()} Clearance AI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Aegis. All rights reserved.</p>
           <p className="font-mono">SOC 2 · ISO 27001 · HIPAA · NIST AI RMF-aligned</p>
         </div>
       </div>

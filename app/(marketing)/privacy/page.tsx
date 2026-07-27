@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         </p>
         <h2 className="mt-8 text-lg font-semibold text-foreground">Data we process</h2>
         <p className="mt-2">
-          Clearance AI stores the evaluation content you create (AI tool profiles, self-assessment
+          Aegis stores the evaluation content you create (AI tool profiles, self-assessment
           scores, notes, evidence links) scoped to your organization’s workspace. Authentication is
           handled by Supabase Auth.
         </p>

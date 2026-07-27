@@ -4,7 +4,8 @@ import { computeScoreFromMap } from '@/workbench/engine/scoring';
 import { TEAM_LENSES, LENS_BY_ID } from '@/workbench/data/teamLenses';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { riskTone, readinessTone, recommendationTone } from '@/components/portal/status';
+import { riskTone, recommendationTone } from '@/components/portal/status';
+import { ScoreGauge } from '@/components/ui/ScoreGauge';
 import { DISCLAIMER } from '@/lib/site';
 
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
@@ -36,16 +37,25 @@ export default async function EvaluationOverview({
         </div>
       )}
 
+      <div className="flex flex-col items-center gap-6 rounded-lg border border-border bg-card p-6 sm:flex-row sm:gap-10">
+        <ScoreGauge value={score.readiness} size={150} />
+        <div className="grid flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
+          <div>
+            <div className="text-xs font-medium text-muted-foreground">Overall risk</div>
+            <div className="mt-2"><Badge tone={riskTone(score.risk)}>{score.risk}</Badge></div>
+          </div>
+          <div>
+            <div className="text-xs font-medium text-muted-foreground">Recommendation</div>
+            <div className="mt-2"><Badge tone={recommendationTone(score.recommendation)}>{score.recommendation}</Badge></div>
+          </div>
+          <div>
+            <div className="text-xs font-medium text-muted-foreground">Evidence complete</div>
+            <div className="mt-1 text-2xl font-semibold">{score.evidenceCompleteness}%</div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Overall readiness" value={`${score.readiness}/100`} />
-        <div className="rounded-lg border border-border bg-card p-4">
-          <div className="text-xs font-medium text-muted-foreground">Overall risk</div>
-          <div className="mt-2"><Badge tone={riskTone(score.risk)}>{score.risk}</Badge></div>
-        </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <div className="text-xs font-medium text-muted-foreground">Recommendation</div>
-          <div className="mt-2"><Badge tone={recommendationTone(score.recommendation)}>{score.recommendation}</Badge></div>
-        </div>
         <Stat label="Evidence complete" value={`${score.evidenceCompleteness}%`} />
         <Stat label="Blockers" value={score.blockersCount} />
         <Stat label="Controls remaining" value={score.controlsRemaining} />

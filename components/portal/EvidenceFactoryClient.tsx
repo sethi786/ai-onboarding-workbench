@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import { download, slug } from '@/workbench/export/download';
 import { saveReport } from '@/lib/actions/reports';
 import { DRAFT_BANNER } from '@/workbench/data/constants';
@@ -74,12 +75,16 @@ export function EvidenceFactoryClient({
                 <button
                   onClick={() =>
                     startTransition(async () => {
-                      await saveReport(evalId, orgId, orgSlug, {
+                      const res = await saveReport(evalId, orgId, orgSlug, {
                         title: selected.title,
                         kind: 'evidence',
                         content: selected.content,
                       });
-                      setSaved(selected.id);
+                      if (res?.error) toast.error(res.error);
+                      else {
+                        setSaved(selected.id);
+                        toast.success(`${selected.title} saved to reports`);
+                      }
                     })
                   }
                   className="rounded-md bg-navy px-3 py-1 text-xs font-medium text-white hover:bg-navy-deep"

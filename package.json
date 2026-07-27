@@ -20,10 +20,12 @@
     "@supabase/supabase-js": "2.45.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "framer-motion": "^11.18.2",
     "lucide-react": "^0.451.0",
     "next": "^15.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {

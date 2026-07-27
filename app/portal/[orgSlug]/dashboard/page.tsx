@@ -5,6 +5,7 @@ import { scoreEvaluation } from '@/lib/db/score';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { riskTone, recommendationTone } from '@/components/portal/status';
+import { ScoreGauge } from '@/components/ui/ScoreGauge';
 import { DISCLAIMER } from '@/lib/site';
 
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
@@ -47,11 +48,15 @@ export default async function DashboardPage({
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="AI tools in flight" value={total} />
-        <Stat label="Cleared to proceed" value={ready} />
-        <Stat label="Blocked" value={blocked} />
-        <Stat label="Avg readiness" value={`${avg}/100`} />
+      <div className="grid gap-4 lg:grid-cols-[auto_1fr]">
+        <div className="grid place-items-center rounded-lg border border-border bg-card p-6">
+          <ScoreGauge value={avg} size={140} label="Avg readiness" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Stat label="AI tools in flight" value={total} />
+          <Stat label="Cleared to proceed" value={ready} />
+          <Stat label="Blocked" value={blocked} />
+        </div>
       </div>
 
       <div className="rounded-lg border border-border bg-card">

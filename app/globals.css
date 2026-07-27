@@ -100,3 +100,105 @@
   background-clip: text;
   color: transparent;
 }
+
+/* ==========================================================================
+   Aegis — bold motion & premium surface utilities
+   ========================================================================== */
+
+/* Animated aurora / mesh gradient backdrop */
+@keyframes aurora-drift {
+  0%   { transform: translate3d(-6%, -4%, 0) scale(1.05) rotate(0deg); }
+  50%  { transform: translate3d(6%, 4%, 0) scale(1.15) rotate(8deg); }
+  100% { transform: translate3d(-6%, -4%, 0) scale(1.05) rotate(0deg); }
+}
+.aurora {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(40% 40% at 20% 30%, oklch(0.65 0.2 250 / 0.55), transparent 70%),
+    radial-gradient(35% 45% at 80% 20%, oklch(0.72 0.14 165 / 0.4), transparent 70%),
+    radial-gradient(45% 40% at 60% 80%, oklch(0.55 0.22 290 / 0.45), transparent 70%);
+  filter: blur(60px);
+  animation: aurora-drift 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Glass panel */
+.glass {
+  background: oklch(1 0 0 / 0.04);
+  border: 1px solid oklch(1 0 0 / 0.1);
+  backdrop-filter: blur(14px);
+}
+
+/* Gradient border wrapper */
+.gradient-border {
+  position: relative;
+  background: oklch(1 0 0 / 0.03);
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, oklch(0.65 0.2 250 / 0.6), oklch(0.72 0.14 165 / 0.3), transparent);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Animated gradient text */
+@keyframes text-sheen {
+  to { background-position: 200% center; }
+}
+.text-aurora {
+  background: linear-gradient(100deg, #fff 10%, oklch(0.78 0.12 245) 30%, oklch(0.8 0.14 165) 50%, #fff 70%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: text-sheen 5s linear infinite;
+}
+
+/* Infinite marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: inline-flex;
+  min-width: 200%;
+  animation: marquee 28s linear infinite;
+}
+
+/* Shimmer (skeletons) */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.08), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+/* Soft pulse for status dots */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora, .marquee-track, .text-aurora, .shimmer::after, .pulse-dot {
+    animation: none !important;
+  }
+  * { scroll-behavior: auto !important; }
+}

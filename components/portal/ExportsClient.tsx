@@ -1,5 +1,6 @@
 'use client';
 
+import { toast } from 'sonner';
 import { download } from '@/workbench/export/download';
 
 interface Bundle {
@@ -25,7 +26,10 @@ export function ExportsClient({ bundle }: { bundle: Bundle }) {
       {actions.map((a) => (
         <button
           key={a.file}
-          onClick={() => download(a.file, a.mime, a.content)}
+          onClick={() => {
+            download(a.file, a.mime, a.content);
+            toast.success(`Downloaded ${a.file}`);
+          }}
           className="flex items-center gap-2 rounded-md border border-border bg-card px-4 py-3 text-left text-sm font-medium hover:border-electric/50"
         >
           ⬇ {a.label}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import type { Profile } from '@/workbench/types';
 import {
   PLATFORMS,
@@ -78,7 +79,12 @@ export function EvaluationForm({
       const res = evalId
         ? await updateEvaluation(evalId, orgSlug, d)
         : await createEvaluation(orgId, orgSlug, d);
-      if (res?.error) setError(res.error);
+      if (res?.error) {
+        setError(res.error);
+        toast.error(res.error);
+      } else if (evalId) {
+        toast.success('Changes saved');
+      }
     });
 
   return (

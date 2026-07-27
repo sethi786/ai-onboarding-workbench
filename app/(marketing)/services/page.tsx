@@ -38,7 +38,7 @@ export default function ServicesPage() {
       <PageHero
         eyebrow="Product"
         title="Everything you need to clear AI for the enterprise"
-        subtitle="Clearance AI turns opaque, multi-team review into a structured, evidence-backed readiness workflow."
+        subtitle="Aegis turns opaque, multi-team review into a structured, evidence-backed readiness workflow."
       />
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

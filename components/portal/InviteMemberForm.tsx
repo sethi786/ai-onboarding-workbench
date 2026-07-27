@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import { inviteMember } from '@/lib/actions/organizations';
 import { Button } from '@/components/ui/button';
 import { Input, Select } from '@/components/ui/input';
@@ -15,11 +16,13 @@ export function InviteMemberForm({ orgId }: { orgId: string }) {
         startTransition(async () => {
           setMsg(null);
           const res = await inviteMember(orgId, fd);
-          setMsg(
-            res?.error
-              ? res.error
-              : 'Invitation recorded. Email delivery + acceptance flow ship in the next phase.',
-          );
+          if (res?.error) {
+            toast.error(res.error);
+            setMsg(res.error);
+          } else {
+            toast.success('Invitation recorded');
+            setMsg('Invitation recorded. Email delivery + acceptance flow ship in the next phase.');
+          }
         })
       }
       className="flex flex-wrap items-end gap-2"

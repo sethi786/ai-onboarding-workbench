@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {children}
         </div>
         <p className="mt-6 text-center text-xs text-slate-500">
-          Clearance AI · self-evaluation & readiness aid
+          Aegis · self-evaluation & readiness aid
         </p>
       </div>
     </div>

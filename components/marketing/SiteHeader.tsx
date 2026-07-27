@@ -12,7 +12,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" aria-label="Clearance AI home" onClick={() => setOpen(false)}>
+        <Link href="/" aria-label="Aegis home" onClick={() => setOpen(false)}>
           <ShieldLogo />
         </Link>
 

@@ -1,11 +1,11 @@
-# Clearance AI
+# Aegis
 
-**Get AI tools cleared for the enterprise.** Clearance AI is a premium, multi-tenant B2B SaaS for
+**Get AI tools cleared for the enterprise.** Aegis is a premium, multi-tenant B2B SaaS for
 onboarding AI tools, agents, RAG apps, and connectors through enterprise review. Teams self-evaluate
 against **20 enterprise review lenses**, track controls/evidence/blockers, get a readiness score, risk
 grade, and go/no-go recommendation, and generate draft evidence packs — **before** formal review.
 
-> Clearance AI is a self-evaluation and readiness aid. It does not replace official enterprise approval
+> Aegis is a self-evaluation and readiness aid. It does not replace official enterprise approval
 > workflows. Final decisions follow your organization's formal governance processes.
 
 ## What's inside

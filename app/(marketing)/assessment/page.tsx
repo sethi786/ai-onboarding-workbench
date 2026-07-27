@@ -5,7 +5,7 @@ import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 
 export const metadata: Metadata = {
   title: 'Readiness Assessment',
-  description: 'The 20 enterprise review lenses Clearance AI simulates.',
+  description: 'The 20 enterprise review lenses Aegis simulates.',
 };
 
 export default function AssessmentPage() {
