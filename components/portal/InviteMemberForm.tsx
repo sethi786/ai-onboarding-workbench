@@ -1,0 +1,44 @@
+'use client';
+
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { inviteMember } from '@/lib/actions/organizations';
+import { Button } from '@/components/ui/button';
+import { Input, Select } from '@/components/ui/input';
+
+export function InviteMemberForm({ orgId }: { orgId: string }) {
+  const [pending, startTransition] = useTransition();
+  const [msg, setMsg] = useState<string | null>(null);
+
+  return (
+    <form
+      action={(fd) =>
+        startTransition(async () => {
+          setMsg(null);
+          const res = await inviteMember(orgId, fd);
+          if (res?.error) {
+            toast.error(res.error);
+            setMsg(res.error);
+          } else {
+            toast.success('Invitation recorded');
+            setMsg('Invitation recorded. Email delivery + acceptance flow ship in the next phase.');
+          }
+        })
+      }
+      className="flex flex-wrap items-end gap-2"
+    >
+      <div className="flex-1">
+        <Input name="email" type="email" placeholder="teammate@company.com" required />
+      </div>
+      <Select name="role" defaultValue="member" className="w-32">
+        <option value="admin">Admin</option>
+        <option value="member">Member</option>
+        <option value="viewer">Viewer</option>
+      </Select>
+      <Button type="submit" variant="primary" disabled={pending}>
+        {pending ? 'Inviting…' : 'Invite'}
+      </Button>
+      {msg && <p className="w-full text-xs text-muted-foreground">{msg}</p>}
+    </form>
+  );
+}

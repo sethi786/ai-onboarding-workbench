@@ -1,0 +1,22 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@/lib/supabase/admin", "**/supabase/admin"],
+            "message": "The service-role admin client must only be used in scripts/, never in app code."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["scripts/**/*.ts"],
+      "rules": { "no-restricted-imports": "off" }
+    }
+  ]
+}
