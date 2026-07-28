@@ -12,16 +12,17 @@ import { writeFileSync } from 'node:fs';
 import { TOOL_TEMPLATE_BY_ID } from '../data/tool-templates';
 import { profilePatchToRow, assessmentPatchToRow, rowToProfile } from '../lib/db/mappers';
 import { TEAM_LENSES, LENS_BY_ID } from '../workbench/data/teamLenses';
-import { isApplicable, isRequired, escalatedLensIds } from '../workbench/engine/reviewIntensity';
+import { isApplicable, isRequired, escalatedLensIds, baseDepth, reviewDepth, controlsAtDepth, evidenceAtDepth } from '../workbench/engine/reviewIntensity';
 import { computeScoreFromMap } from '../workbench/engine/scoring';
-import { makeDefaultWorkflow } from '../workbench/data/workflowStages';
+import { makeDefaultWorkflow, skippedStageNames } from '../workbench/data/workflowStages';
 import { buildReportContext } from '../workbench/export/reportContext';
-import { EVIDENCE_ARTIFACTS } from '../workbench/export/evidenceFactory';
+import { artifactsFor } from '../workbench/export/evidenceFactory';
 import { toBrandedHtml } from '../workbench/export/toBrandedHtml';
 import { toGoNoGoReport } from '../workbench/export/toGoNoGoReport';
 import { buildDiagrams } from '../workbench/diagrams';
 import { makeEmptyAssessment } from '../workbench/types';
 import { resolveBranding } from '../lib/branding';
+import { missingEssentials } from '../workbench/engine/essentials';
 import type { TeamAssessment, TeamId } from '../workbench/types';
 
 const problems: string[] = [];
@@ -40,12 +41,7 @@ console.log(`   ${tpl.summary}`);
 console.log(`   Prefilled flags:`, JSON.stringify(tpl.defaults));
 console.log(`   Prefilled lens notes: ${Object.keys(tpl.suggested).join(', ')}`);
 
-if (!tpl.defaults.toolCategory) {
-  note(
-    'Template m365-copilot has no explicit toolCategory. It falls back to "AI / ML system" ' +
-      'in the seed script but profilePatchToRow may not write it — check what the DB row gets.',
-  );
-}
+
 
 /* -- STEP 2: instantiate (what the server action writes) ------------------ */
 step('2. "Add to workspace" — what actually lands in the database');
@@ -81,14 +77,15 @@ if (profile.dataTypes.length === 0) {
       '"No data types recorded" on a tool that reads the whole mailbox.',
   );
 }
-if (!profile.businessOwner && !profile.technicalOwner) {
-  note(
-    'No owner fields are prefilled or prompted after instantiating. Every review lens ' +
-      'asks who owns this, and the customer has no nudge to fill it in.',
-  );
-}
-if (!profile.useCase) {
-  note('Template sets no useCase, so the Business/Product lens starts with nothing to assess.');
+// Owners and use case are the customer's, not the product's — a template
+// cannot know who owns your adoption. The fix is a prompt, not a prefill, so
+// what's checked here is that the prompt actually catches them.
+const blanks = missingEssentials(profile);
+console.log(`   Essentials prompt flags: ${blanks.map((b) => b.label).join(', ') || '(nothing)'}`);
+for (const field of ['businessOwner', 'technicalOwner', 'useCase'] as const) {
+  if (!profile[field] && !blanks.some((b) => b.field === field)) {
+    note(`${field} is blank and the essentials prompt does not flag it — it will render as a dash on the cover page.`);
+  }
 }
 
 /* -- STEP 3: scoping ------------------------------------------------------ */
@@ -99,10 +96,14 @@ const skipped = TEAM_LENSES.filter((l) => !isApplicable(l, profile));
 const required = TEAM_LENSES.filter((l) => isRequired(l, profile));
 const escalated = escalatedLensIds(profile);
 
+console.log(`   Base depth : ${baseDepth(profile)}`);
 console.log(`   Applicable : ${applicable.length}/20`);
 console.log(`   Required   : ${required.length}  → ${required.map((l) => l.short).join(', ')}`);
 console.log(`   Skipped    : ${skipped.length}  → ${skipped.map((l) => l.short).join(', ') || '(none)'}`);
 console.log(`   Escalated  : ${[...escalated].map((id) => LENS_BY_ID[id].short).join(', ')}`);
+const askedControls = required.reduce((n, l) => n + controlsAtDepth(l, reviewDepth(l, profile)).length, 0);
+const askedEvidence = required.reduce((n, l) => n + evidenceAtDepth(l, reviewDepth(l, profile)).length, 0);
+console.log(`   BURDEN     : ${askedControls} controls, ${askedEvidence} documents`);
 
 if (required.length === 0) {
   note('No lenses are required for a Pilot-environment Copilot — the customer sees no work to do.');
@@ -155,26 +156,18 @@ console.log(`     readiness ${blockedScore.readiness}/100, risk ${blockedScore.r
 /* -- STEP 5: workflow ----------------------------------------------------- */
 step('5. Where is it in the approval path?');
 
-const stages = makeDefaultWorkflow();
+const stages = makeDefaultWorkflow(profile);
 console.log(`   ${stages.length} stages seeded, all "${stages[0].status}".`);
 const aiStages = stages.filter((s) => /AI |Agent/.test(s.name));
 console.log(`   AI-specific stages present: ${aiStages.map((s) => s.name).join(', ')}`);
-const skippedNames = new Set(skipped.map((l) => l.title));
-const orphanStages = stages.filter((s) =>
-  [...skippedNames].some((t) => t.toLowerCase().includes(s.name.toLowerCase())),
+const skippedStages = skippedStageNames(profile);
+console.log(`   Skipped as out of scope: ${skippedStages.join(', ') || '(none)'}`);
+const requiredTitles = new Set(required.map((l) => l.title));
+const orphanStages = stages.filter(
+  (s) => skippedStages.includes(s.name) || (!requiredTitles.has(s.name) && skippedStages.includes(s.name)),
 );
 if (orphanStages.length) {
-  note(
-    `Workflow seeds all 25 stages regardless of scope. For this tool, stages ` +
-      `${orphanStages.map((s) => s.name).join(', ')} correspond to lenses that were skipped ` +
-      `as out of scope — the customer is asked to march through gates that don't apply.`,
-  );
-} else if (skipped.length > 0) {
-  note(
-    `Lens scoping skips ${skipped.length} reviews, but makeDefaultWorkflow() still seeds all ` +
-      `${stages.length} stages unconditionally. Scope is applied on the lenses page and ignored ` +
-      `by the workflow — the two views disagree.`,
-  );
+  note(`Workflow still seeds gates for skipped reviews: ${orphanStages.map((s) => s.name).join(', ')}`);
 }
 
 /* -- STEP 6: outputs ------------------------------------------------------ */
@@ -196,7 +189,7 @@ const ctx = buildReportContext(
   brand,
 );
 
-const artifacts = EVIDENCE_ARTIFACTS.map((a) => ({ id: a.id, title: a.title, body: a.build(ctx) }));
+const artifacts = artifactsFor(profile).map((a) => ({ id: a.id, title: a.title, body: a.build(ctx) }));
 console.log(`   Evidence artifacts: ${artifacts.length}`);
 const emptyArtifacts = artifacts.filter((a) => a.body.length < 500);
 if (emptyArtifacts.length) {
@@ -204,15 +197,10 @@ if (emptyArtifacts.length) {
 }
 
 // Artifacts for lenses this tool skipped are noise in the customer's pack.
-const outOfScopeArtifacts = artifacts.filter((a) => {
-  const lens = skipped.find((l) => a.title.includes(l.title) || a.id.includes(l.id.split('-')[0]));
-  return Boolean(lens);
-});
+const notRequired = new Set(TEAM_LENSES.filter((l) => !isRequired(l, profile)).map((l) => l.id));
+const outOfScopeArtifacts = artifacts.filter((a) => a.id !== 'ai-intake' && notRequired.has(a.id as never));
 if (outOfScopeArtifacts.length) {
-  note(
-    `Evidence Factory offers ${outOfScopeArtifacts.length} artifacts for skipped lenses ` +
-      `(${outOfScopeArtifacts.map((a) => a.id).join(', ')}). Scope is ignored here too.`,
-  );
+  note(`Evidence Factory offers packs for reviews that aren't required: ${outOfScopeArtifacts.map((a) => a.id).join(', ')}`);
 }
 
 const diagrams = buildDiagrams(ctx, stages);

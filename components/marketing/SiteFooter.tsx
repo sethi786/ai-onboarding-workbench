@@ -22,7 +22,7 @@ export function SiteFooter() {
   return (
     <footer className="bg-ink text-white">
       <div className="mx-auto max-w-6xl px-6 py-20 sm:px-8">
-        <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
           <div>
             <ShieldLogo tone="light" />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
@@ -37,7 +37,19 @@ export function SiteFooter() {
               { href: '/use-cases', label: 'Use cases' },
               { href: '/solutions', label: 'Solutions' },
               { href: '/assessment', label: 'The 20 lenses' },
+              { href: '/tools', label: 'Tool reviews' },
               { href: '/pricing', label: 'Pricing' },
+            ]}
+          />
+          <FooterCol
+            title="Popular tools"
+            links={[
+              { href: '/tools/m365-copilot', label: 'Microsoft 365 Copilot' },
+              { href: '/tools/chatgpt-enterprise', label: 'ChatGPT Enterprise' },
+              { href: '/tools/salesforce-sales-cloud', label: 'Salesforce' },
+              { href: '/tools/snowflake', label: 'Snowflake' },
+              { href: '/tools/slack', label: 'Slack' },
+              { href: '/tools', label: 'All tools →' },
             ]}
           />
           <FooterCol
