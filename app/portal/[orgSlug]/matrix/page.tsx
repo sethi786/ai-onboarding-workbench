@@ -11,7 +11,7 @@ export default async function MatrixPage({
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="text-2xl font-semibold tracking-tight">Platform Matrix</h1>
+      <h1 className="display-md">Platform Matrix</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Compare enterprise AI platforms across capability, identity, governance, review intensity, and cost.
       </p>

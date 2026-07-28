@@ -18,7 +18,7 @@ export default async function LibraryPage({
   if (!hasFeature(org.plan, 'toolLibrary')) {
     return (
       <div className="mx-auto max-w-6xl">
-        <h1 className="text-2xl font-semibold tracking-tight">Tool Library</h1>
+        <h1 className="display-md">Tool Library</h1>
         <p className="mt-1 mb-6 text-sm text-muted-foreground">
           Prefilled templates that start an evaluation at roughly 60% complete instead of zero.
         </p>
@@ -34,7 +34,7 @@ export default async function LibraryPage({
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="text-2xl font-semibold tracking-tight">Tool Library</h1>
+      <h1 className="display-md">Tool Library</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Prefilled templates for common tools. Add one to your workspace to start a pre-populated
         evaluation with suggested answers.

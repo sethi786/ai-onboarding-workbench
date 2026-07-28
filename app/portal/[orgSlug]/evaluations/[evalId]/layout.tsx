@@ -17,12 +17,15 @@ export default async function EvaluationLayout({
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-1 flex items-center gap-2 text-sm text-muted-foreground">
+      {/* Mastheads carry the display serif, so the app reads as the same
+          product as the site the customer arrived from. Two halves in two
+          typefaces is what makes a SaaS feel stitched together. */}
+      <div className="mb-1.5 flex items-center gap-2 text-[13px] text-muted-foreground">
         <span>{evalRow.platform || 'AI tool'}</span>
         <span>·</span>
         <span>{evalRow.environment}</span>
       </div>
-      <h1 className="text-2xl font-semibold tracking-tight">{evalRow.name}</h1>
+      <h1 className="display-md">{evalRow.name}</h1>
       <EvalTabs orgSlug={orgSlug} evalId={evalId} />
       <div className="mt-6">{children}</div>
     </div>

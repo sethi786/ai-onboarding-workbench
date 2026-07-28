@@ -3,10 +3,20 @@
 import { useEffect, useState } from 'react';
 import { motion, useMotionValue, animate } from 'framer-motion';
 
+/**
+ * Bands recalibrated for substantiation-weighted scoring.
+ *
+ * They were set when the engine let an unsubstantiated 5/5 self-score reach 50,
+ * so scores ran high and the thresholds sat high with them. Now that evidence
+ * sets the ceiling, a review that has genuinely done most of the work lands in
+ * the sixties — and under the old bands that rendered in near-red, which told a
+ * team doing everything right that they were failing. The recommendation badge
+ * beside this carries the actual call; the ring is a magnitude.
+ */
 function bandColor(v: number) {
-  if (v >= 85) return 'oklch(0.56 0.11 158)';
-  if (v >= 70) return 'oklch(0.72 0.13 74)';
-  if (v >= 50) return 'oklch(0.65 0.16 50)';
+  if (v >= 80) return 'oklch(0.56 0.11 158)';
+  if (v >= 60) return 'oklch(0.72 0.13 74)';
+  if (v >= 35) return 'oklch(0.65 0.16 50)';
   return 'oklch(0.58 0.2 27)';
 }
 

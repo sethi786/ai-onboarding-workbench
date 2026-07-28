@@ -10,12 +10,20 @@ import { LensIcon } from '@/components/icons/LensIcon';
 import { Ban } from 'lucide-react';
 import { DISCLAIMER } from '@/lib/site';
 
+function StatLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+      {children}
+    </div>
+  );
+}
+
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <div className="text-xs font-medium text-muted-foreground">{label}</div>
-      <div className="mt-1 text-2xl font-semibold">{value}</div>
-      {hint && <div className="text-xs text-muted-foreground">{hint}</div>}
+    <div>
+      <StatLabel>{label}</StatLabel>
+      <div className="mt-1 text-[26px] font-semibold leading-none tracking-tight">{value}</div>
+      {hint && <div className="mt-1.5 text-xs leading-snug text-muted-foreground">{hint}</div>}
     </div>
   );
 }
@@ -52,43 +60,44 @@ export default async function EvaluationOverview({
         </div>
       )}
 
-      <div className="flex flex-col items-center gap-6 rounded-lg border border-border bg-card p-6 sm:flex-row sm:gap-10">
-        <ScoreGauge value={score.readiness} size={150} />
-        <div className="grid flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
-          <div>
-            <div className="text-xs font-medium text-muted-foreground">Overall risk</div>
-            <div className="mt-2"><Badge tone={riskTone(score.risk)}>{score.risk}</Badge></div>
-          </div>
-          <div>
-            <div className="text-xs font-medium text-muted-foreground">Recommendation</div>
-            <div className="mt-2"><Badge tone={recommendationTone(score.recommendation)}>{score.recommendation}</Badge></div>
-          </div>
-          <div>
-            <div className="text-xs font-medium text-muted-foreground">Evidence complete</div>
-            <div className="mt-1 text-2xl font-semibold">{score.evidenceCompleteness}%</div>
+      {/* One panel for the state of the review. It used to be two — a gauge
+          card and a row of six bordered stat tiles — which reported evidence
+          completeness twice, in different type, one above the other. */}
+      <div className="rounded-lg border border-border bg-card">
+        <div className="flex flex-col items-center gap-8 p-6 sm:flex-row sm:gap-12">
+          <ScoreGauge value={score.readiness} size={144} />
+          <div className="grid flex-1 gap-6 sm:grid-cols-3">
+            <div>
+              <StatLabel>Overall risk</StatLabel>
+              <div className="mt-2">
+                <Badge tone={riskTone(score.risk)}>{score.risk}</Badge>
+              </div>
+            </div>
+            <div className="sm:col-span-2">
+              <StatLabel>Recommendation</StatLabel>
+              <div className="mt-2">
+                <Badge tone={recommendationTone(score.recommendation)}>
+                  {score.recommendation}
+                </Badge>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Evidence complete" value={`${score.evidenceCompleteness}%`} />
-        <Stat label="Blockers" value={score.blockersCount} />
-        <Stat label="Controls remaining" value={score.controlsRemaining} />
-        <Stat
-          label="Reviews signed off"
-          value={score.teamsSignedOff}
-          hint={`of ${score.requiredTeams} required`}
-        />
-        <Stat label="Reviews blocked" value={score.teamsBlocked} />
-        <Stat
-          label="Not started"
-          value={score.teamsNotStarted}
-          hint={
-            score.teamsNotStarted > 0
-              ? 'Readiness covers only what has been reviewed'
-              : 'Every required review has been opened'
-          }
-        />
+        <div className="grid grid-cols-2 gap-x-8 gap-y-6 border-t border-border p-6 sm:grid-cols-3 lg:grid-cols-5">
+          <Stat label="Evidence complete" value={`${score.evidenceCompleteness}%`} />
+          <Stat label="Controls remaining" value={score.controlsRemaining} />
+          <Stat
+            label="Signed off"
+            value={score.teamsSignedOff}
+            hint={`of ${score.requiredTeams} required`}
+          />
+          <Stat label="Blocked" value={score.teamsBlocked} />
+          <Stat
+            label="Not started"
+            value={score.teamsNotStarted}
+            hint={score.teamsNotStarted > 0 ? 'Readiness covers only what was reviewed' : undefined}
+          />
+        </div>
       </div>
 
       <div className="rounded-lg border border-border bg-card">

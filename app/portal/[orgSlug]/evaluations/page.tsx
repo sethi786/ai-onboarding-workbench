@@ -27,7 +27,7 @@ export default async function EvaluationsPage({
     <div className="mx-auto max-w-6xl">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Evaluations</h1>
+          <h1 className="display-md">Evaluations</h1>
           <p className="text-sm text-muted-foreground">
             Tools your organization is reviewing for adoption.
             {quota.limit !== null && (

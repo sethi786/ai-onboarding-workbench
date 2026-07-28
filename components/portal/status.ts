@@ -21,8 +21,9 @@ export function recommendationTone(rec: Recommendation): Tone {
   }
 }
 
+/** Same bands as ScoreGauge — see the note there on why they moved down. */
 export function readinessTone(v: number): Tone {
-  return v >= 85 ? 'success' : v >= 70 ? 'warning' : v >= 50 ? 'warning' : 'danger';
+  return v >= 80 ? 'success' : v >= 35 ? 'warning' : 'danger';
 }
 
 export function decisionTone(decision: string): Tone {

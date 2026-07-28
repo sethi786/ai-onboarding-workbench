@@ -10,10 +10,12 @@ import { DISCLAIMER } from '@/lib/site';
 
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <div className="text-xs font-medium text-muted-foreground">{label}</div>
-      <div className="mt-1 text-2xl font-semibold">{value}</div>
-      {hint && <div className="text-xs text-muted-foreground">{hint}</div>}
+    <div>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </div>
+      <div className="mt-1 text-[26px] font-semibold leading-none tracking-tight">{value}</div>
+      {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </div>
   );
 }
@@ -44,7 +46,7 @@ export default async function DashboardPage({
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Governance Control Tower</h1>
+          <h1 className="display-md">Governance Control Tower</h1>
           <p className="text-sm text-muted-foreground">{org.name} · tool adoption portfolio</p>
         </div>
         <Link
@@ -55,13 +57,14 @@ export default async function DashboardPage({
         </Link>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[auto_1fr]">
-        <div className="grid place-items-center rounded-lg border border-border bg-card p-6">
-          <ScoreGauge value={avg} size={140} label="Avg readiness" />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+      {/* One panel, not five. The gauge and the four counters answer the same
+          question and belong in the same frame; boxing each of them separately
+          made the first screen after sign-in read as a widget gallery. */}
+      <div className="flex flex-col items-center gap-8 rounded-lg border border-border bg-card p-6 sm:flex-row sm:gap-12">
+        <ScoreGauge value={avg} size={132} label="Avg readiness" />
+        <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
           <Stat label="Tools in flight" value={total} />
-          <Stat label="Cleared to proceed" value={ready} />
+          <Stat label="Cleared" value={ready} />
           <Stat label="Blocked" value={blocked} />
           <Stat label="Not started" value={notStarted} />
         </div>
