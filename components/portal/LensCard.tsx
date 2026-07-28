@@ -5,6 +5,7 @@ import { ChevronRight, Ban } from 'lucide-react';
 import type { TeamLens, TeamAssessment, TeamScore, Decision, Profile } from '@/workbench/types';
 import { controlsAtDepth, evidenceAtDepth, depthRationale } from '@/workbench/engine/reviewIntensity';
 import { SCORE_LABELS, DECISION_OPTIONS } from '@/workbench/data/constants';
+import { CONTROL_GUIDANCE, EVIDENCE_GUIDANCE } from '@/workbench/data/controlGuidance';
 import {
   updateAssessment,
   addEvidenceLink,
@@ -164,7 +165,13 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
                 <span className="text-xs text-muted-foreground">{controlsDone}/{controls.length}</span>
               </div>
               {controls.map((c) => (
-                <CheckRow key={c.id} checked={!!a.checkedControls[c.id]} onChange={() => doToggle('checkedControls', c.id)} disabled={!canEdit}>
+                <CheckRow
+                  key={c.id}
+                  checked={!!a.checkedControls[c.id]}
+                  onChange={() => doToggle('checkedControls', c.id)}
+                  disabled={!canEdit}
+                  guidance={CONTROL_GUIDANCE[c.id]}
+                >
                   {c.label}{c.critical && <CriticalTag />}
                   {recallSummary.byItem[c.id] && !a.checkedControls[c.id] && (
                     <RecallHint tool={recallSummary.byItem[c.id].source.toolName} />
@@ -183,7 +190,13 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
                   environment or data classification.
                 </p>
               ) : evidence.map((e) => (
-                <CheckRow key={e.id} checked={!!a.checkedEvidence[e.id]} onChange={() => doToggle('checkedEvidence', e.id)} disabled={!canEdit}>
+                <CheckRow
+                  key={e.id}
+                  checked={!!a.checkedEvidence[e.id]}
+                  onChange={() => doToggle('checkedEvidence', e.id)}
+                  disabled={!canEdit}
+                  guidance={EVIDENCE_GUIDANCE[e.id]}
+                >
                   {e.label}
                   {recallSummary.byItem[e.id] && !a.checkedEvidence[e.id] && (
                     <RecallHint tool={recallSummary.byItem[e.id].source.toolName} />
@@ -318,11 +331,34 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function CriticalTag() {
   return <span className="ml-1.5 rounded bg-danger/10 px-1.5 py-0.5 text-[10px] font-semibold text-danger">critical</span>;
 }
-function CheckRow({ checked, onChange, disabled, children }: { checked: boolean; onChange: () => void; disabled?: boolean; children: React.ReactNode }) {
+function CheckRow({
+  checked,
+  onChange,
+  disabled,
+  guidance,
+  children,
+}: {
+  checked: boolean;
+  onChange: () => void;
+  disabled?: boolean;
+  /** What "done" concretely means — see workbench/data/controlGuidance. */
+  guidance?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <label className="flex cursor-pointer items-start gap-2 py-1 text-sm">
+    <label className="flex cursor-pointer items-start gap-2 py-1.5 text-sm">
       <input type="checkbox" className="mt-1" checked={checked} onChange={onChange} disabled={disabled} />
-      <span>{children}</span>
+      <span>
+        {children}
+        {guidance && (
+          // Always visible, never behind a tooltip: a reviewer deciding whether
+          // to tick a box is exactly who needs this, and hiding it means the
+          // box gets ticked on a guess.
+          <span className="mt-0.5 block text-[12.5px] leading-snug text-muted-foreground">
+            {guidance}
+          </span>
+        )}
+      </span>
     </label>
   );
 }

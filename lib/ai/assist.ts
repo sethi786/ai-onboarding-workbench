@@ -8,6 +8,7 @@ import {
 } from './prompts';
 import { TOOL_CATEGORIES } from '@/workbench/types';
 import { DATA_CLASSIFICATIONS, DATA_TYPE_OPTIONS, ENVIRONMENTS } from '@/workbench/data/constants';
+import { CONTROL_GUIDANCE, EVIDENCE_GUIDANCE } from '@/workbench/data/controlGuidance';
 import type { Profile, TeamAssessment, TeamLens } from '@/workbench/types';
 import type { ReportContext } from '@/workbench/export/reportContext';
 
@@ -163,11 +164,26 @@ Pass criteria: ${lens.passCriteria.join('; ')}
 </review_team>
 
 <required_controls>
-${lens.requiredControls.map((c) => `${c.id}: ${c.label}${c.critical ? ' [critical]' : ''}`).join('\n')}
+${lens.requiredControls
+  .map(
+    (c) =>
+      `${c.id}: ${c.label}${c.critical ? ' [critical]' : ''}` +
+      // The same definition of "done" the human reviewer sees, so a drafted
+      // "likely satisfied" means satisfied by the standard they'll be held to
+      // rather than by the label alone.
+      (CONTROL_GUIDANCE[c.id] ? `\n    done when: ${CONTROL_GUIDANCE[c.id]}` : ''),
+  )
+  .join('\n')}
 </required_controls>
 
 <expected_evidence>
-${lens.evidenceRequired.map((e) => `${e.id}: ${e.label}`).join('\n')}
+${lens.evidenceRequired
+  .map(
+    (e) =>
+      `${e.id}: ${e.label}` +
+      (EVIDENCE_GUIDANCE[e.id] ? `\n    source: ${EVIDENCE_GUIDANCE[e.id]}` : ''),
+  )
+  .join('\n')}
 </expected_evidence>
 
 <tool_under_review>

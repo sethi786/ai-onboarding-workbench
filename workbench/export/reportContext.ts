@@ -7,6 +7,7 @@ import type {
   TeamLens,
 } from '../types';
 import { TEAM_LENSES, LENS_BY_ID } from '../data/teamLenses';
+import { controlsAtDepth, evidenceAtDepth } from '../engine/reviewIntensity';
 import { DRAFT_BANNER } from '../data/constants';
 
 export interface TeamReportRow {
@@ -20,7 +21,11 @@ export interface TeamReportRow {
   evidenceComplete: number;
   evidenceTotal: number;
   activeBlockerLabels: string[];
+  /** Controls this review asks for at its depth and that are not yet done. */
+  missingControls: { id: string; label: string; critical: boolean }[];
+  /** Evidence this review asks for at its depth and that is not yet collected. */
   missingEvidence: string[];
+  missingEvidenceItems: { id: string; label: string }[];
   hasCriticalBlocker: boolean;
 }
 
@@ -46,9 +51,17 @@ export function buildReportContext(
     const activeBlockerLabels = lens.blockers
       .filter((b) => a.activeBlockers[b.id])
       .map((b) => b.label + (b.critical ? ' (critical)' : ''));
-    const missingEvidence = lens.evidenceRequired
+    // Scoped to the depth this review actually runs at. Listing the full
+    // catalogue would tell a screening-depth review it is missing eight
+    // documents nobody ever asked it for — the exact burden the depth rules
+    // exist to remove.
+    const missingControls = controlsAtDepth(lens, ts.depth)
+      .filter((c) => !a.checkedControls[c.id])
+      .map((c) => ({ id: c.id, label: c.label, critical: c.critical === true }));
+    const missingEvidenceItems = evidenceAtDepth(lens, ts.depth)
       .filter((e) => !a.checkedEvidence[e.id])
-      .map((e) => e.label);
+      .map((e) => ({ id: e.id, label: e.label }));
+    const missingEvidence = missingEvidenceItems.map((e) => e.label);
     return {
       lens,
       assessment: a,
@@ -60,7 +73,9 @@ export function buildReportContext(
       evidenceComplete: ts.evidenceComplete,
       evidenceTotal: ts.evidenceTotal,
       activeBlockerLabels,
+      missingControls,
       missingEvidence,
+      missingEvidenceItems,
       hasCriticalBlocker: ts.hasCriticalBlocker,
     };
   });
