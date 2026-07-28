@@ -26,14 +26,15 @@ export function SiteFooter() {
           <div>
             <ShieldLogo tone="light" />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
-              Bring every AI tool to review already cleared — governance, security, and go/no-go
-              evidence, prepared before the formal gates.
+              Governance for every tool you adopt — SaaS, PaaS, on-prem, and AI. Security, privacy,
+              legal, and risk review as one workflow.
             </p>
           </div>
           <FooterCol
             title="Platform"
             links={[
               { href: '/platform', label: 'Overview' },
+              { href: '/use-cases', label: 'Use cases' },
               { href: '/solutions', label: 'Solutions' },
               { href: '/assessment', label: 'The 20 lenses' },
               { href: '/pricing', label: 'Pricing' },
@@ -43,6 +44,7 @@ export function SiteFooter() {
             title="Company"
             links={[
               { href: '/why-aegis', label: 'Why Aegis' },
+              { href: '/resources', label: 'Guides' },
               { href: '/security', label: 'Security & Trust' },
               { href: '/about', label: 'About' },
               { href: '/contact', label: 'Contact' },

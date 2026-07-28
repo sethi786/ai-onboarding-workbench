@@ -2,12 +2,13 @@ import { Hero } from '@/components/marketing/Hero';
 import { LogoMarquee } from '@/components/marketing/LogoMarquee';
 import { Stats } from '@/components/marketing/Stats';
 import { LiveDemo } from '@/components/marketing/LiveDemo';
+import { ProblemRouter } from '@/components/marketing/ProblemRouter';
 import {
   StatementBand,
   FeatureGrid,
   HowItWorks,
   Pricing,
-  Testimonials,
+  ReviewerQuestions,
   FAQ,
   FinalCTA,
 } from '@/components/marketing/LandingSections';
@@ -17,12 +18,13 @@ export default function HomePage() {
     <>
       <Hero />
       <LogoMarquee />
+      <ProblemRouter />
       <StatementBand />
       <Stats />
       <FeatureGrid />
       <HowItWorks />
       <LiveDemo />
-      <Testimonials />
+      <ReviewerQuestions />
       <Pricing />
       <FAQ />
       <FinalCTA />
