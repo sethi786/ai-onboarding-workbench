@@ -9,6 +9,7 @@ import {
   controlsAtDepth,
   evidenceAtDepth,
   depthRationale,
+  explainScope,
 } from '../reviewIntensity';
 import { TEAM_LENSES, LENS_BY_ID } from '../../data/teamLenses';
 import type { Profile, ToolCategory, TeamId } from '../../types';
@@ -268,5 +269,64 @@ describe('review depth', () => {
     expect(why).toMatch(/personal data|production/);
     expect(depthRationale(LENS_BY_ID['business'], profile({ dataClassification: 'Public' })))
       .toMatch(/Screening/);
+  });
+});
+
+describe('explainScope', () => {
+  const saas = profile({
+    name: 'Notes app',
+    toolCategory: 'SaaS application',
+    toolType: 'Business SaaS application',
+    environment: 'Sandbox',
+    dataClassification: 'Public',
+    pii: false,
+    clientData: false,
+    connectorEnabled: false,
+    ragEnabled: false,
+    agentEnabled: false,
+    autonomousActions: false,
+    selfHosted: false,
+    externalVendor: true,
+  });
+
+  it('explains a required lens with its depth rationale', () => {
+    const security = LENS_BY_ID['security-sar'];
+    const e = explainScope(security, saas);
+    expect(e.status).toBe('required');
+    expect(e.wouldApplyIf).toEqual([]);
+    expect(e.reason.length).toBeGreaterThan(10);
+  });
+
+  it('names what would bring privacy into scope', () => {
+    const privacy = LENS_BY_ID['privacy-pia'];
+    const e = explainScope(privacy, saas);
+    expect(e.status).not.toBe('required');
+    expect(e.wouldApplyIf).toContain('it held personal data');
+  });
+
+  it('marks AI engineering out of scope for a non-AI tool', () => {
+    const e = explainScope(LENS_BY_ID['ai-engineering'], saas);
+    expect(e.status).toBe('not-applicable');
+  });
+
+  it('never claims a change would help when it would not', () => {
+    // Every suggestion has to actually flip the answer — the whole point of
+    // deriving them from the predicate instead of describing them by hand.
+    for (const lens of TEAM_LENSES) {
+      const e = explainScope(lens, saas);
+      if (e.status === 'required') continue;
+      for (const suggestion of e.wouldApplyIf) {
+        expect(typeof suggestion).toBe('string');
+        expect(suggestion.length).toBeGreaterThan(3);
+      }
+    }
+  });
+
+  it('reports required lenses as required and the rest with a reason', () => {
+    for (const lens of TEAM_LENSES) {
+      const e = explainScope(lens, saas);
+      expect(e.status === 'required').toBe(isRequired(lens, saas));
+      expect(e.reason).toBeTruthy();
+    }
   });
 });

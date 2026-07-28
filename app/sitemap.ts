@@ -23,8 +23,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     entry('', 1),
     entry('/platform', 0.9),
-    // The published deliverable — the page that answers "what do I actually
-    // get" without a signup.
+    // The two pages that answer "what do I actually get" without a signup —
+    // the highest-intent entry points the site has after the tool pages.
+    entry('/scope', 0.9),
     entry('/example-review', 0.9),
     entry('/pricing', 0.9),
     // Tool pages answer the highest-intent query this product gets — someone

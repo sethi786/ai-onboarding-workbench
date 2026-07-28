@@ -55,15 +55,22 @@ export function requiredLensIds(lenses: TeamLens[], profile: Profile): TeamId[] 
   return lenses.filter((l) => isRequired(l, profile)).map((l) => l.id);
 }
 
-const ESCALATION: { when: (p: Profile) => boolean; teams: TeamId[] }[] = [
-  { when: (p) => p.pii, teams: ['privacy-pia', 'data-governance'] },
-  { when: (p) => p.clientData, teams: ['privacy-pia', 'legal', 'qrm-risk', 'data-governance'] },
-  { when: (p) => p.autonomousActions, teams: ['security-sar', 'qrm-risk', 'agent-governance'] },
-  { when: (p) => p.externalVendor, teams: ['vendor-risk', 'legal'] },
-  { when: (p) => p.connectorEnabled, teams: ['connector-governance', 'security-sar'] },
-  { when: (p) => p.agentEnabled, teams: ['agent-governance', 'security-sar'] },
+/**
+ * Facts that make specific teams look one level harder.
+ *
+ * `label` reads after "because …" and lives here rather than in a parallel
+ * table, so the explanation a reviewer sees can never describe a rule that
+ * isn't the one that fired.
+ */
+const ESCALATION: { when: (p: Profile) => boolean; teams: TeamId[]; label: string }[] = [
+  { when: (p) => p.pii, teams: ['privacy-pia', 'data-governance'], label: 'personal data is in scope' },
+  { when: (p) => p.clientData, teams: ['privacy-pia', 'legal', 'qrm-risk', 'data-governance'], label: 'client data is in scope' },
+  { when: (p) => p.autonomousActions, teams: ['security-sar', 'qrm-risk', 'agent-governance'], label: 'it acts without per-action approval' },
+  { when: (p) => p.externalVendor, teams: ['vendor-risk', 'legal'], label: 'it comes from an external vendor' },
+  { when: (p) => p.connectorEnabled, teams: ['connector-governance', 'security-sar'], label: 'it reaches your other systems' },
+  { when: (p) => p.agentEnabled, teams: ['agent-governance', 'security-sar'], label: 'it runs as an agent' },
   // You own the runtime: hardening, patching, and supply chain are on you.
-  { when: (p) => p.selfHosted, teams: ['secure-sdlc', 'platform-cloud', 'security-sar'] },
+  { when: (p) => p.selfHosted, teams: ['secure-sdlc', 'platform-cloud', 'security-sar'], label: 'you own the runtime' },
 ];
 
 export function escalatedLensIds(profile: Profile): Set<TeamId> {
@@ -158,25 +165,221 @@ export function evidenceAtDepth(lens: TeamLens, depth: ReviewDepth): EvidenceReq
   return lens.evidenceRequired.filter((e) => !e.deep);
 }
 
-/** One line explaining a lens's depth, for the reviewer who asks why. */
+/* ------------------------------------------------------------ explanation */
+
+/**
+ * Single-fact changes to a profile, used to work out what would bring a review
+ * into scope.
+ *
+ * Rather than describing each lens's trigger in prose that drifts away from the
+ * predicate, this asks the predicate itself: flip one fact, see whether the
+ * answer changes. The explanation is therefore derived from the same code that
+ * makes the decision and cannot contradict it — which matters, because "why
+ * didn't privacy review this?" is the first question anyone asks of a tool that
+ * decides what to skip.
+ */
+interface Probe {
+  /** Reads after "would apply if …". */
+  label: string;
+  /** Reads after "required because …". */
+  present: string;
+  on: (p: Profile) => Profile;
+  off: (p: Profile) => Profile;
+  /** Whether the fact is currently true of this profile. */
+  holds: (p: Profile) => boolean;
+}
+
+const PROBES: Probe[] = [
+  {
+    label: 'it held personal data',
+    present: 'it holds personal data',
+    on: (p) => ({ ...p, pii: true }),
+    off: (p) => ({ ...p, pii: false }),
+    holds: (p) => p.pii,
+  },
+  {
+    label: 'it held client data',
+    present: 'it holds client data',
+    on: (p) => ({ ...p, clientData: true }),
+    off: (p) => ({ ...p, clientData: false }),
+    holds: (p) => p.clientData,
+  },
+  {
+    label: 'it connected to your other systems',
+    present: 'it connects to your other systems',
+    on: (p) => ({ ...p, connectorEnabled: true }),
+    off: (p) => ({ ...p, connectorEnabled: false }),
+    holds: (p) => p.connectorEnabled,
+  },
+  {
+    label: 'it searched your own content',
+    present: 'it searches your own content',
+    on: (p) => ({ ...p, ragEnabled: true }),
+    off: (p) => ({ ...p, ragEnabled: false }),
+    holds: (p) => p.ragEnabled,
+  },
+  {
+    label: 'it took actions on its own',
+    present: 'it takes actions on its own',
+    on: (p) => ({ ...p, agentEnabled: true, autonomousActions: true }),
+    off: (p) => ({ ...p, agentEnabled: false, autonomousActions: false }),
+    holds: (p) => p.agentEnabled || p.autonomousActions,
+  },
+  {
+    label: 'you hosted or built it yourself',
+    present: 'you host or build it yourself',
+    on: (p) => ({ ...p, selfHosted: true }),
+    off: (p) => ({ ...p, selfHosted: false }),
+    holds: (p) => p.selfHosted,
+  },
+  {
+    label: 'it were an AI system',
+    present: 'it is an AI system',
+    on: (p) => ({ ...p, toolCategory: 'AI / ML system' }),
+    off: (p) => ({ ...p, toolCategory: 'SaaS application' }),
+    holds: (p) => p.toolCategory === 'AI / ML system',
+  },
+  {
+    label: 'it came from an external vendor',
+    present: 'it comes from an external vendor',
+    on: (p) => ({ ...p, externalVendor: true }),
+    off: (p) => ({ ...p, externalVendor: false }),
+    holds: (p) => p.externalVendor,
+  },
+  {
+    label: 'it ran in production',
+    present: 'it runs in production',
+    on: (p) => ({ ...p, environment: 'Production' }),
+    off: (p) => ({ ...p, environment: 'Sandbox' }),
+    holds: (p) => p.environment === 'Production',
+  },
+  {
+    label: 'it handled confidential data',
+    present: 'it handles confidential data',
+    on: (p) => ({ ...p, dataClassification: 'Confidential' }),
+    off: (p) => ({ ...p, dataClassification: 'Public' }),
+    holds: (p) => p.dataClassification === 'Confidential' || p.dataClassification === 'Restricted',
+  },
+];
+
+/**
+ * Which facts are actually holding this review in scope.
+ *
+ * Found by removing one fact at a time and seeing whether the requirement
+ * survives — so the answer comes from the predicate rather than from prose
+ * written alongside it. An empty result means nothing specific summoned it: the
+ * review is unconditional.
+ */
+export function requirementDrivers(lens: TeamLens, profile: Profile): string[] {
+  if (!isRequired(lens, profile)) return [];
+  return PROBES.filter((probe) => probe.holds(profile) && !isRequired(lens, probe.off(profile))).map(
+    (probe) => probe.present,
+  );
+}
+
+/** The escalation rule that applies to this lens, if any. */
+function escalationFor(lens: TeamLens, profile: Profile) {
+  return ESCALATION.find((rule) => rule.when(profile) && rule.teams.includes(lens.id));
+}
+
+/**
+ * Do two phrasings refer to the same underlying fact?
+ *
+ * The requirement driver and the escalation label are written for different
+ * sentence positions ("it holds personal data" / "personal data is in scope"),
+ * so they are compared on their distinctive words rather than as strings.
+ */
+function sameFact(driver: string, escalationLabel: string): boolean {
+  const KEYS = ['personal data', 'client data', 'external vendor', 'other systems', 'agent', 'runtime', 'per-action'];
+  return KEYS.some((k) => driver.includes(k) && escalationLabel.includes(k));
+}
+
+export type ScopeStatus = 'required' | 'not-applicable' | 'not-triggered';
+
+export interface ScopeExplanation {
+  status: ScopeStatus;
+  /** Plain-language reason, safe to show a reviewer. */
+  reason: string;
+  /** Single facts that would bring this review into scope. Empty when required. */
+  wouldApplyIf: string[];
+}
+
+/**
+ * Why a review is in scope, or what would put it there.
+ *
+ * A tool that quietly drops fourteen of twenty reviews has to be able to defend
+ * each omission, or the first sceptical reviewer discards the whole result.
+ */
+export function explainScope(lens: TeamLens, profile: Profile): ScopeExplanation {
+  if (isRequired(lens, profile)) {
+    const drivers = requirementDrivers(lens, profile);
+    const why = drivers.length
+      ? `Required because ${drivers.slice(0, 2).join(' and ')}.`
+      : 'Required for every tool — this is one of the reviews nothing skips.';
+
+    // When the same fact both summons the review and deepens it, say it once.
+    // Two sentences making the same point read as padding, and padding is how
+    // a reader learns to stop reading the explanations.
+    const depth = depthRationale(lens, profile);
+    const escalation = escalationFor(lens, profile);
+    const alreadySaid =
+      escalation !== undefined && drivers.some((d) => sameFact(d, escalation.label));
+    const depthClause = alreadySaid
+      ? `${reviewDepth(lens, profile)} depth, one level deeper than the rest of this review.`
+      : depth;
+
+    return { status: 'required', reason: `${why} ${depthClause}`, wouldApplyIf: [] };
+  }
+
+  const wouldApplyIf: string[] = [];
+  for (const probe of PROBES) {
+    if (!probe.holds(profile) && isRequired(lens, probe.on(profile))) wouldApplyIf.push(probe.label);
+  }
+
+  if (!isApplicable(lens, profile)) {
+    return {
+      status: 'not-applicable',
+      reason: `This review has no standing over a tool like ${profile.name || 'this one'} — its remit doesn’t reach it.`,
+      wouldApplyIf,
+    };
+  }
+  return {
+    status: 'not-triggered',
+    reason: 'In this team’s remit, but nothing about this tool triggers a review.',
+    wouldApplyIf,
+  };
+}
+
+/**
+ * One line explaining a lens's depth, for the reviewer who asks why.
+ *
+ * An escalated lens names the rule that escalated *it* rather than restating
+ * the tool's overall exposure — otherwise every section of the report carries
+ * the same sentence and the explanation reads as boilerplate, which is worse
+ * than no explanation because it looks like one.
+ */
 export function depthRationale(lens: TeamLens, profile: Profile): string {
   const depth = reviewDepth(lens, profile);
-  const escalated = escalatedLensIds(profile).has(lens.id);
-  const drivers = [
-    profile.environment === 'Production' && 'runs in production',
-    profile.dataClassification === 'Restricted' && 'handles restricted data',
-    profile.dataClassification === 'Confidential' && 'handles confidential data',
-    profile.pii && 'holds personal data',
-    profile.clientData && 'holds client data',
-    profile.autonomousActions && 'acts without per-action approval',
-    profile.connectorEnabled && 'reaches other systems',
-  ].filter(Boolean) as string[];
 
   if (depth === 'Screening') {
-    return 'Screening review: low exposure, so only the make-or-break controls are asked. Raise the environment or data classification and this deepens automatically.';
+    return 'Screening depth: low exposure, so only the make-or-break controls are asked. Raise the environment or data classification and this deepens automatically.';
   }
-  const because = drivers.length ? ` because it ${drivers.slice(0, 2).join(' and ')}` : '';
-  return escalated
-    ? `${depth} review: this lens is escalated for this tool${because}.`
-    : `${depth} review${because}.`;
+
+  const escalation = ESCALATION.find(
+    (rule) => rule.when(profile) && rule.teams.includes(lens.id),
+  );
+  if (escalation) {
+    return `${depth} depth — one level deeper than the rest of this review, because ${escalation.label}.`;
+  }
+
+  const exposureDrivers = [
+    profile.environment === 'Production' && 'production',
+    profile.environment === 'UAT' && 'UAT',
+    profile.dataClassification === 'Restricted' && 'restricted data',
+    profile.dataClassification === 'Confidential' && 'confidential data',
+  ].filter(Boolean) as string[];
+
+  return exposureDrivers.length
+    ? `${depth} depth, set by the tool's overall exposure (${exposureDrivers.join(', ')}).`
+    : `${depth} depth.`;
 }

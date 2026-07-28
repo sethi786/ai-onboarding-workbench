@@ -65,13 +65,13 @@ export function Hero() {
               Start free
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <a
-              href="#demo"
+            <Link
+              href="/scope"
               className="group inline-flex items-center gap-1.5 text-[15px] font-medium text-foreground"
             >
-              See it score, live
+              Scope your own tool, free
               <span className="text-electric transition-transform group-hover:translate-x-0.5">→</span>
-            </a>
+            </Link>
           </motion.div>
 
           <motion.p custom={4} variants={fade} className="mt-6 text-[13px] text-muted-foreground/80">

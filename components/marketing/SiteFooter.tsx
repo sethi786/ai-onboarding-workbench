@@ -34,6 +34,7 @@ export function SiteFooter() {
             title="Platform"
             links={[
               { href: '/platform', label: 'Overview' },
+              { href: '/scope', label: 'Scope a review free' },
               { href: '/example-review', label: 'Example review' },
               { href: '/use-cases', label: 'Use cases' },
               { href: '/solutions', label: 'Solutions' },
