@@ -25,11 +25,11 @@ export function Hero() {
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-[12.5px] font-medium text-muted-foreground shadow-soft"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-electric" />
-            20-team enterprise review, in one place
+            SaaS · PaaS · On-prem · AI — governed in one place
           </motion.span>
 
           <motion.h1 custom={1} variants={fade} className="display-xl mt-7 max-w-4xl">
-            Bring AI to work,
+            Adopt any tool,
             <br className="hidden sm:block" /> already cleared.
           </motion.h1>
 
@@ -38,8 +38,9 @@ export function Hero() {
             variants={fade}
             className="mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
           >
-            Aegis prepares the security, privacy, legal, and go/no-go evidence enterprise review
-            teams demand — turning a months-long approval gauntlet into a single readiness score.
+            Aegis runs the security, privacy, legal, and risk review that gates every new tool —
+            SaaS, PaaS, on-prem, and AI — as one readiness workflow. Replace a months-long,
+            multi-department approval gauntlet with a single score. No enterprise review org required.
           </motion.p>
 
           <motion.div
