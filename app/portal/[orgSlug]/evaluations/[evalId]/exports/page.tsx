@@ -12,11 +12,7 @@ import { toRemediationPlan } from '@/workbench/export/toRemediationPlan';
 import { makeEmptyAssessment } from '@/workbench/types';
 import { slug } from '@/workbench/export/download';
 import { ExportsClient } from '@/components/portal/ExportsClient';
-import { toBrandedHtml } from '@/workbench/export/toBrandedHtml';
-import { buildDiagrams } from '@/workbench/diagrams';
-import { allCoverage } from '@/workbench/engine/frameworkCoverage';
-import { FRAMEWORK_DISCLAIMER } from '@/workbench/data/frameworks';
-import { esc } from '@/workbench/export/toBrandedHtml';
+import { buildReviewDocument } from '@/lib/review-document';
 import { BrandedDocumentButton } from '@/components/portal/BrandedDocumentButton';
 import { AiReviewAssist } from '@/components/portal/AiReviewAssist';
 import { EssentialsNotice } from '@/components/portal/EssentialsNotice';
@@ -58,46 +54,9 @@ export default async function ExportsPage({
   const brand = resolveBranding(org);
   const ctx = buildReportContext(profile, score, getAssessment, new Date().toISOString(), brand);
 
-  const frameworkSections = allCoverage(profile, TEAM_LENSES, getAssessment).map((f) => ({
-    title: `${f.framework.name} — evidence map`,
-    paragraphs: [f.framework.authority, FRAMEWORK_DISCLAIMER],
-    html:
-      '<table><thead><tr><th>Reference</th><th>Obligation</th><th>Status</th><th class="num">Evidenced</th></tr></thead><tbody>' +
-      f.clauses
-        .map(
-          (c) =>
-            `<tr><td>${esc(c.clause.ref)}</td><td>${esc(c.clause.title)}</td>` +
-            `<td>${esc(
-              c.status === 'out-of-scope'
-                ? 'Out of scope for this tool'
-                : c.status === 'covered'
-                  ? 'Evidenced'
-                  : c.status === 'partial'
-                    ? 'Partly evidenced'
-                    : 'Not started',
-            )}</td>` +
-            `<td class="num">${c.status === 'out-of-scope' ? '—' : Math.round(c.completeness * 100) + '%'}</td></tr>`,
-        )
-        .join('') +
-      '</tbody></table>',
-  }));
-
-  const brandedHtml = toBrandedHtml(ctx, brand, {
-    title: 'Tool Adoption Review',
-    producedWith: `Prepared with ${SITE.name}`,
-    // Diagrams go into the document as inline SVG, so the PDF a reviewer
-    // receives carries them without any renderer or network access.
-    sections: [
-      ...buildDiagrams(ctx, stages).map((d) => ({
-        title: d.title,
-        paragraphs: [d.purpose],
-        html: d.svg,
-      })),
-      // The regulatory table is the reason a compliance officer keeps this
-      // document rather than filing it.
-      ...frameworkSections,
-    ],
-  });
+  // Same builder the published example on the marketing site uses, so what a
+  // prospect previews is exactly what a customer downloads.
+  const brandedHtml = buildReviewDocument(ctx, brand, stages, getAssessment);
 
   const bundle = {
     base: slug(row.name),

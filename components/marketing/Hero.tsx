@@ -25,12 +25,12 @@ export function Hero() {
             className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-[12.5px] font-medium text-muted-foreground shadow-soft"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-electric" />
-            SaaS · PaaS · On-prem · AI — governed in one place
+            Software for reviewing tools before you roll them out
           </motion.span>
 
           <motion.h1 custom={1} variants={fade} className="display-xl mt-7 max-w-4xl">
-            Adopt any tool,
-            <br className="hidden sm:block" /> already cleared.
+            Before you roll it out,
+            <br className="hidden sm:block" /> someone has to check it.
           </motion.h1>
 
           <motion.p
@@ -38,9 +38,19 @@ export function Hero() {
             variants={fade}
             className="mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
           >
-            Aegis runs the security, privacy, legal, and risk review that gates every new tool —
-            SaaS, PaaS, on-prem, and AI — as one readiness workflow. Replace a months-long,
-            multi-department approval gauntlet with a single score. No enterprise review org required.
+            Aegis is the tool that does it. Tell it what you&rsquo;re adopting — Copilot,
+            a new CRM, anything — and it works out which reviews actually apply, walks you through
+            them, and hands you a finished pack: a branded review document, the diagrams, and the
+            answers to what your security team will ask.
+          </motion.p>
+
+          <motion.p
+            custom={2}
+            variants={fade}
+            className="mt-4 max-w-xl text-[15px] text-muted-foreground/85"
+          >
+            Built for companies that have to do this properly and don&rsquo;t have a governance
+            department to do it.
           </motion.p>
 
           <motion.div
@@ -65,7 +75,7 @@ export function Hero() {
           </motion.div>
 
           <motion.p custom={4} variants={fade} className="mt-6 text-[13px] text-muted-foreground/80">
-            No credit card · SOC 2 aligned · NIST AI RMF
+            No credit card · Your first tool free · Maps to EU AI Act, ISO 42001 &amp; NIST AI RMF
           </motion.p>
         </motion.div>
       </div>

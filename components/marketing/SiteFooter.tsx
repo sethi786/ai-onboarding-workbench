@@ -34,6 +34,7 @@ export function SiteFooter() {
             title="Platform"
             links={[
               { href: '/platform', label: 'Overview' },
+              { href: '/example-review', label: 'Example review' },
               { href: '/use-cases', label: 'Use cases' },
               { href: '/solutions', label: 'Solutions' },
               { href: '/assessment', label: 'The 20 lenses' },
@@ -73,7 +74,11 @@ export function SiteFooter() {
         </div>
         <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/40 md:flex-row md:items-center">
           <p>© {new Date().getFullYear()} Aegis. A self-evaluation and readiness aid.</p>
-          <p className="font-mono tracking-tight">SOC 2 · ISO 27001 · HIPAA · NIST AI RMF-aligned</p>
+          {/* Reviews map to these frameworks. Aegis itself holds no attestation
+              yet — /security says so plainly, and this line must not imply it. */}
+          <p className="font-mono tracking-tight">
+            Reviews map to EU AI Act · ISO 42001 · NIST AI RMF
+          </p>
         </div>
       </div>
     </footer>

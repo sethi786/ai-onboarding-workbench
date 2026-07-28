@@ -38,7 +38,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
           <p className="relative font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500">
-            SOC 2 · ISO 27001 · HIPAA · NIST AI RMF-aligned
+            Reviews map to EU AI Act · ISO 42001 · NIST AI RMF
           </p>
         </div>
       </div>

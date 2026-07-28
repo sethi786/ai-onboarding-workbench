@@ -26,6 +26,7 @@ export const MEGA_NAV: NavItem[] = [
         title: 'The platform',
         links: [
           { href: '/platform', label: 'Overview', desc: 'One workflow, intake to go-live' },
+          { href: '/example-review', label: 'See a finished review', desc: 'The whole document, in full' },
           { href: '/platform#engine', label: 'Readiness Engine', desc: '0–100 score, risk, go/no-go' },
           { href: '/platform#lenses', label: '20 Review Lenses', desc: 'Security, privacy, legal, risk…' },
           { href: '/platform#evidence', label: 'Evidence Factory', desc: 'Draft SAR, PIA & approval packs' },

@@ -23,6 +23,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     entry('', 1),
     entry('/platform', 0.9),
+    // The published deliverable — the page that answers "what do I actually
+    // get" without a signup.
+    entry('/example-review', 0.9),
     entry('/pricing', 0.9),
     // Tool pages answer the highest-intent query this product gets — someone
     // typing "<tool> security review" long before they've heard of us.
