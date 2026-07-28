@@ -55,7 +55,9 @@ export default async function LibraryPage({
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <h3 className="font-semibold">{t.name}</h3>
-                  <p className="text-xs text-muted-foreground">{t.vendor}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.vendor} · {t.defaults.toolCategory ?? 'AI / ML system'}
+                  </p>
                 </div>
                 <Badge tone="neutral">{t.category}</Badge>
               </div>

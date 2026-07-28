@@ -73,4 +73,11 @@ export interface TeamLens {
   /** Whether this lens is always required, plus conditional escalation. */
   alwaysRequired: boolean;
   requiredWhen?: (p: Profile) => boolean;
+  /**
+   * Whether this lens applies to this kind of tool at all. A lens that does not
+   * apply is never required — not even in Production, and not even when
+   * `alwaysRequired` is set. Use this for scope (an AI Engineering review means
+   * nothing for a third-party CRM); use `requiredWhen` for intensity.
+   */
+  appliesWhen?: (p: Profile) => boolean;
 }

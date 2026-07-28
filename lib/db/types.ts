@@ -31,6 +31,7 @@ export interface EvaluationRow {
   name: string;
   platform: string;
   tool_type: string;
+  tool_category: string;
   use_case: string;
   business_owner: string;
   technical_owner: string;
@@ -47,6 +48,7 @@ export interface EvaluationRow {
   client_data: boolean;
   pii: boolean;
   autonomous_actions: boolean;
+  self_hosted: boolean;
   status: string;
   source_template_id: string | null;
   created_by: string | null;

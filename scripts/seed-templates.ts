@@ -16,6 +16,8 @@ async function main() {
     vendor: t.vendor,
     platform: t.platform,
     tool_type: t.toolType,
+    tool_category: t.defaults.toolCategory ?? 'AI / ML system',
+    self_hosted: t.defaults.selfHosted ?? false,
     summary: t.summary,
     category: t.category,
     defaults: t.defaults,

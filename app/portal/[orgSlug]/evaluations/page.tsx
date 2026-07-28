@@ -98,7 +98,7 @@ export default async function EvaluationsPage({
                 <div>
                   <h3 className="font-semibold">{r.name}</h3>
                   <p className="text-xs text-muted-foreground">
-                    {r.platform || '—'} · {r.environment}
+                    {r.tool_category} · {r.platform || '—'} · {r.environment}
                   </p>
                 </div>
                 <Badge tone={recommendationTone(s.recommendation)}>{s.recommendation}</Badge>

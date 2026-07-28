@@ -9,6 +9,8 @@ const SEED_DATE = '2025-01-01T00:00:00.000Z';
 
 function base(p: Partial<Profile> & Pick<Profile, 'id' | 'name' | 'platform' | 'toolType'>): Profile {
   return {
+    toolCategory: 'AI / ML system',
+    selfHosted: false,
     useCase: '',
     businessOwner: '',
     technicalOwner: '',

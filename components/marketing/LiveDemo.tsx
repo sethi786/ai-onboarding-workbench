@@ -17,6 +17,7 @@ const sampleProfile: Profile = {
   id: 'demo',
   name: 'ChatGPT Workspace Agent',
   platform: 'ChatGPT Enterprise',
+  toolCategory: 'AI / ML system',
   toolType: 'Workspace agent',
   useCase: '',
   businessOwner: '',
@@ -34,6 +35,7 @@ const sampleProfile: Profile = {
   clientData: false,
   pii: true,
   autonomousActions: true,
+  selfHosted: false,
   createdAt: '',
   updatedAt: '',
 };
