@@ -22,12 +22,18 @@ export async function updateWorkflowStage(
   if (patch.blocker !== undefined) row.blocker = patch.blocker;
   if (patch.decision !== undefined) row.decision = patch.decision;
 
-  const { error } = await supabase
+  // Same RLS caveat as the other writes: a blocked update reports success with
+  // zero rows, so check what actually changed.
+  const { data, error } = await supabase
     .from('workflow_stages')
     .update(row)
     .eq('evaluation_id', evalId)
-    .eq('stage_key', stageKey);
+    .eq('stage_key', stageKey)
+    .select('id');
   if (error) return { error: error.message };
+  if (!data || data.length === 0) {
+    return { error: 'You don\u2019t have permission to update this workflow stage.' };
+  }
   revalidatePath(`/portal/${orgSlug}/evaluations/${evalId}/workflow`);
   return {};
 }

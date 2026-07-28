@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth/require-user';
-import { assertEvaluationQuota } from '@/lib/auth/entitlements';
+import { assertEvaluationQuota, getOrgPlan } from '@/lib/auth/entitlements';
 import { profilePatchToRow } from '@/lib/db/mappers';
 import { makeDefaultWorkflow } from '@/workbench/data/workflowStages';
 import type { Profile } from '@/workbench/types';
@@ -21,20 +21,6 @@ async function seedWorkflow(evalId: string, orgId: string) {
     decision: s.decision,
   }));
   await supabase.from('workflow_stages').insert(rows);
-}
-
-/**
- * Resolve a workspace's plan. RLS restricts this read to orgs the caller belongs
- * to, so a missing row also means "not a member of this workspace".
- */
-async function getOrgPlan(orgId: string): Promise<string | null> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from('organizations')
-    .select('plan')
-    .eq('id', orgId)
-    .maybeSingle();
-  return data?.plan ?? null;
 }
 
 export async function createEvaluation(

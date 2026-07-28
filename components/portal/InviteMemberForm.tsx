@@ -2,26 +2,29 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Copy } from 'lucide-react';
 import { inviteMember } from '@/lib/actions/organizations';
 import { Button } from '@/components/ui/button';
 import { Input, Select } from '@/components/ui/input';
 
 export function InviteMemberForm({ orgId }: { orgId: string }) {
   const [pending, startTransition] = useTransition();
-  const [msg, setMsg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
 
   return (
     <form
       action={(fd) =>
         startTransition(async () => {
-          setMsg(null);
+          setError(null);
+          setInviteUrl(null);
           const res = await inviteMember(orgId, fd);
           if (res?.error) {
             toast.error(res.error);
-            setMsg(res.error);
+            setError(res.error);
           } else {
-            toast.success('Invitation recorded');
-            setMsg('Invitation recorded. Email delivery + acceptance flow ship in the next phase.');
+            toast.success('Invitation created — copy the link to send it');
+            setInviteUrl(res.inviteUrl ?? null);
           }
         })
       }
@@ -38,7 +41,29 @@ export function InviteMemberForm({ orgId }: { orgId: string }) {
       <Button type="submit" variant="primary" disabled={pending}>
         {pending ? 'Inviting…' : 'Invite'}
       </Button>
-      {msg && <p className="w-full text-xs text-muted-foreground">{msg}</p>}
+      {error && <p className="w-full text-xs text-danger">{error}</p>}
+      {inviteUrl && (
+        <div className="w-full rounded-md border border-border bg-muted/40 p-3">
+          <p className="text-xs text-muted-foreground">
+            Send this link to your teammate. It only works for the email address you invited.
+          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <code className="flex-1 truncate rounded bg-background px-2 py-1.5 font-mono text-[11px]">
+              {inviteUrl}
+            </code>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                navigator.clipboard.writeText(inviteUrl);
+                toast.success('Invite link copied');
+              }}
+            >
+              <Copy className="h-3.5 w-3.5" /> Copy
+            </Button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

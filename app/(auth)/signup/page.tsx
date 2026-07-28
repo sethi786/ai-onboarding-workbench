@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { safeNext } from '@/lib/auth/safe-redirect';
 import { AuthInput, AuthLabel, AuthError, AuthSubmit } from '@/components/auth/auth-ui';
 
-export default function SignupPage() {
+function SignupInner() {
   const router = useRouter();
+  const params = useSearchParams();
+  // Carries an invite through signup, so accepting one doesn't dead-end at /portal.
+  const next = safeNext(params.get('next'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +27,7 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/portal`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
     if (error) {
@@ -33,7 +37,7 @@ export default function SignupPage() {
     }
     // If email confirmation is enabled, there is no active session yet.
     if (data.session) {
-      router.push('/portal');
+      router.push(next);
       router.refresh();
     } else {
       setNeedsConfirm(true);
@@ -75,10 +79,21 @@ export default function SignupPage() {
       </form>
       <p className="mt-5 text-center text-sm text-muted-foreground">
         Already have an account?{' '}
-        <Link href="/login" className="text-electric hover:underline">
+        <Link
+          href={`/login?next=${encodeURIComponent(next)}`}
+          className="text-electric hover:underline"
+        >
           Log in
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupInner />
+    </Suspense>
   );
 }

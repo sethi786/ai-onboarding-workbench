@@ -16,7 +16,10 @@ export async function updateAssessment(
 ): Promise<{ error?: string }> {
   await requireUser();
   const supabase = await createClient();
-  const { error } = await supabase
+  // Select the affected row: an upsert blocked by RLS comes back from PostgREST
+  // as success with zero rows, so without this a viewer sees "Changes saved"
+  // while nothing was written.
+  const { data, error } = await supabase
     .from('team_assessments')
     .upsert(
       {
@@ -26,8 +29,12 @@ export async function updateAssessment(
         ...assessmentPatchToRow(patch),
       },
       { onConflict: 'evaluation_id,team_id' },
-    );
+    )
+    .select('id');
   if (error) return { error: error.message };
+  if (!data || data.length === 0) {
+    return { error: 'You don\u2019t have permission to edit this evaluation.' };
+  }
   revalidatePath(`/portal/${orgSlug}/evaluations/${evalId}`, 'layout');
   return {};
 }
@@ -57,8 +64,15 @@ export async function removeEvidenceLink(
 ): Promise<{ error?: string }> {
   await requireUser();
   const supabase = await createClient();
-  const { error } = await supabase.from('evidence_links').delete().eq('id', linkId);
+  const { data, error } = await supabase
+    .from('evidence_links')
+    .delete()
+    .eq('id', linkId)
+    .select('id');
   if (error) return { error: error.message };
+  if (!data || data.length === 0) {
+    return { error: 'You don\u2019t have permission to remove this evidence link.' };
+  }
   revalidatePath(`/portal/${orgSlug}/evaluations/${evalId}`, 'layout');
   return {};
 }
