@@ -28,6 +28,40 @@ function criticalBlockersActive(lens: TeamLens, a: TeamAssessment): number {
   return lens.blockers.filter((b) => b.critical && a.activeBlockers[b.id]).length;
 }
 
+/**
+ * Has anyone actually worked this review?
+ *
+ * Without this, an evaluation created five seconds ago reads exactly like one
+ * where every team looked hard and found the tool unacceptable: both are zeros.
+ * That makes the headline number untrustworthy for the entire middle of a
+ * review — the period when someone is most likely to be looking at it.
+ */
+export function isStarted(a: TeamAssessment): boolean {
+  return (
+    a.score >= 0 ||
+    a.decision !== 'Not Reviewed' ||
+    Object.values(a.checkedControls).some(Boolean) ||
+    Object.values(a.checkedEvidence).some(Boolean) ||
+    Object.values(a.activeBlockers).some(Boolean) ||
+    a.notes.trim() !== '' ||
+    a.owner.trim() !== ''
+  );
+}
+
+/**
+ * How much of the self-score survives without substantiation.
+ *
+ * The old model let judgement carry the whole number and used completeness only
+ * as a 0.5–1.0 haircut, so a team that skipped every control and rated itself
+ * 5/5 scored 50 while a team that completed everything and honestly rated
+ * itself 3/5 scored 60. The opinion was worth five times the work. Here the
+ * evidence sets the ceiling — no controls, no points — and the reviewer's
+ * judgement moves the result within 40–100% of what that evidence supports.
+ * The judgement still matters, because a reviewer can see what a checklist
+ * cannot; it just can no longer manufacture readiness out of nothing.
+ */
+const JUDGEMENT_FLOOR = 0.4;
+
 function scoreTeam(lens: TeamLens, a: TeamAssessment, profile: Profile): TeamScore {
   const required = isRequired(lens, profile);
   const escalated = escalatedLensIds(profile).has(lens.id);
@@ -52,11 +86,10 @@ function scoreTeam(lens: TeamLens, a: TeamAssessment, profile: Profile): TeamSco
   const denom = controlsTotal + evidenceTotal;
   const completeness = denom === 0 ? 1 : (controlsComplete + evidenceComplete) / denom;
 
-  // score 0..5 -> 0..100, unset (-1) treated as 0
+  // Evidence sets the ceiling; the 0–5 judgement moves the result within it.
+  // An unset score (-1) counts as 0 — an unscored review is an incomplete one.
   const raw = a.score < 0 ? 0 : a.score;
-  let normalized = (raw / 5) * 100;
-  // Missing evidence / controls drag the score down (0.5..1.0 factor)
-  normalized = normalized * (0.5 + 0.5 * completeness);
+  let normalized = 100 * completeness * (JUDGEMENT_FLOOR + (1 - JUDGEMENT_FLOOR) * (raw / 5));
   if (hasCriticalBlocker) normalized = 0;
 
   return {
@@ -65,6 +98,7 @@ function scoreTeam(lens: TeamLens, a: TeamAssessment, profile: Profile): TeamSco
     escalated,
     depth,
     score: a.score,
+    started: isStarted(a),
     normalized: Math.round(normalized),
     controlsTotal,
     controlsComplete,
@@ -116,10 +150,14 @@ export function computeScore(input: EngineInput): ScoreResult {
     const a = getAssessment(lens.id);
     const ts = scoreTeam(lens, a, profile);
     perTeam[lens.id] = ts;
-    blockersCount += ts.activeBlockers;
-    if (ts.hasCriticalBlocker) hasCriticalBlocker = true;
+    // Only lenses in scope can affect the result. A blocker left flagged on a
+    // review that doesn't apply — from a template default, or from an earlier
+    // profile before the tool was scoped down — used to zero out readiness and
+    // drive risk to Critical, which makes the scoping promise a lie.
     if (ts.required) {
       requiredTeams.push(ts);
+      blockersCount += ts.activeBlockers;
+      if (ts.hasCriticalBlocker) hasCriticalBlocker = true;
       controlsComplete += ts.controlsComplete;
       controlsTotalReq += ts.controlsTotal;
       evidenceComplete += ts.evidenceComplete;
@@ -127,10 +165,14 @@ export function computeScore(input: EngineInput): ScoreResult {
     }
   }
 
-  // Weighted average of required team normalized scores.
+  // Weighted average over *started* required lenses. Averaging in reviews
+  // nobody has opened would report "we haven't looked yet" as "this scored
+  // zero" — the recommendation, not the average, is what withholds a positive
+  // call until coverage is complete.
+  const startedTeams = requiredTeams.filter((t) => t.started);
   let weightedSum = 0;
   let weightTotal = 0;
-  for (const ts of requiredTeams) {
+  for (const ts of startedTeams) {
     const lens = lenses.find((l) => l.id === ts.teamId)!;
     weightedSum += ts.normalized * lens.weight;
     weightTotal += lens.weight;
@@ -138,15 +180,30 @@ export function computeScore(input: EngineInput): ScoreResult {
   let readiness = weightTotal === 0 ? 0 : Math.round(weightedSum / weightTotal);
   if (hasCriticalBlocker) readiness = 0;
 
+  // Nothing required means nothing outstanding — the same empty-set convention
+  // scoreTeam uses. Reporting 0% when a Screening-depth review asks for no
+  // evidence reads as a failure to collect it.
   const evidenceCompleteness =
-    evidenceTotalReq === 0 ? 0 : Math.round((evidenceComplete / evidenceTotalReq) * 100);
+    evidenceTotalReq === 0 ? 100 : Math.round((evidenceComplete / evidenceTotalReq) * 100);
+
+  const coverage = requiredTeams.length === 0 ? 0 : startedTeams.length / requiredTeams.length;
 
   const risk = computeRisk(profile, hasCriticalBlocker);
-  const recommendation = computeRecommendation(readiness, risk, hasCriticalBlocker);
+  const recommendation = computeRecommendation(readiness, risk, hasCriticalBlocker, coverage);
   const approvalStatus = recommendationToApproval(recommendation);
 
-  const teamsReady = requiredTeams.filter((t) => t.normalized >= 80 && !t.hasCriticalBlocker).length;
+  // "Signed off" means a reviewer recorded a decision, which is what a reader
+  // of the report means by ready. The old measure — normalized >= 80 — let the
+  // same document say every team approved and simultaneously that zero were
+  // ready, which is the kind of contradiction that costs a pack its credibility.
+  const teamsSignedOff = requiredTeams.filter(
+    (t) =>
+      !t.hasCriticalBlocker &&
+      (getAssessment(t.teamId).decision === 'Approved' ||
+        getAssessment(t.teamId).decision === 'Approved with Conditions'),
+  ).length;
   const teamsBlocked = requiredTeams.filter((t) => t.hasCriticalBlocker).length;
+  const teamsNotStarted = requiredTeams.length - startedTeams.length;
 
   return {
     readiness,
@@ -158,9 +215,11 @@ export function computeScore(input: EngineInput): ScoreResult {
     controlsRemaining: Math.max(0, controlsTotalReq - controlsComplete),
     blockersCount,
     hasCriticalBlocker,
-    teamsReady,
+    teamsSignedOff,
     teamsBlocked,
+    teamsNotStarted,
     requiredTeams: requiredTeams.length,
+    coverage,
     perTeam,
   };
 }

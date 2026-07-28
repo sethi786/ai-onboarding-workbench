@@ -203,7 +203,12 @@ Overall readiness: ${ctx.score.readiness}/100
 Overall risk: ${ctx.score.risk}
 Evidence completeness: ${ctx.score.evidenceCompleteness}%
 Active blockers: ${ctx.score.blockersCount}
-Review teams ready: ${ctx.score.teamsReady} of ${ctx.score.requiredTeams}
+Reviews signed off: ${ctx.score.teamsSignedOff} of ${ctx.score.requiredTeams}
+Reviews not yet started: ${ctx.score.teamsNotStarted} of ${ctx.score.requiredTeams}${
+      ctx.score.teamsNotStarted > 0
+        ? ' (the readiness figure covers only the reviews that have been done — do not describe this tool as assessed)'
+        : ''
+    }
 </assessment_result>
 
 <team_status>

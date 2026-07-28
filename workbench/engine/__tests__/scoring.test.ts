@@ -119,7 +119,7 @@ describe('computeScoreFromMap', () => {
     expect(withAgent.perTeam['agent-governance'].required).toBe(true);
   });
 
-  it('drops readiness when controls/evidence are incomplete', () => {
+  it('gives no credit for an unsubstantiated self-score', () => {
     const p = baseProfile({ dataClassification: 'Public' });
     const map: Record<string, TeamAssessment> = {};
     TEAM_LENSES.forEach((l) => {
@@ -128,8 +128,134 @@ describe('computeScoreFromMap', () => {
       map[l.id] = a;
     });
     const r = computeScoreFromMap(p, TEAM_LENSES, map);
-    // score 5 -> 100, times completeness factor 0.5 (nothing checked) -> ~50
-    expect(r.readiness).toBeLessThan(60);
-    expect(r.readiness).toBeGreaterThan(40);
+    // The evidence sets the ceiling. No controls, no points — otherwise the
+    // number a customer defends in a risk committee is just an opinion.
+    expect(r.readiness).toBe(0);
+  });
+
+  it('ranks doing the work above claiming it', () => {
+    const p = baseProfile({ dataClassification: 'Public' });
+
+    const claimed: Record<string, TeamAssessment> = {};
+    TEAM_LENSES.forEach((l) => {
+      const a = makeEmptyAssessment(l.id);
+      a.score = 5;
+      claimed[l.id] = a;
+    });
+
+    const done: Record<string, TeamAssessment> = {};
+    TEAM_LENSES.forEach((l) => {
+      const a = fullAssessment(l.id);
+      a.score = 3; // did everything, rated itself honestly
+      done[l.id] = a;
+    });
+
+    const claimedScore = computeScoreFromMap(p, TEAM_LENSES, claimed).readiness;
+    const doneScore = computeScoreFromMap(p, TEAM_LENSES, done).readiness;
+    expect(doneScore).toBeGreaterThan(claimedScore);
+  });
+
+  it('distinguishes a review nobody started from one that failed', () => {
+    const p = baseProfile({ dataClassification: 'Public' });
+
+    const untouched: Record<string, TeamAssessment> = {};
+    TEAM_LENSES.forEach((l) => (untouched[l.id] = makeEmptyAssessment(l.id)));
+    const fresh = computeScoreFromMap(p, TEAM_LENSES, untouched);
+    expect(fresh.recommendation).toBe('Not Started');
+    expect(fresh.coverage).toBe(0);
+    expect(fresh.teamsNotStarted).toBe(fresh.requiredTeams);
+
+    const reviewed: Record<string, TeamAssessment> = {};
+    TEAM_LENSES.forEach((l) => {
+      const a = makeEmptyAssessment(l.id);
+      a.score = 0;
+      a.decision = 'Needs Remediation';
+      reviewed[l.id] = a;
+    });
+    const failed = computeScoreFromMap(p, TEAM_LENSES, reviewed);
+    expect(failed.recommendation).not.toBe('Not Started');
+    expect(failed.coverage).toBe(1);
+    expect(failed.teamsNotStarted).toBe(0);
+  });
+
+  it('refuses to clear a tool on a partial review, however well it scored', () => {
+    const p = baseProfile({ dataClassification: 'Public' });
+    const map: Record<string, TeamAssessment> = {};
+    TEAM_LENSES.forEach((l) => (map[l.id] = makeEmptyAssessment(l.id)));
+
+    const required = TEAM_LENSES.filter(
+      (l) => computeScoreFromMap(p, TEAM_LENSES, map).perTeam[l.id].required,
+    );
+    // Perfect marks on the first required lens, nothing else touched.
+    map[required[0].id] = fullAssessment(required[0].id);
+
+    const r = computeScoreFromMap(p, TEAM_LENSES, map);
+    expect(r.coverage).toBeLessThan(1);
+    expect(r.recommendation).toBe('Review in Progress');
+  });
+
+  it('still reports bad news found early in a partial review', () => {
+    const p = baseProfile({ dataClassification: 'Public' });
+    const map: Record<string, TeamAssessment> = {};
+    TEAM_LENSES.forEach((l) => (map[l.id] = makeEmptyAssessment(l.id)));
+
+    const probe = computeScoreFromMap(p, TEAM_LENSES, map);
+    const firstRequired = TEAM_LENSES.find((l) => probe.perTeam[l.id].required)!;
+    const a = makeEmptyAssessment(firstRequired.id);
+    a.score = 1;
+    a.decision = 'Needs Remediation';
+    map[firstRequired.id] = a;
+
+    const r = computeScoreFromMap(p, TEAM_LENSES, map);
+    // A poor result is actionable now; hiding it behind "in progress" would
+    // waste the only window in which the team can still respond to it.
+    expect(r.recommendation).not.toBe('Review in Progress');
+    expect(r.recommendation).toBe('Not Ready for Review');
+  });
+
+  it('ignores blockers flagged on lenses that are out of scope', () => {
+    const p = baseProfile({ dataClassification: 'Public' });
+    const map = allFull();
+    const clean = computeScoreFromMap(p, TEAM_LENSES, map);
+
+    const outOfScope = TEAM_LENSES.find(
+      (l) => !clean.perTeam[l.id].required && l.blockers.some((b) => b.critical),
+    )!;
+    const blocker = outOfScope.blockers.find((b) => b.critical)!;
+    map[outOfScope.id].activeBlockers[blocker.id] = true;
+
+    const after = computeScoreFromMap(p, TEAM_LENSES, map);
+    expect(after.readiness).toBe(clean.readiness);
+    expect(after.hasCriticalBlocker).toBe(false);
+    expect(after.blockersCount).toBe(clean.blockersCount);
+  });
+
+  it('still zeroes readiness for a blocker on a lens that is in scope', () => {
+    const p = baseProfile({ dataClassification: 'Public' });
+    const map = allFull();
+    const clean = computeScoreFromMap(p, TEAM_LENSES, map);
+
+    const inScope = TEAM_LENSES.find(
+      (l) => clean.perTeam[l.id].required && l.blockers.some((b) => b.critical),
+    )!;
+    const blocker = inScope.blockers.find((b) => b.critical)!;
+    map[inScope.id].activeBlockers[blocker.id] = true;
+
+    const after = computeScoreFromMap(p, TEAM_LENSES, map);
+    expect(after.readiness).toBe(0);
+    expect(after.hasCriticalBlocker).toBe(true);
+    expect(after.recommendation).toBe('Blocked');
+  });
+
+  it('counts a review as signed off only when a decision was recorded', () => {
+    const p = baseProfile({ dataClassification: 'Public' });
+    const map = allFull(); // every control and evidence item done, score 5…
+    const none = computeScoreFromMap(p, TEAM_LENSES, map);
+    // …but nobody recorded a decision, so nothing is signed off.
+    expect(none.teamsSignedOff).toBe(0);
+
+    TEAM_LENSES.forEach((l) => (map[l.id].decision = 'Approved with Conditions'));
+    const signed = computeScoreFromMap(p, TEAM_LENSES, map);
+    expect(signed.teamsSignedOff).toBe(signed.requiredTeams);
   });
 });

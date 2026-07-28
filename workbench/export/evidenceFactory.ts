@@ -136,7 +136,13 @@ function executiveDashboardReport(ctx: ReportContext): string {
   lines.push(`- Evidence Complete: **${score.evidenceCompleteness}%**`);
   lines.push(`- Blockers: **${score.blockersCount}**`);
   lines.push(`- Controls Complete / Remaining: **${score.controlsComplete} / ${score.controlsRemaining}**`);
-  lines.push(`- Teams Ready / Blocked: **${score.teamsReady} / ${score.teamsBlocked}** (of ${score.requiredTeams})`);
+  lines.push(
+    `- Reviews signed off / blocked: **${score.teamsSignedOff} / ${score.teamsBlocked}** (of ${score.requiredTeams} required)`,
+  );
+  lines.push(
+    `- Reviews not started: **${score.teamsNotStarted}**` +
+      (score.teamsNotStarted > 0 ? ' — readiness covers only what has been reviewed' : ''),
+  );
   lines.push('');
   lines.push('## Required Team Readiness');
   lines.push('');

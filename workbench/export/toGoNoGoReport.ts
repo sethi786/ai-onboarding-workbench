@@ -16,7 +16,19 @@ export function toGoNoGoReport(ctx: ReportContext): string {
   lines.push(`- Overall Readiness: **${score.readiness}/100**`);
   lines.push(`- Overall Risk: **${score.risk}**`);
   lines.push(`- Evidence Complete: **${score.evidenceCompleteness}%**`);
-  lines.push(`- Required teams: ${score.requiredTeams} · Ready: ${score.teamsReady} · Blocked: ${score.teamsBlocked}`);
+  lines.push(
+    `- Required reviews: ${score.requiredTeams} · Signed off: ${score.teamsSignedOff} · Blocked: ${score.teamsBlocked} · Not started: ${score.teamsNotStarted}`,
+  );
+  if (score.teamsNotStarted > 0) {
+    // A go/no-go pack is exactly where an unfinished review must not read as a
+    // clean one, so say it above the fold rather than leaving it to be inferred.
+    lines.push('');
+    lines.push(
+      `> **${score.teamsNotStarted} required review${score.teamsNotStarted === 1 ? ' has' : 's have'} not been started.** ` +
+        'The readiness figure covers only the reviews that have been done, and no approval recommendation ' +
+        'can be issued until every required review is complete.',
+    );
+  }
   lines.push('');
 
   lines.push('## Blocking Items');

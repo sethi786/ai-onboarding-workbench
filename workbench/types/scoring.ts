@@ -7,7 +7,11 @@ export type Recommendation =
   | 'Proceed with Conditions'
   | 'Needs Remediation'
   | 'Blocked'
-  | 'Not Ready for Review';
+  | 'Not Ready for Review'
+  /** Nobody has opened a single required review yet — distinct from failing one. */
+  | 'Not Started'
+  /** Some required reviews are outstanding, so nothing can be cleared yet. */
+  | 'Review in Progress';
 
 export interface TeamScore {
   teamId: TeamId;
@@ -16,6 +20,11 @@ export interface TeamScore {
   /** How hard this team looks at this tool — see workbench/engine/reviewIntensity. */
   depth: ReviewDepth;
   score: number; // 0..5, -1 if unset
+  /**
+   * Whether anyone has touched this review at all. A lens nobody has opened
+   * must not read the same as one that was reviewed and scored zero.
+   */
+  started: boolean;
   normalized: number; // 0..100
   controlsTotal: number;
   controlsComplete: number;
@@ -27,6 +36,15 @@ export interface TeamScore {
 }
 
 export interface ScoreResult {
+  /**
+   * How ready the reviews that have actually been done are, 0..100.
+   *
+   * Averaged over *started* required lenses only, so it never conflates "we
+   * haven't looked" with "we looked and it's bad". Always read it next to
+   * `coverage` — a high readiness at 20% coverage is an early signal, not a
+   * verdict, and `recommendation` refuses to clear anything until coverage
+   * reaches 1.
+   */
   readiness: number; // 0..100
   risk: RiskLevel;
   recommendation: Recommendation;
@@ -36,8 +54,13 @@ export interface ScoreResult {
   controlsRemaining: number;
   blockersCount: number;
   hasCriticalBlocker: boolean;
-  teamsReady: number;
+  /** Required lenses signed off (Approved / Approved with Conditions, no critical blocker). */
+  teamsSignedOff: number;
   teamsBlocked: number;
+  /** Required lenses nobody has opened yet. */
+  teamsNotStarted: number;
   requiredTeams: number;
+  /** Required lenses started / required lenses, 0..1. */
+  coverage: number;
   perTeam: Record<string, TeamScore>;
 }

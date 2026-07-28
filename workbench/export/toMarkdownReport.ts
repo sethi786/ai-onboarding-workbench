@@ -45,7 +45,13 @@ export function toMarkdownReport(ctx: ReportContext): string {
   lines.push(`- **Evidence Complete:** ${score.evidenceCompleteness}%`);
   lines.push(`- **Blockers:** ${score.blockersCount}`);
   lines.push(
-    `- **Teams Ready / Blocked:** ${score.teamsReady} / ${score.teamsBlocked} (of ${score.requiredTeams} required)`,
+    `- **Reviews signed off / blocked:** ${score.teamsSignedOff} / ${score.teamsBlocked} (of ${score.requiredTeams} required)`,
+  );
+  lines.push(
+    `- **Reviews started:** ${score.requiredTeams - score.teamsNotStarted} of ${score.requiredTeams}` +
+      (score.teamsNotStarted > 0
+        ? ' — readiness above reflects only the reviews that have been done'
+        : ''),
   );
   lines.push('');
 

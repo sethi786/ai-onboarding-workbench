@@ -31,7 +31,14 @@ export default async function DashboardPage({
   const total = scored.length;
   const ready = scored.filter((x) => x.s.recommendation === 'Proceed').length;
   const blocked = scored.filter((x) => x.s.hasCriticalBlocker).length;
-  const avg = total ? Math.round(scored.reduce((a, x) => a + x.s.readiness, 0) / total) : 0;
+  // Average only what's been reviewed. Counting untouched evaluations as zero
+  // would make the portfolio look worse the more tools you queue up, which
+  // punishes the one behaviour this product is trying to encourage.
+  const started = scored.filter((x) => x.s.coverage > 0);
+  const notStarted = total - started.length;
+  const avg = started.length
+    ? Math.round(started.reduce((a, x) => a + x.s.readiness, 0) / started.length)
+    : 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -52,10 +59,11 @@ export default async function DashboardPage({
         <div className="grid place-items-center rounded-lg border border-border bg-card p-6">
           <ScoreGauge value={avg} size={140} label="Avg readiness" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Stat label="AI tools in flight" value={total} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Stat label="Tools in flight" value={total} />
           <Stat label="Cleared to proceed" value={ready} />
           <Stat label="Blocked" value={blocked} />
+          <Stat label="Not started" value={notStarted} />
         </div>
       </div>
 
@@ -82,7 +90,17 @@ export default async function DashboardPage({
                   <div className="truncate text-sm font-medium">{r.name}</div>
                   <div className="text-xs text-muted-foreground">{r.platform || '—'} · {r.environment}</div>
                 </div>
-                <div className="min-w-[120px] flex-1"><Progress value={s.readiness} showLabel /></div>
+                <div className="min-w-[120px] flex-1">
+                  <Progress value={s.readiness} showLabel />
+                  {/* A readiness figure is only as meaningful as the share of
+                      reviews behind it — say so rather than let 100% of one
+                      lens read as 100% of the review. */}
+                  {s.coverage < 1 && (
+                    <div className="mt-1 text-[11px] text-muted-foreground">
+                      {s.requiredTeams - s.teamsNotStarted} of {s.requiredTeams} reviews started
+                    </div>
+                  )}
+                </div>
                 <Badge tone={riskTone(s.risk)}>{s.risk}</Badge>
                 <Badge tone={recommendationTone(s.recommendation)}>{s.recommendation}</Badge>
               </Link>

@@ -107,7 +107,12 @@ function summarySection(ctx: ReportContext, brand: DocumentBrand): string {
       <div><dt>Approval status</dt><dd>${esc(s.approvalStatus)}</dd></div>
       <div><dt>Evidence complete</dt><dd>${esc(s.evidenceCompleteness)}%</dd></div>
       <div><dt>Active blockers</dt><dd>${esc(s.blockersCount)}</dd></div>
-      <div><dt>Review teams ready</dt><dd>${esc(s.teamsReady)} of ${esc(s.requiredTeams)}</dd></div>
+      <div><dt>Reviews signed off</dt><dd>${esc(s.teamsSignedOff)} of ${esc(s.requiredTeams)}</dd></div>
+      <div><dt>Reviews started</dt><dd>${esc(s.requiredTeams - s.teamsNotStarted)} of ${esc(s.requiredTeams)}${
+        s.teamsNotStarted > 0
+          ? ` <span class="muted">— readiness covers the ${esc(s.requiredTeams - s.teamsNotStarted)} reviewed</span>`
+          : ''
+      }</dd></div>
     </dl>
   </div>
 </section>`.trim();
@@ -235,6 +240,7 @@ export function toBrandedHtml(
        padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
   h3 { font-size: 15px; margin: 20px 0 6px; }
   .note { color: #6B6B6B; font-size: 13px; margin-top: -8px; }
+  .muted { color: #7A7A7A; font-weight: 400; }
   .summary { display: flex; gap: 34px; align-items: center; flex-wrap: wrap; }
   .stats { flex: 1; min-width: 260px; display: grid; grid-template-columns: 1fr 1fr;
            gap: 14px 24px; margin: 0; }

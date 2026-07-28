@@ -9,22 +9,45 @@ const RISK_ORDER: Record<RiskLevel, number> = {
 
 /**
  * Final go/no-go recommendation from readiness + risk + blocker state.
- *  - Critical blocker         -> Blocked
+ *
+ * `coverage` (0..1) is the share of required reviews anyone has started, and it
+ * is what stops the number from lying in the two directions it otherwise would.
+ * Nothing gets cleared on a partial review, however well the finished parts
+ * scored — a security review nobody opened is not an implicit pass. Bad news,
+ * though, travels immediately: a blocker or a poor result found in the first
+ * lens reviewed is reported as it stands, because that is exactly when the
+ * team can still act on it.
+ *
+ *  - no required review started -> Not Started
+ *  - critical blocker           -> Blocked
  *  - readiness >= 85 & risk<=Medium -> Proceed
- *  - readiness >= 70          -> Proceed with Conditions
- *  - readiness >= 50          -> Needs Remediation
- *  - otherwise                -> Not Ready for Review
+ *  - readiness >= 70            -> Proceed with Conditions
+ *  - readiness >= 50            -> Needs Remediation
+ *  - otherwise                  -> Not Ready for Review
+ *  …but a positive call with coverage < 1 downgrades to Review in Progress.
  */
 export function computeRecommendation(
   readiness: number,
   risk: RiskLevel,
   hasCriticalBlocker: boolean,
+  coverage = 1,
 ): Recommendation {
+  if (coverage <= 0) return 'Not Started';
   if (hasCriticalBlocker) return 'Blocked';
-  if (readiness >= 85 && RISK_ORDER[risk] <= RISK_ORDER.Medium) return 'Proceed';
-  if (readiness >= 70) return 'Proceed with Conditions';
-  if (readiness >= 50) return 'Needs Remediation';
-  return 'Not Ready for Review';
+
+  const call: Recommendation =
+    readiness >= 85 && RISK_ORDER[risk] <= RISK_ORDER.Medium
+      ? 'Proceed'
+      : readiness >= 70
+        ? 'Proceed with Conditions'
+        : readiness >= 50
+          ? 'Needs Remediation'
+          : 'Not Ready for Review';
+
+  if (coverage < 1 && (call === 'Proceed' || call === 'Proceed with Conditions')) {
+    return 'Review in Progress';
+  }
+  return call;
 }
 
 export function recommendationToApproval(rec: Recommendation): ApprovalStatus {
@@ -35,8 +58,11 @@ export function recommendationToApproval(rec: Recommendation): ApprovalStatus {
       return 'Approved with Conditions';
     case 'Blocked':
       return 'Blocked';
+    case 'Not Started':
+      return 'Not Started';
     case 'Needs Remediation':
     case 'Not Ready for Review':
+    case 'Review in Progress':
       return 'In Progress';
   }
 }

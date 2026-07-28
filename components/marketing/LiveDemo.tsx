@@ -153,8 +153,10 @@ export function LiveDemo() {
                 <Row label="Active blockers">
                   <span className={`font-semibold ${result.blockersCount ? 'text-danger' : ''}`}>{result.blockersCount}</span>
                 </Row>
-                <Row label="Teams ready">
-                  <span className="font-semibold">{result.teamsReady}/{result.requiredTeams}</span>
+                <Row label="Reviews signed off">
+                  <span className="font-semibold">
+                    {result.teamsSignedOff}/{result.requiredTeams}
+                  </span>
                 </Row>
               </div>
             </div>

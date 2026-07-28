@@ -39,6 +39,19 @@ export default async function EvaluationOverview({
         </div>
       )}
 
+      {score.teamsNotStarted > 0 && (
+        <div className="rounded-md border border-border bg-muted/40 px-4 py-3 text-sm">
+          <span className="font-medium">
+            {score.teamsNotStarted} of {score.requiredTeams} required reviews haven&rsquo;t been
+            started.
+          </span>{' '}
+          <span className="text-muted-foreground">
+            The readiness figure below covers only the reviews that have been done — nothing can be
+            cleared until every required review is complete.
+          </span>
+        </div>
+      )}
+
       <div className="flex flex-col items-center gap-6 rounded-lg border border-border bg-card p-6 sm:flex-row sm:gap-10">
         <ScoreGauge value={score.readiness} size={150} />
         <div className="grid flex-1 grid-cols-2 gap-4 sm:grid-cols-3">
@@ -61,8 +74,21 @@ export default async function EvaluationOverview({
         <Stat label="Evidence complete" value={`${score.evidenceCompleteness}%`} />
         <Stat label="Blockers" value={score.blockersCount} />
         <Stat label="Controls remaining" value={score.controlsRemaining} />
-        <Stat label="Teams ready" value={score.teamsReady} hint={`of ${score.requiredTeams} required`} />
-        <Stat label="Teams blocked" value={score.teamsBlocked} />
+        <Stat
+          label="Reviews signed off"
+          value={score.teamsSignedOff}
+          hint={`of ${score.requiredTeams} required`}
+        />
+        <Stat label="Reviews blocked" value={score.teamsBlocked} />
+        <Stat
+          label="Not started"
+          value={score.teamsNotStarted}
+          hint={
+            score.teamsNotStarted > 0
+              ? 'Readiness covers only what has been reviewed'
+              : 'Every required review has been opened'
+          }
+        />
       </div>
 
       <div className="rounded-lg border border-border bg-card">

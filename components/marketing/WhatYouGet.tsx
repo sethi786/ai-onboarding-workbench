@@ -56,6 +56,10 @@ export function WhatYouGet() {
               <Stat label="Readiness" value={`${DEMO.score.readiness}/100`} />
               <Stat label="Risk" value={DEMO.score.risk} />
               <Stat label="Reviews that apply" value={`${DEMO.lensesRequired} of ${DEMO.lensesTotal}`} />
+              <Stat
+                label="Signed off"
+                value={`${DEMO.score.teamsSignedOff} of ${DEMO.score.requiredTeams}`}
+              />
               <Stat label="Evidence complete" value={`${DEMO.score.evidenceCompleteness}%`} />
             </div>
 
