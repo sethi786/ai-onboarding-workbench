@@ -109,29 +109,53 @@ export function HowItWorks() {
   );
 }
 
-/* ----------------------------------------------------------------- Testimonials */
-const QUOTES = [
-  { q: 'We used to discover Security and Privacy requirements the week before launch. Now every AI tool arrives at review already prepared.', a: 'Director, AI Program', c: 'Global bank' },
-  { q: 'The go/no-go pack alone saved us weeks. Leadership finally has one readiness number they trust.', a: 'CISO', c: 'Health insurer' },
-  { q: 'Agent governance was a black box. Aegis turned it into a checklist our engineers actually follow.', a: 'Head of Platform', c: 'Gov contractor' },
+/* ------------------------------------------------------- What reviewers ask */
+const REVIEWER_QUESTIONS = [
+  {
+    team: 'Security asks',
+    q: 'What can this reach, under whose identity, and how do we revoke it?',
+    d: 'Access scope, authentication, secrets handling, and the blast radius if the tool is compromised.',
+  },
+  {
+    team: 'Privacy & Legal ask',
+    q: 'Whose data goes in, where does it live, and what did we promise about it?',
+    d: 'Personal data in scope, sub-processors, residency, retention, and the contract terms behind them.',
+  },
+  {
+    team: 'Risk & leadership ask',
+    q: 'What is the residual exposure, and who is accepting it?',
+    d: 'A consistent risk grade, the controls behind it, and a named owner on the decision.',
+  },
 ];
 
-export function Testimonials() {
+export function ReviewerQuestions() {
   return (
     <section className="bg-paper">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
-        <div className="grid gap-12 md:grid-cols-3">
-          {QUOTES.map((t, i) => (
-            <Reveal key={i} index={i}>
-              <figure className="flex h-full flex-col">
-                <blockquote className="text-[19px] font-medium leading-snug tracking-[-0.01em] text-foreground">
-                  “{t.q}”
-                </blockquote>
-                <figcaption className="mt-6 border-t border-border pt-4 text-sm">
-                  <span className="font-semibold">{t.a}</span>
-                  <span className="block text-muted-foreground">{t.c}</span>
-                </figcaption>
-              </figure>
+        <Reveal>
+          <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
+            Built around the real questions
+          </span>
+          <h2 className="display-lg mt-4 max-w-2xl">
+            Every review comes down to a handful of questions.
+          </h2>
+          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
+            Aegis is organized around what review teams actually press on — so you answer it once,
+            with evidence, instead of rediscovering it per tool.
+          </p>
+        </Reveal>
+        <div className="mt-14 grid gap-12 md:grid-cols-3">
+          {REVIEWER_QUESTIONS.map((t, i) => (
+            <Reveal key={t.team} index={i}>
+              <div className="flex h-full flex-col">
+                <div className="text-[12px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+                  {t.team}
+                </div>
+                <p className="mt-3 text-[19px] font-medium leading-snug tracking-[-0.01em]">“{t.q}”</p>
+                <p className="mt-4 border-t border-border pt-4 text-[14.5px] leading-relaxed text-muted-foreground">
+                  {t.d}
+                </p>
+              </div>
             </Reveal>
           ))}
         </div>

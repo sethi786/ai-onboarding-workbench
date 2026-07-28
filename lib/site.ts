@@ -68,6 +68,25 @@ export const MEGA_NAV: NavItem[] = [
     ],
   },
   {
+    label: 'Use cases',
+    href: '/use-cases',
+    columns: [
+      {
+        title: 'Start where you’re stuck',
+        links: [
+          { href: '/use-cases/security-questionnaire', label: 'A customer sent a security questionnaire', desc: 'Answer from a record, not memory' },
+          { href: '/use-cases/shadow-ai', label: 'Unknown AI tools in use', desc: 'Find and triage shadow AI' },
+          { href: '/use-cases/stalled-approval', label: 'A tool is blocked in review', desc: 'Surface the real blockers' },
+          { href: '/use-cases/audit-prep', label: 'Preparing for SOC 2 / ISO', desc: 'Evidence your process ran' },
+          { href: '/use-cases/vendor-access', label: 'A vendor wants access', desc: 'Scope and own the grant' },
+          { href: '/use-cases/ai-rollout', label: 'Rolling out Copilot / ChatGPT', desc: 'Permissions before indexing' },
+          { href: '/use-cases/slow-process', label: 'Approvals take months', desc: 'Make the fast path compliant' },
+          { href: '/use-cases/diligence', label: 'In diligence or acquiring', desc: 'Build the data-room record' },
+        ],
+      },
+    ],
+  },
+  {
     label: 'Why Aegis',
     href: '/why-aegis',
     columns: [
@@ -77,6 +96,7 @@ export const MEGA_NAV: NavItem[] = [
           { href: '/why-aegis', label: 'vs. the manual process', desc: 'Weeks of email → one workflow' },
           { href: '/security', label: 'Security & Trust', desc: 'How we protect your data' },
           { href: '/assessment', label: 'The 20 lenses', desc: 'What every review inspects' },
+          { href: '/resources', label: 'Guides', desc: 'Free reference reading' },
         ],
       },
     ],
