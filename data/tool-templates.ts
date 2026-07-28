@@ -1,7 +1,8 @@
 import type { Profile, TeamId, TeamAssessment } from '@/workbench/types';
 
 /**
- * Prefilled AI-tool library. Canonical source of truth (also seeded into the
+ * Prefilled tool library covering SaaS, PaaS, on-premise, and AI tools.
+ * Canonical source of truth (also seeded into the
  * `tool_templates` table via scripts/seed-templates.ts). `defaults` pre-sets
  * capability flags that drive review intensity; `suggested` seeds starter notes
  * on key lenses when a template is instantiated into an org.
@@ -352,6 +353,132 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       'security-sar': note('Enable privacy mode; confirm no code retention; scope repo access.'),
     },
     sortOrder: 15,
+  },
+
+  /* ---------------------------------------------------------- SaaS / PaaS / on-prem */
+  {
+    id: 'salesforce-sales-cloud',
+    name: 'Salesforce Sales Cloud',
+    vendor: 'Salesforce',
+    platform: 'Salesforce',
+    toolType: 'CRM / sales platform',
+    category: 'SaaS',
+    summary: 'CRM holding customer records, pipeline, and contact data — typically the system of record for client information.',
+    defaults: {
+      toolCategory: 'SaaS application',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      externalVendor: true,
+      connectorEnabled: true,
+      clientData: true,
+      pii: true,
+      selfHosted: false,
+    },
+    suggested: {
+      'vendor-risk': note('Obtain SOC 2 Type II and the DPA; review the sub-processor list and change-notice terms.'),
+      'privacy-pia': note('Customer contact data in scope. Confirm retention, regional storage, and deletion on request.'),
+      'iam': note('Enforce SSO and SCIM; review profile/permission-set design and admin access.'),
+      'connector-governance': note('Inventory installed AppExchange packages and API integrations; scope each to least privilege.'),
+    },
+    sortOrder: 20,
+  },
+  {
+    id: 'snowflake',
+    name: 'Snowflake',
+    vendor: 'Snowflake',
+    platform: 'Snowflake',
+    toolType: 'Data platform / warehouse',
+    category: 'PaaS',
+    summary: 'Cloud data warehouse concentrating analytical data — often the widest single data exposure in the estate.',
+    defaults: {
+      toolCategory: 'PaaS / cloud service',
+      dataClassification: 'Restricted',
+      environment: 'Pilot',
+      externalVendor: true,
+      connectorEnabled: true,
+      clientData: true,
+      pii: true,
+      selfHosted: false,
+    },
+    suggested: {
+      'data-governance': note('Classify every schema; apply masking policies to personal and client data.'),
+      'iam': note('Role hierarchy and least privilege on warehouses; separate ingestion from analyst roles.'),
+      'platform-cloud': note('Confirm region, network policy, and private connectivity requirements.'),
+      'security-sar': note('Review key management, and confirm no broad ACCOUNTADMIN grants to humans.'),
+    },
+    sortOrder: 21,
+  },
+  {
+    id: 'slack',
+    name: 'Slack',
+    vendor: 'Salesforce',
+    platform: 'Slack',
+    toolType: 'Collaboration & messaging',
+    category: 'SaaS',
+    summary: 'Messaging platform that accumulates unstructured sensitive content and a long tail of third-party app grants.',
+    defaults: {
+      toolCategory: 'SaaS application',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      externalVendor: true,
+      connectorEnabled: true,
+      pii: true,
+      selfHosted: false,
+    },
+    suggested: {
+      'connector-governance': note('Review every installed app and its OAuth scopes; restrict app installation to admins.'),
+      'data-governance': note('Set message and file retention deliberately; confirm eDiscovery and export controls.'),
+      'privacy-pia': note('DMs and channels carry personal data incidentally; document retention and access.'),
+    },
+    sortOrder: 22,
+  },
+  {
+    id: 'self-hosted-gitlab',
+    name: 'GitLab (self-managed)',
+    vendor: 'GitLab',
+    platform: 'Self-hosted',
+    toolType: 'Self-hosted application',
+    category: 'On-premise',
+    summary: 'Self-managed source control and CI. You own the hardening, patching, runner isolation, and supply chain.',
+    defaults: {
+      toolCategory: 'On-premise software',
+      dataClassification: 'Confidential',
+      environment: 'Pilot',
+      externalVendor: true,
+      connectorEnabled: true,
+      selfHosted: true,
+    },
+    suggested: {
+      'secure-sdlc': note('Runner isolation, protected branches, signed commits, and dependency scanning.'),
+      'platform-cloud': note('Hardening baseline, network placement, backup and restore tested.'),
+      'security-sar': note('Patch cadence and CVE response owner named; secrets kept out of the repo and CI logs.'),
+      'operations': note('Named owner, upgrade path, and end-of-life plan documented.'),
+    },
+    sortOrder: 23,
+  },
+  {
+    id: 'workday',
+    name: 'Workday',
+    vendor: 'Workday',
+    platform: 'Workday',
+    toolType: 'HR / people platform',
+    category: 'SaaS',
+    summary: 'HR system of record holding employee personal data, compensation, and performance information.',
+    defaults: {
+      toolCategory: 'SaaS application',
+      dataClassification: 'Restricted',
+      environment: 'Pilot',
+      externalVendor: true,
+      connectorEnabled: true,
+      pii: true,
+      selfHosted: false,
+    },
+    suggested: {
+      'privacy-pia': note('Employee personal and special-category data in scope; confirm lawful basis and retention.'),
+      'legal': note('DPA plus cross-border transfer mechanism; works-council consultation where applicable.'),
+      'iam': note('Strict role design; audit who can view compensation and performance records.'),
+    },
+    sortOrder: 24,
   },
 ];
 

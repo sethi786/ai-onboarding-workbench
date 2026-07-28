@@ -1,4 +1,10 @@
-import type { Profile, ProjectType, DataClassification, Environment } from '@/workbench/types';
+import type {
+  Profile,
+  ProjectType,
+  ToolCategory,
+  DataClassification,
+  Environment,
+} from '@/workbench/types';
 import type { TeamAssessment, TeamId, EvidenceLink } from '@/workbench/types';
 import type { WorkflowStage } from '@/workbench/types';
 import { makeEmptyAssessment } from '@/workbench/types';
@@ -15,6 +21,7 @@ export function rowToProfile(r: EvaluationRow): Profile {
     id: r.id,
     name: r.name,
     platform: r.platform,
+    toolCategory: (r.tool_category ?? 'AI / ML system') as ToolCategory,
     toolType: r.tool_type as ProjectType,
     useCase: r.use_case,
     businessOwner: r.business_owner,
@@ -32,6 +39,7 @@ export function rowToProfile(r: EvaluationRow): Profile {
     clientData: r.client_data,
     pii: r.pii,
     autonomousActions: r.autonomous_actions,
+    selfHosted: r.self_hosted ?? false,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -42,6 +50,7 @@ export function profilePatchToRow(p: Partial<Profile>): Partial<EvaluationRow> {
   const out: Partial<EvaluationRow> = {};
   if (p.name !== undefined) out.name = p.name;
   if (p.platform !== undefined) out.platform = p.platform;
+  if (p.toolCategory !== undefined) out.tool_category = p.toolCategory;
   if (p.toolType !== undefined) out.tool_type = p.toolType;
   if (p.useCase !== undefined) out.use_case = p.useCase;
   if (p.businessOwner !== undefined) out.business_owner = p.businessOwner;

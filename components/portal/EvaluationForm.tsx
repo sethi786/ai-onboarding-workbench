@@ -2,10 +2,10 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import type { Profile } from '@/workbench/types';
+import type { Profile, ToolCategory } from '@/workbench/types';
+import { TOOL_CATEGORIES, PROJECT_TYPES_BY_CATEGORY, isAiTool } from '@/workbench/types';
 import {
   PLATFORMS,
-  PROJECT_TYPES,
   DATA_CLASSIFICATIONS,
   ENVIRONMENTS,
   DATA_TYPE_OPTIONS,
@@ -16,15 +16,32 @@ import { Input, Label, Select, Textarea } from '@/components/ui/input';
 
 type Draft = Partial<Profile> & { name: string };
 
-const FLAGS: { key: keyof Profile; label: string }[] = [
-  { key: 'agentEnabled', label: 'Agent enabled' },
-  { key: 'connectorEnabled', label: 'Connector enabled' },
-  { key: 'ragEnabled', label: 'RAG enabled' },
-  { key: 'externalVendor', label: 'External vendor' },
-  { key: 'clientData', label: 'Client data' },
-  { key: 'pii', label: 'PII involved' },
-  { key: 'autonomousActions', label: 'Autonomous actions' },
+type FlagDef = { key: keyof Profile; label: string; hint: string };
+
+/** Flags that matter regardless of what kind of tool this is. */
+const UNIVERSAL_FLAGS: FlagDef[] = [
+  { key: 'externalVendor', label: 'Third-party vendor', hint: 'Supplied by an outside company' },
+  { key: 'pii', label: 'Personal data', hint: 'Processes personal or employee data' },
+  { key: 'clientData', label: 'Client data', hint: 'Touches customer or client data' },
+  { key: 'connectorEnabled', label: 'Integrations', hint: 'Connects to other systems via API or OAuth' },
+  { key: 'selfHosted', label: 'Self-hosted', hint: 'You run it — you own patching and hardening' },
 ];
+
+/** Flags that only make sense for AI/ML capability. */
+const AI_FLAGS: FlagDef[] = [
+  { key: 'agentEnabled', label: 'Agent capability', hint: 'Can plan and call tools' },
+  { key: 'ragEnabled', label: 'RAG / retrieval', hint: 'Retrieves from your documents' },
+  { key: 'autonomousActions', label: 'Autonomous actions', hint: 'Acts without human approval each time' },
+];
+
+/** Sensible starting flags per category, so the form matches the tool. */
+const CATEGORY_DEFAULTS: Record<ToolCategory, Partial<Draft>> = {
+  'SaaS application': { externalVendor: true, selfHosted: false },
+  'PaaS / cloud service': { externalVendor: true, selfHosted: false },
+  'On-premise software': { externalVendor: true, selfHosted: true },
+  'AI / ML system': { externalVendor: true, selfHosted: false },
+  'Internal build': { externalVendor: false, selfHosted: true },
+};
 
 export function EvaluationForm({
   orgId,
@@ -37,10 +54,13 @@ export function EvaluationForm({
   evalId?: string;
   initial?: Partial<Profile>;
 }) {
+  const initialCategory: ToolCategory = initial?.toolCategory ?? 'SaaS application';
+
   const [d, setD] = useState<Draft>({
     name: initial?.name ?? '',
     platform: initial?.platform ?? PLATFORMS[0],
-    toolType: initial?.toolType ?? PROJECT_TYPES[1],
+    toolCategory: initialCategory,
+    toolType: initial?.toolType ?? PROJECT_TYPES_BY_CATEGORY[initialCategory][0],
     model: initial?.model ?? '',
     useCase: initial?.useCase ?? '',
     businessOwner: initial?.businessOwner ?? '',
@@ -57,10 +77,33 @@ export function EvaluationForm({
     clientData: initial?.clientData ?? false,
     pii: initial?.pii ?? false,
     autonomousActions: initial?.autonomousActions ?? false,
+    selfHosted: initial?.selfHosted ?? CATEGORY_DEFAULTS[initialCategory].selfHosted ?? false,
   });
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const set = (patch: Partial<Draft>) => setD((prev) => ({ ...prev, ...patch }));
+
+  const category = (d.toolCategory ?? 'SaaS application') as ToolCategory;
+  const projectTypes = PROJECT_TYPES_BY_CATEGORY[category];
+  // Mirrors the engine's own rule so the form shows exactly the fields that
+  // will affect scoring.
+  const showAi = isAiTool({
+    toolCategory: category,
+    agentEnabled: Boolean(d.agentEnabled),
+    ragEnabled: Boolean(d.ragEnabled),
+    autonomousActions: Boolean(d.autonomousActions),
+  });
+
+  /** Changing category re-scopes the project type and re-applies defaults. */
+  function changeCategory(next: ToolCategory) {
+    const types = PROJECT_TYPES_BY_CATEGORY[next];
+    const keepType = d.toolType && types.includes(d.toolType);
+    set({
+      toolCategory: next,
+      toolType: keepType ? d.toolType : types[0],
+      ...CATEGORY_DEFAULTS[next],
+    });
+  }
 
   const toggleDataType = (dt: string) =>
     set({
@@ -95,31 +138,64 @@ export function EvaluationForm({
         </div>
       )}
 
-      <Section title="Identity">
+      <Section title="What are you adopting?">
+        <Field label="Category">
+          <div className="grid gap-2 pt-1 sm:grid-cols-3">
+            {TOOL_CATEGORIES.map((c) => {
+              const on = category === c;
+              return (
+                <button
+                  type="button"
+                  key={c}
+                  onClick={() => changeCategory(c)}
+                  className={
+                    'rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors ' +
+                    (on
+                      ? 'border-electric bg-electric/10 text-electric'
+                      : 'border-border bg-background hover:bg-muted')
+                  }
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+          <p className="pt-2 text-xs text-muted-foreground">
+            This decides which review lenses apply. AI-specific reviews are skipped for tools that
+            aren’t AI; build and hardening reviews are skipped for software you don’t run yourself.
+          </p>
+        </Field>
+
         <Grid>
           <Field label="Name">
             <Input value={d.name} onChange={(e) => set({ name: e.target.value })} />
           </Field>
-          <Field label="Platform">
+          <Field label="Vendor / platform">
             <Select value={d.platform} onChange={(e) => set({ platform: e.target.value })}>
               {PLATFORMS.map((p) => (
                 <option key={p}>{p}</option>
               ))}
             </Select>
           </Field>
-          <Field label="Tool / project type">
+          <Field label="Type">
             <Select
               value={d.toolType}
               onChange={(e) => set({ toolType: e.target.value as Profile['toolType'] })}
             >
-              {PROJECT_TYPES.map((t) => (
+              {projectTypes.map((t) => (
                 <option key={t}>{t}</option>
               ))}
             </Select>
           </Field>
-          <Field label="Model">
-            <Input value={d.model} onChange={(e) => set({ model: e.target.value })} />
-          </Field>
+          {showAi && (
+            <Field label="Model">
+              <Input
+                value={d.model}
+                placeholder="e.g. GPT-4o, Claude, Gemini"
+                onChange={(e) => set({ model: e.target.value })}
+              />
+            </Field>
+          )}
         </Grid>
         <Field label="Use case">
           <Textarea value={d.useCase} onChange={(e) => set({ useCase: e.target.value })} />
@@ -190,26 +266,53 @@ export function EvaluationForm({
         </Field>
       </Section>
 
-      <Section title="Capability flags (drive review intensity)">
-        <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
-          {FLAGS.map((f) => (
-            <label key={String(f.key)} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={Boolean(d[f.key])}
-                onChange={(e) => set({ [f.key]: e.target.checked } as Partial<Draft>)}
-              />
-              {f.label}
-            </label>
-          ))}
-        </div>
+      <Section title="Characteristics (these drive review intensity)">
+        <FlagGrid flags={UNIVERSAL_FLAGS} draft={d} set={set} />
       </Section>
+
+      {(category === 'AI / ML system' || showAi) && (
+        <Section title="AI capability">
+          <FlagGrid flags={AI_FLAGS} draft={d} set={set} />
+        </Section>
+      )}
 
       <div className="flex justify-end">
         <Button variant="electric" size="lg" onClick={submit} disabled={pending}>
           {pending ? 'Saving…' : evalId ? 'Save changes' : 'Create evaluation'}
         </Button>
       </div>
+    </div>
+  );
+}
+
+function FlagGrid({
+  flags,
+  draft,
+  set,
+}: {
+  flags: FlagDef[];
+  draft: Draft;
+  set: (p: Partial<Draft>) => void;
+}) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      {flags.map((f) => (
+        <label
+          key={String(f.key)}
+          className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
+        >
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={Boolean(draft[f.key])}
+            onChange={(e) => set({ [f.key]: e.target.checked } as Partial<Draft>)}
+          />
+          <span>
+            <span className="block text-sm font-medium">{f.label}</span>
+            <span className="block text-xs text-muted-foreground">{f.hint}</span>
+          </span>
+        </label>
+      ))}
     </div>
   );
 }

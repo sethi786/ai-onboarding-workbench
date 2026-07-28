@@ -1,4 +1,5 @@
 import type { TeamLens, TeamId } from '../types';
+import { isAiTool, isSelfBuiltOrHosted } from '../types';
 
 /**
  * The 20 enterprise review "lenses". Static reference content the user
@@ -123,6 +124,7 @@ export const TEAM_LENSES: TeamLens[] = [
     icon: '🧭',
     weight: 1,
     alwaysRequired: true,
+    appliesWhen: isAiTool,
     reviewPurpose:
       'AI Enablement validates alignment with enterprise AI strategy, avoids duplicate efforts, tracks the AI footprint, and ensures the use case follows AI intake and governance processes.',
     scope: [
@@ -1126,6 +1128,7 @@ export const TEAM_LENSES: TeamLens[] = [
     icon: '🔧',
     weight: 1,
     alwaysRequired: true,
+    appliesWhen: isSelfBuiltOrHosted,
     reviewPurpose:
       'Secure SDLC validates code quality, deployment process, CI/CD controls, scanning, testing, secrets management, release governance, and prompt/model versioning.',
     scope: [
@@ -1227,6 +1230,7 @@ export const TEAM_LENSES: TeamLens[] = [
     icon: '🧠',
     weight: 1,
     alwaysRequired: true,
+    appliesWhen: isAiTool,
     reviewPurpose:
       'AI Engineering validates model selection, prompt quality, evaluation, observability, RAG quality, latency, token use, model lifecycle, and output reliability.',
     scope: [
@@ -1321,6 +1325,7 @@ export const TEAM_LENSES: TeamLens[] = [
     icon: '🤖',
     weight: 1.5,
     alwaysRequired: false,
+    appliesWhen: isAiTool,
     requiredWhen: (p) => p.agentEnabled || p.autonomousActions,
     reviewPurpose:
       'Agent Governance validates agent ownership, autonomy, tool permissions, identity, human oversight, auditability, kill switch, registry, and lifecycle.',
