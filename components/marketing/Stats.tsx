@@ -5,8 +5,8 @@ import { CountUp } from '@/components/motion/CountUp';
 const STATS = [
   { value: 20, suffix: '', label: 'Enterprise review lenses' },
   { value: 150, suffix: '+', label: 'Controls & evidence items' },
-  { value: 25, suffix: '', label: 'Onboarding workflow stages' },
-  { value: 15, suffix: '+', label: 'Prefilled AI tools' },
+  { value: 25, suffix: '', label: 'Adoption workflow stages' },
+  { value: 15, suffix: '+', label: 'Prefilled tool templates' },
 ];
 
 export function Stats() {

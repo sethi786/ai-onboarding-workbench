@@ -6,7 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ScanEye,
   GitBranch,
-  ShieldCheck,
+  Sparkles,
+  Palette,
+  Network,
+  Route,
   Boxes,
   FileCheck2,
   Users,
@@ -26,7 +29,7 @@ export function StatementBand() {
             The review teams aren&apos;t the enemy.
             <span className="text-muted-foreground">
               {' '}
-              Showing up unprepared is. Aegis gets every AI tool ready before the gates.
+              Showing up unprepared is. Aegis gets every tool ready before the gates.
             </span>
           </p>
         </Reveal>
@@ -37,12 +40,15 @@ export function StatementBand() {
 
 /* ---------------------------------------------------------------- Features */
 const FEATURES = [
-  { icon: ScanEye, t: 'Deep-dive review simulator', d: 'Walk all 20 lenses — Security, Privacy, Legal, Risk, Data Governance, Agent & Connector Governance — with the exact controls and evidence each team inspects.' },
+  { icon: Sparkles, t: 'AI that does the first draft', d: 'Paste a vendor page and the intake fills itself in. Each review team’s section gets drafted — narrative, open controls, and the exact questions to send the vendor. You review and own it; you never start from a blank page.' },
+  { icon: ScanEye, t: 'Only the reviews that apply', d: 'Twenty lenses, scoped to what you’re actually adopting. A CRM never gets pushed through an AI engineering review, and software you don’t host skips the build and hardening lenses.' },
   { icon: GitBranch, t: 'Live readiness scoring', d: 'A weighted engine turns your self-assessment into a 0–100 readiness score, risk grade, and go/no-go call. Critical blockers force it to zero.' },
-  { icon: ShieldCheck, t: 'Agent & connector governance', d: 'Purpose-built controls for autonomy, tool permissions, identity, kill switches, OAuth scopes, and DLP — the things that actually fail review.' },
-  { icon: FileCheck2, t: 'Evidence Factory', d: 'Generate draft SAR, PIA, architecture, and go/no-go packs from your data — walk into real reviews already prepared.' },
-  { icon: Boxes, t: 'Prefilled tool library', d: 'Instantiate the major AI tools as pre-populated evaluations with suggested answers, so you start at 60%, not zero.' },
-  { icon: Users, t: 'One tower for every stakeholder', d: 'AI Program, Security, Privacy, Legal, Risk, Platform, and leadership — shared readiness, owners, and blockers in a single view.' },
+  { icon: Palette, t: 'Documents in your branding', d: 'Your logo, colour, and handling marking on every pack, plus a print-ready review document. What reaches your auditor looks like it came from you, because it did.' },
+  { icon: Network, t: 'Diagrams that can’t go stale', d: 'Data flow, trust boundary, approval path, and readiness heatmap, generated from the evaluation itself — as SVG and as Mermaid you can keep editing.' },
+  { icon: FileCheck2, t: 'Evidence Factory', d: 'Twenty draft artifacts — SAR, PIA, architecture, go/no-go — built from your data, so you walk into real reviews already prepared.' },
+  { icon: Route, t: 'The whole approval path', d: 'Twenty-five stages from intake to recertification, with owners, due dates, and decisions — so nobody has to ask where it’s stuck.' },
+  { icon: Boxes, t: 'Prefilled tool library', d: 'Instantiate common tools as pre-populated evaluations with suggested answers, so you start at 60%, not zero.' },
+  { icon: Users, t: 'One tower for every stakeholder', d: 'Security, Privacy, Legal, Risk, Platform, and leadership — shared readiness, owners, and blockers in a single view.' },
 ];
 
 export function FeatureGrid() {
@@ -75,10 +81,10 @@ export function FeatureGrid() {
 
 /* --------------------------------------------------------------- How it works */
 const STEPS = [
-  { n: '01', t: 'Profile the tool', d: 'Capture platform, data, ownership, and capability flags — or instantiate a prefilled template in one click.' },
-  { n: '02', t: 'Self-evaluate', d: 'Walk each lens: the controls, the evidence, the blockers, and a 0–5 readiness score per team.' },
-  { n: '03', t: 'Score & simulate', d: 'Get a readiness number, a risk grade, and a go/no-go recommendation — with hard blockers surfaced.' },
-  { n: '04', t: 'Generate evidence', d: 'Produce draft SAR, PIA, architecture, and go/no-go packs for the real reviews. Walk in prepared.' },
+  { n: '01', t: 'Describe the tool', d: 'Paste the vendor page or the request email and the intake fills itself in — or instantiate a prefilled template in one click. What you record decides which reviews apply.' },
+  { n: '02', t: 'Work the lenses', d: 'Only the reviews in scope. Controls, evidence, blockers, and a 0–5 score per team — each section drafted for you to check and edit.' },
+  { n: '03', t: 'Score and see the gaps', d: 'A readiness number, a risk grade, and a go/no-go call, with hard blockers surfaced and diagrams generated from your answers.' },
+  { n: '04', t: 'Hand over the pack', d: 'Branded evidence packs and a print-ready review document, plus drafted answers to whatever the reviewers send back.' },
 ];
 
 export function HowItWorks() {
