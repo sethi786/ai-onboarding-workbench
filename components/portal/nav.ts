@@ -1,4 +1,5 @@
-import { LayoutDashboard, ClipboardList, Boxes, Grid3x3, Settings, type LucideIcon } from 'lucide-react';
+import {
+  Radar, LayoutDashboard, ClipboardList, Boxes, Grid3x3, Settings, type LucideIcon } from 'lucide-react';
 
 export interface PortalNavItem {
   href: string;
@@ -11,6 +12,7 @@ export function portalNav(orgSlug: string): PortalNavItem[] {
   const base = `/portal/${orgSlug}`;
   return [
     { href: `${base}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
+    { href: `${base}/discover`, label: 'Discover', icon: Radar },
     { href: `${base}/evaluations`, label: 'Evaluations', icon: ClipboardList },
     { href: `${base}/library`, label: 'Tool Library', icon: Boxes },
     { href: `${base}/matrix`, label: 'Platform Matrix', icon: Grid3x3 },

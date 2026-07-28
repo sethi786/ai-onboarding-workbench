@@ -1,0 +1,26 @@
+import { requireMembership } from '@/lib/auth/membership';
+import { isAiConfigured } from '@/lib/ai/client';
+import { DiscoverClient } from '@/components/portal/DiscoverClient';
+
+export default async function DiscoverPage({
+  params,
+}: {
+  params: Promise<{ orgSlug: string }>;
+}) {
+  const { orgSlug } = await params;
+  const { org } = await requireMembership(orgSlug);
+
+  return (
+    <div className="mx-auto max-w-5xl">
+      <h1 className="text-2xl font-semibold tracking-tight">Discover what you&rsquo;re running</h1>
+      <p className="mb-6 mt-1 max-w-2xl text-sm text-muted-foreground">
+        Most organizations can&rsquo;t list their own tools — the majority of SaaS and AI runs
+        outside IT&rsquo;s view. Start from a list you already have rather than from memory, and get
+        back a queue ordered by what actually needs reviewing first.
+      </p>
+      <DiscoverClient orgId={org.id} orgSlug={orgSlug} aiAvailable={isAiConfigured()} />
+    </div>
+  );
+}
+
+export const dynamic = 'force-dynamic';

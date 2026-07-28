@@ -223,6 +223,67 @@ recommendation and why.`,
   });
 }
 
+/* ------------------------------------------------------------- discovery */
+
+export interface ClassifiedTool {
+  raw: string;
+  name: string;
+  vendor: string;
+  toolCategory: string;
+  ai: boolean;
+  /** What it's for, in a few words — enough to decide whether to review it. */
+  purpose: string;
+}
+
+const DISCOVERY_SCHEMA = {
+  type: 'object',
+  properties: {
+    tools: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          raw: { type: 'string', description: 'The input line this came from, verbatim.' },
+          name: { type: 'string' },
+          vendor: { type: 'string', description: 'Empty string if not identifiable.' },
+          toolCategory: { type: 'string', enum: TOOL_CATEGORIES },
+          ai: { type: 'boolean', description: 'True only if the core function is AI.' },
+          purpose: { type: 'string' },
+        },
+        required: ['raw', 'name', 'vendor', 'toolCategory', 'ai', 'purpose'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['tools'],
+  additionalProperties: false,
+} as const;
+
+/**
+ * Identify the lines deterministic matching couldn't place.
+ *
+ * Only ever called with the leftovers — the catalogue handles everything it
+ * recognises for free, and this fills the tail. Told explicitly not to invent
+ * a vendor, because a fabricated vendor name on an inventory is worse than an
+ * honest blank.
+ */
+export async function classifyUnknownTools(lines: string[]): Promise<AiResult<{ tools: ClassifiedTool[] }>> {
+  return structured<{ tools: ClassifiedTool[] }>({
+    system: INTAKE_SYSTEM,
+    schema: DISCOVERY_SCHEMA as unknown as Record<string, unknown>,
+    prompt: `These lines came from a software inventory — an SSO application list, an expense
+export, or a browser extension dump. Identify what each one is.
+
+<lines>
+${lines.map((l) => `- ${l}`).join('\n')}
+</lines>
+
+Return one entry per line you can identify, carrying the original line in "raw". Skip lines that
+are clearly not software. Leave "vendor" empty rather than guessing, and set "ai" true only where
+the tool's core function is AI, not merely where it has an AI feature.`,
+  });
+}
+
 /* ----------------------------------------------------------- questionnaire */
 
 export interface DraftedAnswer {

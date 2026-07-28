@@ -77,14 +77,23 @@ export default async function EvaluationsPage({
           <ClipboardList className="mx-auto h-8 w-8 text-muted-foreground" />
           <h3 className="mt-3 font-semibold">No evaluations yet</h3>
           <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            Start from the prefilled tool library or create a blank evaluation.
+            Don&rsquo;t start from memory. Paste a list of what you already run and we&rsquo;ll rank
+            what needs reviewing first.
           </p>
-          <Link
-            href={`/portal/${orgSlug}/library`}
-            className="mt-5 inline-flex h-9 items-center rounded-md bg-electric px-4 text-sm font-medium text-white hover:opacity-90"
-          >
-            Browse tool library
-          </Link>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Link
+              href={`/portal/${orgSlug}/discover`}
+              className="inline-flex h-9 items-center rounded-md bg-electric px-4 text-sm font-medium text-white hover:opacity-90"
+            >
+              Discover your tools
+            </Link>
+            <Link
+              href={`/portal/${orgSlug}/library`}
+              className="inline-flex h-9 items-center rounded-md border border-border bg-background px-4 text-sm font-medium hover:bg-muted"
+            >
+              Browse tool library
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
