@@ -1,5 +1,7 @@
 import { requireMembership } from '@/lib/auth/membership';
 import { canEdit } from '@/lib/rbac';
+import { hasFeature } from '@/lib/plans';
+import { UpgradeGate } from '@/components/portal/UpgradeGate';
 import { TOOL_TEMPLATES } from '@/data/tool-templates';
 import { Badge } from '@/components/ui/badge';
 import { InstantiateButton } from '@/components/portal/InstantiateButton';
@@ -13,12 +15,29 @@ export default async function LibraryPage({
   const { org, role } = await requireMembership(orgSlug);
   const editable = canEdit(role);
 
+  if (!hasFeature(org.plan, 'toolLibrary')) {
+    return (
+      <div className="mx-auto max-w-6xl">
+        <h1 className="text-2xl font-semibold tracking-tight">Tool Library</h1>
+        <p className="mt-1 mb-6 text-sm text-muted-foreground">
+          Prefilled templates that start an evaluation at roughly 60% complete instead of zero.
+        </p>
+        <UpgradeGate
+          feature="toolLibrary"
+          plan={org.plan}
+          orgSlug={orgSlug}
+          description="Instantiate common SaaS, cloud, and AI tools as pre-populated evaluations with suggested answers and the right lenses already selected."
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="text-2xl font-semibold tracking-tight">AI Tool Library</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Tool Library</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Prefilled templates for the world’s major AI tools. Add one to your workspace to start a
-        pre-populated evaluation with suggested answers.
+        Prefilled templates for common tools. Add one to your workspace to start a pre-populated
+        evaluation with suggested answers.
       </p>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">

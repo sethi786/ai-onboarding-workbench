@@ -6,6 +6,8 @@ import { scoreEvaluation } from '@/lib/db/score';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { riskTone, readinessTone, recommendationTone } from '@/components/portal/status';
+import { evaluationQuota, getPlan } from '@/lib/plans';
+import { UpgradeNotice } from '@/components/portal/UpgradeGate';
 
 export default async function EvaluationsPage({
   params,
@@ -17,12 +19,23 @@ export default async function EvaluationsPage({
   const rows = await listEvaluations(org.id);
   const scored = await Promise.all(rows.map(async (r) => ({ r, s: await scoreEvaluation(r) })));
 
+  // Quota is derived from the rows we already loaded — no extra round trip.
+  const quota = evaluationQuota(org.plan, rows.length);
+  const plan = getPlan(org.plan);
+
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Evaluations</h1>
-          <p className="text-sm text-muted-foreground">AI tools your organization is evaluating for onboarding.</p>
+          <p className="text-sm text-muted-foreground">
+            Tools your organization is reviewing for adoption.
+            {quota.limit !== null && (
+              <span className="ml-1.5 text-muted-foreground/80">
+                {quota.used} of {quota.limit} on {plan.name}.
+              </span>
+            )}
+          </p>
         </div>
         <div className="flex gap-2">
           <Link
@@ -31,14 +44,33 @@ export default async function EvaluationsPage({
           >
             From template
           </Link>
-          <Link
-            href={`/portal/${orgSlug}/evaluations/new`}
-            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-electric px-4 text-sm font-medium text-white hover:opacity-90"
-          >
-            <Plus className="h-4 w-4" /> New evaluation
-          </Link>
+          {quota.allowed ? (
+            <Link
+              href={`/portal/${orgSlug}/evaluations/new`}
+              className="inline-flex h-9 items-center gap-1.5 rounded-md bg-electric px-4 text-sm font-medium text-white hover:opacity-90"
+            >
+              <Plus className="h-4 w-4" /> New evaluation
+            </Link>
+          ) : (
+            <span
+              aria-disabled
+              title="You've reached your plan's evaluation limit"
+              className="inline-flex h-9 cursor-not-allowed items-center gap-1.5 rounded-md bg-muted px-4 text-sm font-medium text-muted-foreground"
+            >
+              <Plus className="h-4 w-4" /> New evaluation
+            </span>
+          )}
         </div>
       </div>
+
+      {!quota.allowed && (
+        <div className="mb-6">
+          <UpgradeNotice orgSlug={orgSlug}>
+            You’ve used all {quota.limit} evaluations on the {plan.name} plan. Upgrade for unlimited
+            evaluations, or delete one to free a slot.
+          </UpgradeNotice>
+        </div>
+      )}
 
       {scored.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border bg-card p-12 text-center">

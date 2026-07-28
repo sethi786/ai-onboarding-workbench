@@ -12,6 +12,8 @@ import { toRemediationPlan } from '@/workbench/export/toRemediationPlan';
 import { makeEmptyAssessment } from '@/workbench/types';
 import { slug } from '@/workbench/export/download';
 import { ExportsClient } from '@/components/portal/ExportsClient';
+import { hasFeature } from '@/lib/plans';
+import { UpgradeGate } from '@/components/portal/UpgradeGate';
 import { Badge } from '@/components/ui/badge';
 
 export default async function ExportsPage({
@@ -20,9 +22,21 @@ export default async function ExportsPage({
   params: Promise<{ orgSlug: string; evalId: string }>;
 }) {
   const { orgSlug, evalId } = await params;
-  await requireMembership(orgSlug);
+  const { org } = await requireMembership(orgSlug);
   const row = await getEvaluation(evalId);
   if (!row) notFound();
+
+  if (!hasFeature(org.plan, 'exports')) {
+    return (
+      <UpgradeGate
+        feature="exports"
+        plan={org.plan}
+        orgSlug={orgSlug}
+        description="Download machine-readable data and review-ready reports — go/no-go packs, remediation plans, CSV, and JSON — for this evaluation."
+      />
+    );
+  }
+
   const map = await loadAssessmentMap(evalId);
   const profile = rowToProfile(row);
   const score = computeScoreFromMap(profile, TEAM_LENSES, map);
