@@ -33,6 +33,16 @@ export const MEGA_NAV: NavItem[] = [
           { href: '/platform#library', label: 'Tool Library', desc: 'Prefilled SaaS, PaaS & AI templates' },
         ],
       },
+      {
+        title: 'By tool',
+        links: [
+          { href: '/tools', label: 'All tool reviews', desc: 'What the review covers, tool by tool' },
+          { href: '/tools/m365-copilot', label: 'Microsoft 365 Copilot', desc: 'Graph oversharing, PII, connectors' },
+          { href: '/tools/chatgpt-enterprise', label: 'ChatGPT Enterprise', desc: 'Retention, connectors, custom GPTs' },
+          { href: '/tools/salesforce-sales-cloud', label: 'Salesforce', desc: 'Client data, integrations, access' },
+          { href: '/tools/snowflake', label: 'Snowflake', desc: 'Data residency, sharing, cost' },
+        ],
+      },
     ],
   },
   {
