@@ -1,3 +1,4 @@
+import type { ReviewDepth } from './lens';
 import type { RiskLevel, ApprovalStatus } from './profile';
 import type { TeamId } from './lens';
 
@@ -12,6 +13,8 @@ export interface TeamScore {
   teamId: TeamId;
   required: boolean;
   escalated: boolean;
+  /** How hard this team looks at this tool — see workbench/engine/reviewIntensity. */
+  depth: ReviewDepth;
   score: number; // 0..5, -1 if unset
   normalized: number; // 0..100
   controlsTotal: number;

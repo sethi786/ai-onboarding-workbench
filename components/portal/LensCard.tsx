@@ -2,7 +2,8 @@
 
 import { useState, useTransition, useRef } from 'react';
 import { ChevronRight, Ban } from 'lucide-react';
-import type { TeamLens, TeamAssessment, TeamScore, Decision } from '@/workbench/types';
+import type { TeamLens, TeamAssessment, TeamScore, Decision, Profile } from '@/workbench/types';
+import { controlsAtDepth, evidenceAtDepth, depthRationale } from '@/workbench/engine/reviewIntensity';
 import { SCORE_LABELS, DECISION_OPTIONS } from '@/workbench/data/constants';
 import {
   updateAssessment,
@@ -27,16 +28,25 @@ interface Props {
   canEdit: boolean;
   defaultOpen?: boolean;
   aiAvailable?: boolean;
+  /** Needed to work out how deep this team's review goes for this tool. */
+  profile: Profile;
 }
 
-export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, canEdit, defaultOpen, aiAvailable }: Props) {
+export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, canEdit, defaultOpen, aiAvailable, profile }: Props) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   const [a, setA] = useState(assessment);
   const [, startTransition] = useTransition();
   const notesTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const controlsDone = lens.requiredControls.filter((c) => a.checkedControls[c.id]).length;
-  const evidenceDone = lens.evidenceRequired.filter((e) => a.checkedEvidence[e.id]).length;
+  // Depth decides what this team asks for. Rendering the full control set and
+  // scoring against a subset would tell the reviewer two different stories.
+  const depth = teamScore.depth;
+  const controls = controlsAtDepth(lens, depth);
+  const evidence = evidenceAtDepth(lens, depth);
+  const deferredControls = lens.requiredControls.length - controls.length;
+  const deferredEvidence = lens.evidenceRequired.length - evidence.length;
+  const controlsDone = controls.filter((c) => a.checkedControls[c.id]).length;
+  const evidenceDone = evidence.filter((e) => a.checkedEvidence[e.id]).length;
 
   // Persist the FULL map on each toggle (not a server-side read-modify-write),
   // so rapid successive toggles can't clobber each other's keys.
@@ -78,6 +88,9 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
         </span>
         <span className="font-semibold">{lens.title}</span>
         {!teamScore.required && <Badge tone="neutral">Not required</Badge>}
+        <Badge tone={depth === 'Deep' ? 'warning' : depth === 'Standard' ? 'trust' : 'neutral'}>
+          {depth}
+        </Badge>
         {teamScore.escalated && <Badge tone="electric">Escalated</Badge>}
         <div className="flex items-center gap-2 max-sm:mt-1 max-sm:w-full max-sm:justify-between sm:ml-auto sm:gap-3">
           <span className="text-xs text-muted-foreground">
@@ -96,6 +109,23 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
               <Ban className="h-4 w-4 shrink-0" /> Blocked until remediated.
             </div>
           )}
+
+          {/* Reviewers push back on scope constantly; saying why up front is
+              cheaper than the argument. */}
+          <div className="rounded-md border border-border bg-muted/40 px-3 py-2">
+            <p className="text-xs text-muted-foreground">{depthRationale(lens, profile)}</p>
+            {(deferredControls > 0 || deferredEvidence > 0) && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {[
+                  deferredControls > 0 && `${deferredControls} further control${deferredControls === 1 ? '' : 's'}`,
+                  deferredEvidence > 0 && `${deferredEvidence} further document${deferredEvidence === 1 ? '' : 's'}`,
+                ]
+                  .filter(Boolean)
+                  .join(' and ')}{' '}
+                would be asked at a deeper review. Not skipped — not warranted yet.
+              </p>
+            )}
+          </div>
 
           <div>
             <SectionLabel>Review purpose</SectionLabel>
@@ -121,9 +151,9 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
             <div className="rounded-md border border-border p-3">
               <div className="mb-2 flex items-center justify-between">
                 <SectionLabel>Required controls</SectionLabel>
-                <span className="text-xs text-muted-foreground">{controlsDone}/{lens.requiredControls.length}</span>
+                <span className="text-xs text-muted-foreground">{controlsDone}/{controls.length}</span>
               </div>
-              {lens.requiredControls.map((c) => (
+              {controls.map((c) => (
                 <CheckRow key={c.id} checked={!!a.checkedControls[c.id]} onChange={() => doToggle('checkedControls', c.id)} disabled={!canEdit}>
                   {c.label}{c.critical && <CriticalTag />}
                 </CheckRow>
@@ -132,9 +162,14 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
             <div className="rounded-md border border-border p-3">
               <div className="mb-2 flex items-center justify-between">
                 <SectionLabel>Evidence required</SectionLabel>
-                <span className="text-xs text-muted-foreground">{evidenceDone}/{lens.evidenceRequired.length}</span>
+                <span className="text-xs text-muted-foreground">{evidenceDone}/{evidence.length}</span>
               </div>
-              {lens.evidenceRequired.map((e) => (
+              {evidence.length === 0 ? (
+                <p className="py-1 text-xs text-muted-foreground">
+                  A screening review collects no documents. Deepen the review by raising the
+                  environment or data classification.
+                </p>
+              ) : evidence.map((e) => (
                 <CheckRow key={e.id} checked={!!a.checkedEvidence[e.id]} onChange={() => doToggle('checkedEvidence', e.id)} disabled={!canEdit}>
                   {e.label}
                 </CheckRow>

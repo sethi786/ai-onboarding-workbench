@@ -8,7 +8,13 @@ import type {
   RiskLevel,
 } from '../types';
 import { makeEmptyAssessment } from '../types';
-import { isRequired, escalatedLensIds } from './reviewIntensity';
+import {
+  isRequired,
+  escalatedLensIds,
+  reviewDepth,
+  controlsAtDepth,
+  evidenceAtDepth,
+} from './reviewIntensity';
 import { computeRecommendation, recommendationToApproval } from './recommendation';
 
 export interface EngineInput {
@@ -26,10 +32,18 @@ function scoreTeam(lens: TeamLens, a: TeamAssessment, profile: Profile): TeamSco
   const required = isRequired(lens, profile);
   const escalated = escalatedLensIds(profile).has(lens.id);
 
-  const controlsTotal = lens.requiredControls.length;
-  const controlsComplete = lens.requiredControls.filter((c) => a.checkedControls[c.id]).length;
-  const evidenceTotal = lens.evidenceRequired.length;
-  const evidenceComplete = lens.evidenceRequired.filter((e) => a.checkedEvidence[e.id]).length;
+  // Only what this depth actually asks for counts toward completeness. Scoring
+  // a Screening review against the full control set would leave every low-risk
+  // tool permanently stuck below 50%, which is the same failure as demanding
+  // the controls in the first place.
+  const depth = reviewDepth(lens, profile);
+  const controls = controlsAtDepth(lens, depth);
+  const evidence = evidenceAtDepth(lens, depth);
+
+  const controlsTotal = controls.length;
+  const controlsComplete = controls.filter((c) => a.checkedControls[c.id]).length;
+  const evidenceTotal = evidence.length;
+  const evidenceComplete = evidence.filter((e) => a.checkedEvidence[e.id]).length;
 
   const activeBlockers = Object.values(a.activeBlockers).filter(Boolean).length;
   const hasCriticalBlocker =
@@ -49,6 +63,7 @@ function scoreTeam(lens: TeamLens, a: TeamAssessment, profile: Profile): TeamSco
     teamId: lens.id,
     required,
     escalated,
+    depth,
     score: a.score,
     normalized: Math.round(normalized),
     controlsTotal,

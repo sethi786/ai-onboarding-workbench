@@ -123,7 +123,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 2,
     icon: '🧭',
     weight: 1,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.environment !== 'Sandbox',
     appliesWhen: isAiTool,
     reviewPurpose:
       'AI Enablement validates alignment with enterprise AI strategy, avoids duplicate efforts, tracks the AI footprint, and ensures the use case follows AI intake and governance processes.',
@@ -222,7 +223,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 3,
     icon: '🏛️',
     weight: 1,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.selfHosted || p.toolCategory === 'Internal build' || p.environment === 'UAT',
     reviewPurpose:
       'Enterprise Architecture validates strategic fit, platform standardization, integration alignment, scalability, and avoidance of unnecessary technology debt.',
     scope: [
@@ -272,7 +274,7 @@ export const TEAM_LENSES: TeamLens[] = [
       { id: 'ea-e5', label: 'Integration map' },
       { id: 'ea-e6', label: 'Non-functional requirements document' },
       { id: 'ea-e7', label: 'Decision log' },
-      { id: 'ea-e8', label: 'Exit strategy' },
+      { id: 'ea-e8', label: 'Exit strategy', deep: true },
     ],
     passCriteria: [
       'Architecture aligns with approved platforms',
@@ -318,7 +320,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 4,
     icon: '🧩',
     weight: 1,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.selfHosted || p.toolCategory === 'Internal build' || p.environment === 'UAT',
     reviewPurpose:
       'Solution Architecture validates whether the solution design is technically viable, reliable, maintainable, observable, and properly integrated.',
     scope: [
@@ -367,7 +370,7 @@ export const TEAM_LENSES: TeamLens[] = [
     ],
     evidenceRequired: [
       { id: 'sa-e1', label: 'Solution Design Document (SDD)' },
-      { id: 'sa-e2', label: 'Sequence diagrams' },
+      { id: 'sa-e2', label: 'Sequence diagrams', deep: true },
       { id: 'sa-e3', label: 'Data flow diagrams' },
       { id: 'sa-e4', label: 'API specs' },
       { id: 'sa-e5', label: 'Prompt flow documentation' },
@@ -476,7 +479,7 @@ export const TEAM_LENSES: TeamLens[] = [
     ],
     evidenceRequired: [
       { id: 'sar-e1', label: 'SAR document' },
-      { id: 'sar-e2', label: 'Threat model' },
+      { id: 'sar-e2', label: 'Threat model', deep: true },
       { id: 'sar-e3', label: 'Data flow diagram' },
       { id: 'sar-e4', label: 'Network diagram' },
       { id: 'sar-e5', label: 'IAM / RBAC matrix' },
@@ -484,7 +487,7 @@ export const TEAM_LENSES: TeamLens[] = [
       { id: 'sar-e7', label: 'Encryption proof' },
       { id: 'sar-e8', label: 'Prompt injection test results' },
       { id: 'sar-e9', label: 'Vulnerability scan results' },
-      { id: 'sar-e10', label: 'Pen test report (if required)' },
+      { id: 'sar-e10', label: 'Pen test report (if required)', deep: true },
       { id: 'sar-e11', label: 'Logging / monitoring design' },
       { id: 'sar-e12', label: 'Incident response runbook' },
     ],
@@ -539,8 +542,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 6,
     icon: '🔏',
     weight: 2,
-    alwaysRequired: true,
-    requiredWhen: (p) => p.pii || p.clientData,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.pii || p.clientData || p.dataClassification === 'Restricted',
     reviewPurpose:
       'Privacy validates whether personal data is processed lawfully, minimally, transparently, securely, and within approved data residency and retention requirements.',
     scope: [
@@ -639,8 +642,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 7,
     icon: '⚖️',
     weight: 1.5,
-    alwaysRequired: true,
-    requiredWhen: (p) => p.clientData || p.externalVendor,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.externalVendor || p.clientData,
     reviewPurpose:
       'Legal/OGC validates contract compliance, client restrictions, vendor terms, IP ownership, liability, indemnification, and regulatory obligations.',
     scope: [
@@ -688,7 +691,7 @@ export const TEAM_LENSES: TeamLens[] = [
       { id: 'lgl-e2', label: 'Vendor agreement' },
       { id: 'lgl-e3', label: 'DPA' },
       { id: 'lgl-e4', label: 'Subprocessor list' },
-      { id: 'lgl-e5', label: 'Client restriction matrix' },
+      { id: 'lgl-e5', label: 'Client restriction matrix', deep: true },
       { id: 'lgl-e6', label: 'IP assessment' },
       { id: 'lgl-e7', label: 'Acceptable use terms' },
       { id: 'lgl-e8', label: 'Contract exception list' },
@@ -738,7 +741,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 8,
     icon: '🎯',
     weight: 2,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.autonomousActions || p.clientData || p.dataClassification === 'Restricted' || p.dataClassification === 'Confidential',
     reviewPurpose:
       'QRM/Risk validates enterprise, reputational, client, quality, independence, hallucination, bias, and residual risk.',
     scope: [
@@ -788,10 +792,10 @@ export const TEAM_LENSES: TeamLens[] = [
       { id: 'qrm-e2', label: 'Residual risk memo' },
       { id: 'qrm-e3', label: 'HITL procedure' },
       { id: 'qrm-e4', label: 'Accuracy testing' },
-      { id: 'qrm-e5', label: 'Bias / fairness results' },
+      { id: 'qrm-e5', label: 'Bias / fairness results', deep: true },
       { id: 'qrm-e6', label: 'Risk sign-off' },
       { id: 'qrm-e7', label: 'Risk register' },
-      { id: 'qrm-e8', label: 'Worst-case scenario analysis' },
+      { id: 'qrm-e8', label: 'Worst-case scenario analysis', deep: true },
     ],
     passCriteria: [
       'Risks identified and controlled',
@@ -836,8 +840,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 9,
     icon: '🗄️',
     weight: 1.5,
-    alwaysRequired: true,
-    requiredWhen: (p) => p.ragEnabled || p.clientData || p.pii,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.pii || p.clientData || p.ragEnabled || p.dataClassification === 'Restricted' || p.dataClassification === 'Confidential',
     reviewPurpose:
       'Data Governance validates source data quality, lineage, access controls, classification, lifecycle, permission trimming, and — where the tool indexes content — vector index governance.',
     scope: [
@@ -884,7 +888,7 @@ export const TEAM_LENSES: TeamLens[] = [
       { id: 'dg-e1', label: 'Data inventory' },
       { id: 'dg-e2', label: 'Data flow diagram' },
       { id: 'dg-e3', label: 'Permission model' },
-      { id: 'dg-e4', label: 'Vector DB lifecycle procedure' },
+      { id: 'dg-e4', label: 'Vector DB lifecycle procedure', deep: true },
       { id: 'dg-e5', label: 'Data owner approval' },
       { id: 'dg-e6', label: 'Data quality assessment' },
       { id: 'dg-e7', label: 'Classification matrix' },
@@ -934,7 +938,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 10,
     icon: '🔑',
     weight: 1,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.connectorEnabled || p.selfHosted || p.environment !== 'Sandbox',
     reviewPurpose:
       'IAM validates authentication, authorization, provisioning, deprovisioning, non-human identities, OAuth scopes, service principals, and least privilege.',
     scope: [
@@ -981,7 +986,7 @@ export const TEAM_LENSES: TeamLens[] = [
       { id: 'iam-e3', label: 'Group mapping' },
       { id: 'iam-e4', label: 'App registration details' },
       { id: 'iam-e5', label: 'SCIM config' },
-      { id: 'iam-e6', label: 'Access review log' },
+      { id: 'iam-e6', label: 'Access review log', deep: true },
       { id: 'iam-e7', label: 'JML procedure' },
       { id: 'iam-e8', label: 'OAuth scope justification' },
     ],
@@ -1029,7 +1034,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 11,
     icon: '☁️',
     weight: 1,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.selfHosted || p.toolCategory === 'PaaS / cloud service' || p.toolCategory === 'Internal build',
     reviewPurpose:
       'Platform/Cloud validates cloud architecture, region, network, quotas, environment separation, infrastructure, reliability, and FinOps readiness.',
     scope: [
@@ -1079,7 +1085,7 @@ export const TEAM_LENSES: TeamLens[] = [
       { id: 'plt-e3', label: 'IaC repository' },
       { id: 'plt-e4', label: 'Quota approval' },
       { id: 'plt-e5', label: 'Cost estimate' },
-      { id: 'plt-e6', label: 'DR plan' },
+      { id: 'plt-e6', label: 'DR plan', deep: true },
       { id: 'plt-e7', label: 'Monitoring design' },
       { id: 'plt-e8', label: 'Environment strategy' },
     ],
@@ -1177,7 +1183,7 @@ export const TEAM_LENSES: TeamLens[] = [
     ],
     evidenceRequired: [
       { id: 'sdl-e1', label: 'Pipeline config' },
-      { id: 'sdl-e2', label: 'Scan results' },
+      { id: 'sdl-e2', label: 'Scan results', deep: true },
       { id: 'sdl-e3', label: 'Test reports' },
       { id: 'sdl-e4', label: 'Release plan' },
       { id: 'sdl-e5', label: 'Prompt library version history' },
@@ -1229,7 +1235,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 13,
     icon: '🧠',
     weight: 1,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.environment !== 'Sandbox',
     appliesWhen: isAiTool,
     reviewPurpose:
       'AI Engineering validates model selection, prompt quality, evaluation, observability, RAG quality, latency, token use, model lifecycle, and output reliability.',
@@ -1272,7 +1279,7 @@ export const TEAM_LENSES: TeamLens[] = [
     ],
     evidenceRequired: [
       { id: 'aien-e1', label: 'Prompt library' },
-      { id: 'aien-e2', label: 'Evaluation metrics' },
+      { id: 'aien-e2', label: 'Evaluation metrics', deep: true },
       { id: 'aien-e3', label: 'Test dataset' },
       { id: 'aien-e4', label: 'RAG evaluation results' },
       { id: 'aien-e5', label: 'Observability dashboard' },
@@ -1521,7 +1528,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 16,
     icon: '🛟',
     weight: 1,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.environment === 'UAT' || p.environment === 'Production',
     reviewPurpose:
       'Operations validates support readiness, monitoring, incident response, SLAs, user support, runbooks, escalation, and lifecycle operations.',
     scope: [
@@ -1616,7 +1624,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 17,
     icon: '📣',
     weight: 1,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.environment === 'UAT' || p.environment === 'Production',
     reviewPurpose:
       'Adoption validates whether users can use the tool effectively, safely, and consistently with policy.',
     scope: [
@@ -1803,7 +1812,8 @@ export const TEAM_LENSES: TeamLens[] = [
     order: 19,
     icon: '💰',
     weight: 1,
-    alwaysRequired: true,
+    alwaysRequired: false,
+    requiredWhen: (p) => p.environment !== 'Sandbox',
     reviewPurpose:
       'Finance validates TCO, budget, licensing, API/token costs, compute costs, chargeback/showback, cost controls, and cost spike management.',
     scope: [

@@ -3,7 +3,15 @@ import { requireMembership } from '@/lib/auth/membership';
 import { getEvaluation, loadAssessmentMap, rowToProfile } from '@/lib/db/queries';
 import { computeScoreFromMap } from '@/workbench/engine/scoring';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
-import { isApplicable } from '@/workbench/engine/reviewIntensity';
+import {
+  isApplicable,
+  isRequired,
+  baseDepth,
+  reviewDepth,
+  controlsAtDepth,
+  evidenceAtDepth,
+} from '@/workbench/engine/reviewIntensity';
+import { Badge } from '@/components/ui/badge';
 import { canEdit } from '@/lib/rbac';
 import { isAiConfigured } from '@/lib/ai/client';
 import { LensCard } from '@/components/portal/LensCard';
@@ -30,8 +38,44 @@ export default async function LensesPage({
   const applicable = TEAM_LENSES.filter((lens) => isApplicable(lens, profile));
   const outOfScope = TEAM_LENSES.filter((lens) => !isApplicable(lens, profile));
 
+  // The size of the job, stated up front. Somebody deciding whether to start
+  // deserves to know what they're agreeing to before they scroll.
+  const required = TEAM_LENSES.filter((lens) => isRequired(lens, profile));
+  const depth = baseDepth(profile);
+  const totalControls = required.reduce(
+    (n, lens) => n + controlsAtDepth(lens, reviewDepth(lens, profile)).length,
+    0,
+  );
+  const totalEvidence = required.reduce(
+    (n, lens) => n + evidenceAtDepth(lens, reviewDepth(lens, profile)).length,
+    0,
+  );
+
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="font-semibold">Your review</h2>
+          <Badge tone={depth === 'Deep' ? 'warning' : depth === 'Standard' ? 'trust' : 'neutral'}>
+            {depth} depth
+          </Badge>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          <strong className="text-foreground">{required.length}</strong> of {TEAM_LENSES.length}{' '}
+          reviews apply to this tool, asking{' '}
+          <strong className="text-foreground">{totalControls} controls</strong>
+          {totalEvidence > 0 ? (
+            <>
+              {' '}and <strong className="text-foreground">{totalEvidence} documents</strong>
+            </>
+          ) : (
+            ' and no documents'
+          )}
+          . Depth follows what&rsquo;s at stake — change the environment, data classification, or
+          capability flags and this recalculates.
+        </p>
+      </div>
+
       <p className="rounded-md border border-warning/30 bg-warning/10 p-3 text-xs text-[oklch(0.45_0.09_75)]">
         {DISCLAIMER}
       </p>
@@ -47,6 +91,7 @@ export default async function LensesPage({
           orgSlug={orgSlug}
           canEdit={editable}
           aiAvailable={aiAvailable}
+          profile={profile}
         />
       ))}
 

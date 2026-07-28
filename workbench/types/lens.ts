@@ -25,9 +25,25 @@ export type TeamId =
 export interface ControlItem {
   id: string;
   label: string;
-  /** A critical control that, if flagged as a blocker, forces readiness to 0. */
+  /**
+   * A make-or-break control. Two consequences: flagged as a blocker it forces
+   * readiness to 0, and it is the one thing still asked at Screening depth —
+   * the critical controls ARE the screening questionnaire.
+   */
   critical?: boolean;
 }
+
+/**
+ * How far a review goes, independent of whether it applies at all.
+ *
+ * Applicability answers "does this team care about this tool at all"; depth
+ * answers "how hard do they look". A sandbox trial of a note-taking app and a
+ * production rollout of a mailbox-reading assistant both warrant a security
+ * review — they do not warrant the same security review. Without this
+ * distinction the lowest-risk tool imaginable carries almost the full control
+ * set, which is the process people bypass rather than follow.
+ */
+export type ReviewDepth = 'Screening' | 'Standard' | 'Deep';
 
 export interface ChecklistItem {
   id: string;
@@ -37,6 +53,12 @@ export interface ChecklistItem {
 export interface EvidenceReq {
   id: string;
   label: string;
+  /**
+   * Collected only at Deep depth. Reserve this for artifacts that cost real
+   * money or weeks to produce — a pen test, a bias study, a DR rehearsal.
+   * Demanding them on a low-risk pilot is how a control becomes theatre.
+   */
+  deep?: boolean;
 }
 
 export interface BlockerDef {
