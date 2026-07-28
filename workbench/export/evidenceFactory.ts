@@ -1,5 +1,7 @@
 import type { ReportContext, TeamReportRow } from './reportContext';
-import type { TeamId } from '../types';
+import type { Profile, TeamId } from '../types';
+import { LENS_BY_ID } from '../data/teamLenses';
+import { isRequired } from '../engine/reviewIntensity';
 import { headerMeta } from './reportContext';
 import { documentHeaderLines } from './documentHeader';
 import { toGoNoGoReport } from './toGoNoGoReport';
@@ -151,27 +153,47 @@ export interface ArtifactDef {
   id: string;
   title: string;
   build: (ctx: ReportContext) => string;
+  /**
+   * The review team this pack belongs to. An artifact for a review that isn't
+   * required is noise in the customer's evidence bundle — and worse, it implies
+   * a review they were told they didn't have to do.
+   */
+  team?: TeamId;
 }
 
 export const EVIDENCE_ARTIFACTS: ArtifactDef[] = [
-  { id: 'business-case', title: 'Business Case Summary', build: businessCaseSummary },
+  { id: 'business-case', title: 'Business Case Summary', build: businessCaseSummary , team: 'business' },
   { id: 'ai-intake', title: 'AI Intake Form', build: aiIntakeForm },
-  { id: 'architecture', title: 'Architecture Review Summary', build: architectureReviewSummary },
-  { id: 'sar', title: 'Security / SAR Evidence Pack', build: (c) => teamArtifact(c, 'security-sar', 'Security / SAR Evidence Pack') },
-  { id: 'pia', title: 'Privacy / PIA Evidence Pack', build: (c) => teamArtifact(c, 'privacy-pia', 'Privacy / PIA Evidence Pack') },
-  { id: 'legal', title: 'Legal Review Summary', build: (c) => teamArtifact(c, 'legal', 'Legal Review Summary') },
-  { id: 'qrm', title: 'QRM / Risk Summary', build: (c) => teamArtifact(c, 'qrm-risk', 'QRM / Risk Summary') },
-  { id: 'data-gov', title: 'Data Governance Summary', build: (c) => teamArtifact(c, 'data-governance', 'Data Governance Summary') },
-  { id: 'iam', title: 'IAM Review Summary', build: (c) => teamArtifact(c, 'iam', 'IAM Review Summary') },
-  { id: 'platform', title: 'Platform / Cloud Review Summary', build: (c) => teamArtifact(c, 'platform-cloud', 'Platform / Cloud Review Summary') },
-  { id: 'sdlc', title: 'Secure SDLC Evidence Pack', build: (c) => teamArtifact(c, 'secure-sdlc', 'Secure SDLC Evidence Pack') },
-  { id: 'ai-eng', title: 'AI Engineering Evidence Pack', build: (c) => teamArtifact(c, 'ai-engineering', 'AI Engineering Evidence Pack') },
-  { id: 'agent-gov', title: 'Agent Governance Summary', build: (c) => teamArtifact(c, 'agent-governance', 'Agent Governance Summary') },
-  { id: 'connector-gov', title: 'Connector Governance Summary', build: (c) => teamArtifact(c, 'connector-governance', 'Connector Governance Summary') },
-  { id: 'support', title: 'Support Readiness Pack', build: (c) => teamArtifact(c, 'operations', 'Support Readiness Pack') },
-  { id: 'adoption', title: 'Adoption and Training Plan', build: (c) => teamArtifact(c, 'adoption', 'Adoption and Training Plan') },
-  { id: 'vendor', title: 'Vendor Risk Summary', build: (c) => teamArtifact(c, 'vendor-risk', 'Vendor Risk Summary') },
-  { id: 'finance', title: 'Finance / FinOps Summary', build: (c) => teamArtifact(c, 'finance', 'Finance / FinOps Summary') },
-  { id: 'go-no-go', title: 'Go / No-Go Decision Pack', build: toGoNoGoReport },
+  { id: 'architecture', title: 'Architecture Review Summary', build: architectureReviewSummary , team: 'enterprise-architecture' },
+  { id: 'sar', title: 'Security / SAR Evidence Pack', build: (c) => teamArtifact(c, 'security-sar', 'Security / SAR Evidence Pack') , team: 'security-sar' },
+  { id: 'pia', title: 'Privacy / PIA Evidence Pack', build: (c) => teamArtifact(c, 'privacy-pia', 'Privacy / PIA Evidence Pack') , team: 'privacy-pia' },
+  { id: 'legal', title: 'Legal Review Summary', build: (c) => teamArtifact(c, 'legal', 'Legal Review Summary') , team: 'legal' },
+  { id: 'qrm', title: 'QRM / Risk Summary', build: (c) => teamArtifact(c, 'qrm-risk', 'QRM / Risk Summary') , team: 'qrm-risk' },
+  { id: 'data-gov', title: 'Data Governance Summary', build: (c) => teamArtifact(c, 'data-governance', 'Data Governance Summary') , team: 'data-governance' },
+  { id: 'iam', title: 'IAM Review Summary', build: (c) => teamArtifact(c, 'iam', 'IAM Review Summary') , team: 'iam' },
+  { id: 'platform', title: 'Platform / Cloud Review Summary', build: (c) => teamArtifact(c, 'platform-cloud', 'Platform / Cloud Review Summary') , team: 'platform-cloud' },
+  { id: 'sdlc', title: 'Secure SDLC Evidence Pack', build: (c) => teamArtifact(c, 'secure-sdlc', 'Secure SDLC Evidence Pack') , team: 'secure-sdlc' },
+  { id: 'ai-eng', title: 'AI Engineering Evidence Pack', build: (c) => teamArtifact(c, 'ai-engineering', 'AI Engineering Evidence Pack') , team: 'ai-engineering' },
+  { id: 'agent-gov', title: 'Agent Governance Summary', build: (c) => teamArtifact(c, 'agent-governance', 'Agent Governance Summary') , team: 'agent-governance' },
+  { id: 'connector-gov', title: 'Connector Governance Summary', build: (c) => teamArtifact(c, 'connector-governance', 'Connector Governance Summary') , team: 'connector-governance' },
+  { id: 'support', title: 'Support Readiness Pack', build: (c) => teamArtifact(c, 'operations', 'Support Readiness Pack') , team: 'operations' },
+  { id: 'adoption', title: 'Adoption and Training Plan', build: (c) => teamArtifact(c, 'adoption', 'Adoption and Training Plan') , team: 'adoption' },
+  { id: 'vendor', title: 'Vendor Risk Summary', build: (c) => teamArtifact(c, 'vendor-risk', 'Vendor Risk Summary') , team: 'vendor-risk' },
+  { id: 'finance', title: 'Finance / FinOps Summary', build: (c) => teamArtifact(c, 'finance', 'Finance / FinOps Summary') , team: 'finance' },
+  { id: 'go-no-go', title: 'Go / No-Go Decision Pack', build: toGoNoGoReport , team: 'go-no-go' },
   { id: 'exec-dashboard', title: 'Executive Dashboard Report', build: executiveDashboardReport },
 ];
+
+/**
+ * The packs worth generating for one tool.
+ *
+ * `ai-intake` has no team: it is the intake record itself, which every
+ * evaluation has regardless of which reviews it owes.
+ */
+export function artifactsFor(profile: Profile): ArtifactDef[] {
+  return EVIDENCE_ARTIFACTS.filter((a) => {
+    if (!a.team) return true;
+    const lens = LENS_BY_ID[a.team];
+    return lens ? isRequired(lens, profile) : true;
+  });
+}

@@ -90,7 +90,7 @@ export function ProductPreview() {
           <div className="space-y-5 p-5">
             <div>
               <h3 className="text-lg font-semibold tracking-tight">Governance Control Tower</h3>
-              <p className="text-xs text-muted-foreground">Acme Financial · AI onboarding portfolio</p>
+              <p className="text-xs text-muted-foreground">Acme Financial · tool adoption portfolio</p>
             </div>
 
             {/* Stat row */}

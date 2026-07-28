@@ -9,9 +9,11 @@ import { profilePatchToRow } from '@/lib/db/mappers';
 import { makeDefaultWorkflow } from '@/workbench/data/workflowStages';
 import type { Profile } from '@/workbench/types';
 
-async function seedWorkflow(evalId: string, orgId: string) {
+async function seedWorkflow(evalId: string, orgId: string, profile: Partial<Profile>) {
   const supabase = await createClient();
-  const rows = makeDefaultWorkflow().map((s) => ({
+  // Scoped to the tool: seeding all 25 gates would ask the customer to clear
+  // reviews the self-evaluation page just told them don't apply.
+  const rows = makeDefaultWorkflow(profile as Profile).map((s) => ({
     org_id: orgId,
     evaluation_id: evalId,
     stage_key: s.id,
@@ -44,7 +46,7 @@ export async function createEvaluation(
     .single();
   if (error || !data) return { error: error?.message ?? 'Could not create evaluation.' };
 
-  await seedWorkflow(data.id, orgId);
+  await seedWorkflow(data.id, orgId, input);
   revalidatePath(`/portal/${orgSlug}/evaluations`);
   redirect(`/portal/${orgSlug}/evaluations/${data.id}`);
 }

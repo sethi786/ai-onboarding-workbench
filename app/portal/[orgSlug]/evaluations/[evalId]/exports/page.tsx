@@ -16,6 +16,8 @@ import { toBrandedHtml } from '@/workbench/export/toBrandedHtml';
 import { buildDiagrams } from '@/workbench/diagrams';
 import { BrandedDocumentButton } from '@/components/portal/BrandedDocumentButton';
 import { AiReviewAssist } from '@/components/portal/AiReviewAssist';
+import { EssentialsNotice } from '@/components/portal/EssentialsNotice';
+import { missingEssentials } from '@/workbench/engine/essentials';
 import { isAiConfigured } from '@/lib/ai/client';
 import { resolveBranding, isBranded } from '@/lib/branding';
 import { SITE } from '@/lib/site';
@@ -77,6 +79,11 @@ export default async function ExportsPage({
 
   return (
     <div className="space-y-6">
+      <EssentialsNotice
+        missing={missingEssentials(profile)}
+        editHref={`/portal/${orgSlug}/evaluations/${evalId}/edit`}
+      />
+
       <div>
         <h2 className="mb-1 font-semibold">Branded review document</h2>
         <p className="mb-3 text-sm text-muted-foreground">

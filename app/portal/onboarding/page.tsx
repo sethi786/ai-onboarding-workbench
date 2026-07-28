@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <h1 className="text-lg font-semibold">Create your workspace</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          A workspace holds your organization’s AI tool evaluations. You’ll be the owner.
+          A workspace holds your organization’s tool reviews — SaaS, cloud, on-premise, or AI. You’ll be the owner.
         </p>
         <div className="mt-6">
           <CreateOrgForm />

@@ -12,7 +12,7 @@ export default function BookPage() {
     <>
       <PageHero
         eyebrow="Book a demo"
-        title="See Aegis on your AI stack"
+        title="See Aegis on the tools you are adopting"
         subtitle="A 30-minute walkthrough of the readiness workflow, control tower, and evidence factory."
       />
       <section className="mx-auto max-w-xl px-4 py-20 sm:px-6">

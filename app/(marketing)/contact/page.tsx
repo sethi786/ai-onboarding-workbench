@@ -12,8 +12,8 @@ export default function ContactPage() {
     <>
       <PageHero
         eyebrow="Contact"
-        title="Talk to us about AI onboarding"
-        subtitle="Tell us about your AI stack and governance goals — we’ll get back within one business day."
+        title="Talk to us about your review process"
+        subtitle="Tell us what you’re adopting and where the review is stuck — we’ll get back within one business day."
       />
       <section className="mx-auto max-w-xl px-4 py-20 sm:px-6">
         {sent ? (

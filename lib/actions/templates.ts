@@ -8,7 +8,7 @@ import { assertEvaluationQuota, assertFeature } from '@/lib/auth/entitlements';
 import { profilePatchToRow, assessmentPatchToRow } from '@/lib/db/mappers';
 import { makeDefaultWorkflow } from '@/workbench/data/workflowStages';
 import { makeEmptyAssessment } from '@/workbench/types';
-import type { TeamId } from '@/workbench/types';
+import type { Profile, TeamId } from '@/workbench/types';
 import { TOOL_TEMPLATE_BY_ID } from '@/data/tool-templates';
 
 /** Instantiate a library template into an org as a new, editable evaluation. */
@@ -55,9 +55,9 @@ export async function instantiateTemplate(
 
   const evalId = created.id;
 
-  // Seed the 25 workflow stages
+  // Seed the approval path, scoped to what this tool actually has to clear.
   await supabase.from('workflow_stages').insert(
-    makeDefaultWorkflow().map((s) => ({
+    makeDefaultWorkflow(tpl.defaults as Profile).map((s) => ({
       org_id: orgId,
       evaluation_id: evalId,
       stage_key: s.id,

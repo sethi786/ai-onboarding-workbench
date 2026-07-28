@@ -9,6 +9,14 @@ import { makeEmptyAssessment } from '@/workbench/types';
 import { resolveBranding } from '@/lib/branding';
 import { DiagramCard } from '@/components/portal/DiagramCard';
 
+/**
+ * Deliberately ungated on every plan.
+ *
+ * These are generated from answers the customer already gave, they cost nothing
+ * per view, and a data-flow diagram pasted into a security questionnaire is the
+ * most persuasive thing this product produces. Charging for it would be
+ * charging for the demo.
+ */
 export default async function DiagramsPage({
   params,
 }: {

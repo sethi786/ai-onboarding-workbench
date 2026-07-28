@@ -38,7 +38,7 @@ export default async function DashboardPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Governance Control Tower</h1>
-          <p className="text-sm text-muted-foreground">{org.name} · AI onboarding portfolio</p>
+          <p className="text-sm text-muted-foreground">{org.name} · tool adoption portfolio</p>
         </div>
         <Link
           href={`/portal/${orgSlug}/evaluations/new`}

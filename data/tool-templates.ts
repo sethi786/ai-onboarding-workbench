@@ -32,6 +32,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Assistant',
     summary: 'General-purpose enterprise assistant with SSO/SCIM, no training on your data, connectors and custom GPTs.',
     defaults: {
+      dataTypes: ['Internal Documents'],
       model: 'GPT-4o',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -56,6 +57,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Assistant',
     summary: 'Graph-grounded productivity across Word, Excel, Outlook, Teams. Respects existing M365 permissions.',
     defaults: {
+      dataTypes: ['Internal Documents', 'Personal Data (PII)', 'HR Data'],
       model: 'GPT-4o (Copilot)',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -80,6 +82,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Agent',
     summary: 'Low-code custom agents with connectors, knowledge sources, and actions across Power Platform.',
     defaults: {
+      dataTypes: ['Internal Documents', 'Personal Data (PII)'],
       model: 'GPT-4o (Copilot)',
       dataClassification: 'Confidential',
       environment: 'UAT',
@@ -105,6 +108,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Assistant',
     summary: 'Google Workspace-grounded assistant with enterprise controls and connectors.',
     defaults: {
+      dataTypes: ['Internal Documents'],
       model: 'Gemini 2.5 Pro',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -127,6 +131,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Assistant',
     summary: 'Long-context reasoning and analysis with SSO/SCIM, Projects, and no training on your data.',
     defaults: {
+      dataTypes: ['Internal Documents'],
       model: 'Claude',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -148,6 +153,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'RAG',
     summary: 'Custom RAG apps on your Azure tenant with private networking and managed identities.',
     defaults: {
+      dataTypes: ['Internal Documents', 'Source Code'],
       model: 'GPT-4o (Azure)',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -172,6 +178,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'RAG',
     summary: 'Enterprise knowledge search / GenAI apps on GCP with VPC-SC and org policy.',
     defaults: {
+      dataTypes: ['Internal Documents', 'Source Code'],
       model: 'Gemini 2.5 (Vertex)',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -193,6 +200,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'RAG',
     summary: 'Model-choice GenAI apps with Knowledge Bases, Agents, and Guardrails on AWS.',
     defaults: {
+      dataTypes: ['Internal Documents', 'Source Code'],
       model: 'Claude on Bedrock',
       dataClassification: 'Restricted',
       environment: 'UAT',
@@ -218,6 +226,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Agent',
     summary: 'Repo-aware coding agent for engineering with tool access and optional autonomous actions.',
     defaults: {
+      dataTypes: ['Source Code', 'Credentials / Secrets'],
       model: 'Claude',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -242,6 +251,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Developer',
     summary: 'Sandboxed code generation for experimentation.',
     defaults: {
+      dataTypes: ['Source Code'],
       model: 'Codex',
       dataClassification: 'Internal',
       environment: 'Sandbox',
@@ -262,6 +272,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Developer',
     summary: 'Cloud dev workspace with AI assistance for prototyping.',
     defaults: {
+      dataTypes: ['Source Code'],
       model: 'Replit AI',
       dataClassification: 'Internal',
       environment: 'Sandbox',
@@ -281,6 +292,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Developer',
     summary: 'In-IDE AI pair programmer for developers.',
     defaults: {
+      dataTypes: ['Source Code'],
       model: 'GPT-4o (Copilot)',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -301,6 +313,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'RAG',
     summary: 'Enterprise search + assistant over connected SaaS with permission-aware retrieval.',
     defaults: {
+      dataTypes: ['Internal Documents', 'Personal Data (PII)'],
       dataClassification: 'Confidential',
       environment: 'Pilot',
       ragEnabled: true,
@@ -323,6 +336,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Assistant',
     summary: 'Answer engine with web + internal file search for research.',
     defaults: {
+      dataTypes: ['None / Public'],
       dataClassification: 'Internal',
       environment: 'Pilot',
       ragEnabled: true,
@@ -343,6 +357,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'Developer',
     summary: 'AI-native code editor with agentic edits across a codebase.',
     defaults: {
+      dataTypes: ['Source Code'],
       dataClassification: 'Confidential',
       environment: 'Pilot',
       agentEnabled: true,
@@ -365,6 +380,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'SaaS',
     summary: 'CRM holding customer records, pipeline, and contact data — typically the system of record for client information.',
     defaults: {
+      dataTypes: ['Client Data', 'Personal Data (PII)'],
       toolCategory: 'SaaS application',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -391,6 +407,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'PaaS',
     summary: 'Cloud data warehouse concentrating analytical data — often the widest single data exposure in the estate.',
     defaults: {
+      dataTypes: ['Client Data', 'Financial Data', 'Personal Data (PII)'],
       toolCategory: 'PaaS / cloud service',
       dataClassification: 'Restricted',
       environment: 'Pilot',
@@ -417,6 +434,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'SaaS',
     summary: 'Messaging platform that accumulates unstructured sensitive content and a long tail of third-party app grants.',
     defaults: {
+      dataTypes: ['Internal Documents', 'Personal Data (PII)'],
       toolCategory: 'SaaS application',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -441,6 +459,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'On-premise',
     summary: 'Self-managed source control and CI. You own the hardening, patching, runner isolation, and supply chain.',
     defaults: {
+      dataTypes: ['Source Code', 'Credentials / Secrets'],
       toolCategory: 'On-premise software',
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -465,6 +484,7 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     category: 'SaaS',
     summary: 'HR system of record holding employee personal data, compensation, and performance information.',
     defaults: {
+      dataTypes: ['HR Data', 'Personal Data (PII)', 'Financial Data'],
       toolCategory: 'SaaS application',
       dataClassification: 'Restricted',
       environment: 'Pilot',

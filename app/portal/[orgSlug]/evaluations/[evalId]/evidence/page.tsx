@@ -4,7 +4,7 @@ import { getEvaluation, loadAssessmentMap, rowToProfile } from '@/lib/db/queries
 import { computeScoreFromMap } from '@/workbench/engine/scoring';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 import { buildReportContext } from '@/workbench/export/reportContext';
-import { EVIDENCE_ARTIFACTS } from '@/workbench/export/evidenceFactory';
+import { artifactsFor } from '@/workbench/export/evidenceFactory';
 import { makeEmptyAssessment } from '@/workbench/types';
 import { canEdit } from '@/lib/rbac';
 import { hasFeature } from '@/lib/plans';
@@ -44,7 +44,7 @@ export default async function EvidencePage({
     resolveBranding(org),
   );
 
-  const artifacts = EVIDENCE_ARTIFACTS.map((a) => ({
+  const artifacts = artifactsFor(profile).map((a) => ({
     id: a.id,
     title: a.title,
     content: a.build(ctx),
