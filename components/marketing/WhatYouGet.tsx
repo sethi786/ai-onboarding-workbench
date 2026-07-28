@@ -27,10 +27,7 @@ export function WhatYouGet() {
     <section className="border-y border-border bg-paper">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
         <Reveal>
-          <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
-            What you get
-          </span>
-          <h2 className="display-lg mt-4 max-w-3xl">
+          <h2 className="display-lg max-w-3xl">
             This is a real review, made by the real product.
           </h2>
           <p className="mt-5 max-w-2xl text-lg text-muted-foreground">

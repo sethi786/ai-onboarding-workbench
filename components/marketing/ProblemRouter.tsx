@@ -13,29 +13,35 @@ export function ProblemRouter() {
     <section className="border-y border-border bg-surface">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-28">
         <Reveal>
-          <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
-            Start where you’re stuck
-          </span>
-          <h2 className="display-lg mt-4 max-w-2xl">What’s blocking you this week?</h2>
-          <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-            Most people don’t arrive shopping for governance software. They arrive with one urgent
-            problem. Pick yours.
-          </p>
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+            <h2 className="display-lg">What&rsquo;s blocking you this week?</h2>
+            <p className="max-w-md self-end text-lg leading-relaxed text-muted-foreground">
+              Most people don&rsquo;t arrive shopping for governance software. They arrive with one
+              urgent problem. Pick yours.
+            </p>
+          </div>
         </Reveal>
 
-        <div className="mt-12 grid gap-3 sm:grid-cols-2">
+        {/* A ruled index, not a card grid. Eight bordered boxes read as one
+            undifferentiated block; a list with hairlines reads as a list, which
+            is what this is. */}
+        <div className="mt-12 border-t border-foreground/15">
           {PROBLEMS.map((p, i) => (
             <Reveal key={p.slug} index={i % 2}>
               <Link
                 href={`/use-cases/${p.slug}`}
-                className="group flex h-full items-start gap-4 rounded-xl border border-border bg-card px-5 py-4 transition-colors hover:border-electric/40 hover:bg-muted/30"
+                className="group flex items-baseline gap-5 border-b border-border py-5 transition-colors hover:bg-paper/60 sm:gap-8"
               >
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-electric" />
-                <span className="flex-1">
-                  <span className="block text-[15px] font-medium leading-snug">“{p.trigger}”</span>
-                  <span className="mt-1 block text-[13px] text-muted-foreground">{p.who}</span>
+                <span className="w-6 shrink-0 font-mono text-[12px] text-muted-foreground/70">
+                  {String(i + 1).padStart(2, '0')}
                 </span>
-                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-electric" />
+                <span className="flex-1 text-[17px] font-medium leading-snug tracking-[-0.01em] sm:text-[19px]">
+                  &ldquo;{p.trigger}&rdquo;
+                </span>
+                <span className="hidden shrink-0 text-[13px] text-muted-foreground sm:block">
+                  {p.who}
+                </span>
+                <ArrowRight className="h-4 w-4 shrink-0 self-center text-muted-foreground/40 transition-transform group-hover:translate-x-1 group-hover:text-electric" />
               </Link>
             </Reveal>
           ))}

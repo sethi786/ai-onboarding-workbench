@@ -12,6 +12,7 @@
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-display: var(--font-display), 'Iowan Old Style', Georgia, 'Times New Roman', serif;
 
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
@@ -73,8 +74,16 @@
   }
   /* Confident, tightly-tracked display type — the single biggest signal of
      a hand-crafted site. */
+  /* h1/h2 carry the display serif; h3/h4 stay in the interface face so a card
+     title never competes with a section head. */
   h1,
-  h2,
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+    color: var(--color-foreground);
+  }
   h3,
   h4 {
     font-weight: 600;
@@ -83,11 +92,9 @@
     color: var(--color-foreground);
   }
   h1 {
-    letter-spacing: -0.035em;
-    line-height: 1.02;
+    line-height: 1.0;
   }
   h2 {
-    letter-spacing: -0.03em;
     line-height: 1.06;
   }
   p {
@@ -98,18 +105,27 @@
   }
 }
 
-/* Fluid display scale used by the hero + section headers */
+/* Fluid display scale used by the hero + section headers.
+   A serif at 400 needs more size and far less negative tracking than the
+   grotesk it replaced — the old -0.04em would collide the letterforms. */
 .display-xl {
-  font-size: clamp(2.75rem, 1.6rem + 5.6vw, 5.5rem);
-  line-height: 0.98;
-  letter-spacing: -0.04em;
-  font-weight: 620;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 1.7rem + 6.2vw, 6rem);
+  line-height: 0.96;
+  letter-spacing: -0.015em;
+  font-weight: 400;
 }
 .display-lg {
-  font-size: clamp(2.1rem, 1.4rem + 3vw, 3.5rem);
-  line-height: 1.03;
-  letter-spacing: -0.032em;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 1.5rem + 3.4vw, 3.9rem);
+  line-height: 1.04;
+  letter-spacing: -0.012em;
+  font-weight: 400;
+}
+/* For the one or two places a line should lean — used sparingly, as emphasis
+   inside a headline rather than as decoration. */
+.display-em {
+  font-style: italic;
 }
 .measure {
   max-width: 46ch;

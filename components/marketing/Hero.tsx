@@ -19,18 +19,20 @@ export function Hero() {
     <section className="relative overflow-hidden bg-paper">
       <div className="mx-auto max-w-5xl px-5 pt-20 text-center sm:px-8 sm:pt-28">
         <motion.div initial="hidden" animate="show" className="flex flex-col items-center">
+          {/* Set as a rule-and-caption rather than the pill-with-a-dot every
+              generated hero opens with. */}
           <motion.span
             custom={0}
             variants={fade}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-[12.5px] font-medium text-muted-foreground shadow-soft"
+            className="border-b border-foreground/20 pb-2 text-[13px] text-muted-foreground"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-electric" />
             Software for reviewing tools before you roll them out
           </motion.span>
 
-          <motion.h1 custom={1} variants={fade} className="display-xl mt-7 max-w-4xl">
+          <motion.h1 custom={1} variants={fade} className="display-xl mt-8 max-w-4xl">
             Before you roll it out,
-            <br className="hidden sm:block" /> someone has to check it.
+            <br className="hidden sm:block" />{' '}
+            <span className="display-em">someone</span> has to check it.
           </motion.h1>
 
           <motion.p

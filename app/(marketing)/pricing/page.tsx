@@ -42,7 +42,7 @@ export default function PricingPage() {
         subtitle="Your first tool goes all the way through on the free plan — library, evidence packs, diagrams, and the branded review document. Pay when you have a portfolio, not a pilot."
       />
 
-      <Pricing />
+      <Pricing heading={false} />
 
       {/* Comparison matrix */}
       <section className="mx-auto max-w-5xl px-5 py-24 sm:px-8">

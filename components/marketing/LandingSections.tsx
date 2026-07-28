@@ -3,20 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  ScanEye,
-  GitBranch,
-  Sparkles,
-  Palette,
-  Network,
-  Route,
-  Boxes,
-  FileCheck2,
-  Users,
-  ChevronDown,
-  Check,
-  ArrowRight,
-} from 'lucide-react';
+import { ChevronDown, Check, ArrowRight } from 'lucide-react';
 import { Reveal } from '@/components/motion/Reveal';
 
 /* --------------------------------------------------------------- Statement band */
@@ -38,17 +25,73 @@ export function StatementBand() {
   );
 }
 
-/* ---------------------------------------------------------------- Features */
-const FEATURES = [
-  { icon: Sparkles, t: 'AI that does the first draft', d: 'Paste a vendor page and the intake fills itself in. Each review team’s section gets drafted — narrative, open controls, and the exact questions to send the vendor. You review and own it; you never start from a blank page.' },
-  { icon: ScanEye, t: 'Only the reviews that apply', d: 'Twenty lenses, scoped to what you’re actually adopting. A CRM never gets pushed through an AI engineering review, and software you don’t host skips the build and hardening lenses.' },
-  { icon: GitBranch, t: 'Live readiness scoring', d: 'A weighted engine turns your self-assessment into a 0–100 readiness score, risk grade, and go/no-go call. Critical blockers force it to zero.' },
-  { icon: Palette, t: 'Documents in your branding', d: 'Your logo, colour, and handling marking on every pack, plus a print-ready review document. What reaches your auditor looks like it came from you, because it did.' },
-  { icon: Network, t: 'Diagrams that can’t go stale', d: 'Data flow, trust boundary, approval path, and readiness heatmap, generated from the evaluation itself — as SVG and as Mermaid you can keep editing.' },
-  { icon: FileCheck2, t: 'Evidence Factory', d: 'Twenty draft artifacts — SAR, PIA, architecture, go/no-go — built from your data, so you walk into real reviews already prepared.' },
-  { icon: Route, t: 'The whole approval path', d: 'Twenty-five stages from intake to recertification, with owners, due dates, and decisions — so nobody has to ask where it’s stuck.' },
-  { icon: Boxes, t: 'Prefilled tool library', d: 'Instantiate common tools as pre-populated evaluations with suggested answers, so you start at 60%, not zero.' },
-  { icon: Users, t: 'One tower for every stakeholder', d: 'Security, Privacy, Legal, Risk, Platform, and leadership — shared readiness, owners, and blockers in a single view.' },
+/* ---------------------------------------------------------------- Features
+ *
+ * Deliberately not a grid of tinted icon cards. Nine equal cells with a lucide
+ * glyph in a rounded square is the house style of every generated site, and it
+ * flattens nine different claims into one texture — the reader skims all of it
+ * and retains none. Here the work is grouped into the three things the product
+ * actually does, each with a lead line carrying real weight and its parts set
+ * as prose under hairlines. No boxes, no icons, uneven by design.
+ */
+const CHAPTERS = [
+  {
+    n: '01',
+    lead: 'It works out how much review you owe.',
+    body: 'Most of the effort in a tool review is spent on questions that don’t apply to it.',
+    points: [
+      {
+        t: 'Only the reviews in scope',
+        d: 'Twenty lenses, scoped to what you’re actually adopting. A CRM never gets pushed through an AI engineering review, and software you don’t host skips the build and hardening lenses.',
+      },
+      {
+        t: 'Depth proportionate to exposure',
+        d: 'A sandbox trial answers the make-or-break questions and collects no documents. A production rollout holding personal data answers everything. Same engine, 22 controls against 126.',
+      },
+      {
+        t: 'Every omission defended',
+        d: 'Each skipped review states its reason and what would bring it back into scope — derived from the rule itself, so it can’t drift from the decision.',
+      },
+    ],
+  },
+  {
+    n: '02',
+    lead: 'It carries you through the questions.',
+    body: 'A checklist you have to interpret is a checklist people guess at.',
+    points: [
+      {
+        t: 'Every control says what done means',
+        d: 'Not “secrets vault” but: every credential lives in a secrets manager with a recorded path, and no key appears in config, code, or a spreadsheet. All 332 controls and documents carry one.',
+      },
+      {
+        t: 'The AI drafts the first pass',
+        d: 'Paste a vendor page and the intake fills itself in. Each team’s section gets drafted — narrative, open controls, the exact questions to send the vendor. You review and own it; you never start from a blank page.',
+      },
+      {
+        t: 'Scoring you can defend',
+        d: 'Evidence sets the ceiling, judgement moves within it, and a critical blocker forces readiness to zero. You cannot score points for work you haven’t done.',
+      },
+    ],
+  },
+  {
+    n: '03',
+    lead: 'It hands you the pack.',
+    body: 'The artifact is the point. Everything before it is preparation.',
+    points: [
+      {
+        t: 'A review document in your branding',
+        d: 'Your logo, colour, and handling marking, print-ready. What reaches your auditor looks like it came from you, because it did.',
+      },
+      {
+        t: 'Four diagrams that can’t go stale',
+        d: 'Data flow, trust boundary, approval path, and readiness heatmap, generated from the evaluation itself — as SVG and as Mermaid you can keep editing.',
+      },
+      {
+        t: 'The regulation, mapped',
+        d: 'EU AI Act, ISO 42001, and NIST AI RMF, clause by clause, each marked evidenced, partly evidenced, or out of scope for this tool.',
+      },
+    ],
+  },
 ];
 
 export function FeatureGrid() {
@@ -56,20 +99,35 @@ export function FeatureGrid() {
     <section className="bg-paper">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
         <Reveal>
-          <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
-            The platform
-          </span>
-          <h2 className="display-lg mt-4 max-w-2xl">Everything a review team asks for, prepared in advance.</h2>
+          <h2 className="display-lg max-w-2xl">
+            Three things, done properly,
+            <br className="hidden sm:block" /> instead of thirty done thinly.
+          </h2>
         </Reveal>
-        <div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f, i) => (
-            <Reveal key={f.t} index={i % 3}>
-              <div className="flex h-full flex-col bg-card p-8">
-                <div className="grid h-11 w-11 place-items-center rounded-xl bg-electric/10">
-                  <f.icon className="h-5 w-5 text-electric" />
+
+        <div className="mt-16 space-y-16 sm:mt-20 sm:space-y-24">
+          {CHAPTERS.map((c) => (
+            <Reveal key={c.n}>
+              <div className="grid gap-8 border-t border-foreground/15 pt-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,9fr)] lg:gap-16">
+                <div>
+                  <div className="font-mono text-[13px] text-muted-foreground">{c.n}</div>
+                  <h3 className="mt-3 font-[family-name:var(--font-display)] text-[30px] font-normal leading-[1.1] tracking-[-0.01em] sm:text-[36px]">
+                    {c.lead}
+                  </h3>
+                  <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-muted-foreground">
+                    {c.body}
+                  </p>
                 </div>
-                <h3 className="mt-5 text-[17px] font-semibold tracking-tight">{f.t}</h3>
-                <p className="mt-2.5 text-[14.5px] leading-relaxed text-muted-foreground">{f.d}</p>
+                <div className="space-y-6">
+                  {c.points.map((p) => (
+                    <div key={p.t} className="border-t border-border pt-5 first:border-0 first:pt-0">
+                      <h4 className="text-[16px] font-semibold tracking-tight">{p.t}</h4>
+                      <p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">
+                        {p.d}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </Reveal>
           ))}
@@ -92,10 +150,7 @@ export function HowItWorks() {
     <section className="bg-sage">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
         <Reveal>
-          <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
-            How it works
-          </span>
-          <h2 className="display-lg mt-4 max-w-2xl">From intake to go/no-go in four moves.</h2>
+          <h2 className="display-lg max-w-2xl">From intake to go/no-go in four moves.</h2>
         </Reveal>
         <div className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2">
           {STEPS.map((s, i) => (
@@ -139,10 +194,7 @@ export function ReviewerQuestions() {
     <section className="bg-paper">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
         <Reveal>
-          <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
-            Built around the real questions
-          </span>
-          <h2 className="display-lg mt-4 max-w-2xl">
+          <h2 className="display-lg max-w-2xl">
             Every review comes down to a handful of questions.
           </h2>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
@@ -177,17 +229,22 @@ const PLANS = [
   { name: 'Enterprise', price: 'Custom', per: '', desc: 'For regulated orgs at scale.', cta: 'Talk to us', highlight: false, features: ['SSO / SCIM', 'Custom lenses & templates', 'Audit & retention controls', 'Dedicated environment', 'Solution engineering'] },
 ];
 
-export function Pricing() {
+/**
+ * `heading={false}` on /pricing, where the page masthead already carries this
+ * exact line — it was printing twice, one above the other.
+ */
+export function Pricing({ heading = true }: { heading?: boolean } = {}) {
   return (
     <section id="pricing" className="border-y border-border bg-surface">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
-        <Reveal>
-          <div className="text-center">
-            <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">Pricing</span>
-            <h2 className="display-lg mt-4">Start free. Grow when you do.</h2>
-          </div>
-        </Reveal>
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        {heading && (
+          <Reveal>
+            <div className="text-center">
+              <h2 className="display-lg">Start free. Grow when you do.</h2>
+            </div>
+          </Reveal>
+        )}
+        <div className={`grid gap-6 md:grid-cols-3 ${heading ? 'mt-14' : ''}`}>
           {PLANS.map((p, i) => (
             <Reveal key={p.name} index={i}>
               <div
