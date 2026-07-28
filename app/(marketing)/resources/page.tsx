@@ -36,7 +36,7 @@ export default function ResourcesPage() {
                   <Clock className="h-3 w-3" /> {lead.minutes} min
                 </span>
               </div>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">{lead.title}</h2>
+              <h2 className="display-md mt-4">{lead.title}</h2>
               <p className="mt-4 text-[15.5px] leading-relaxed text-muted-foreground">{lead.dek}</p>
               <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-electric">
                 Read the guide

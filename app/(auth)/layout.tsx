@@ -20,7 +20,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <ShieldLogo tone="light" />
           </Link>
           <div className="my-auto max-w-md">
-            <h2 className="text-3xl font-semibold leading-tight tracking-tight">
+            <h2 className="display-md">
               Clear AI for the enterprise with confidence.
             </h2>
             <div className="mt-10 space-y-6">

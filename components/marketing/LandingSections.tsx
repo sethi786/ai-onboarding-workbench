@@ -6,25 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check, ArrowRight } from 'lucide-react';
 import { Reveal } from '@/components/motion/Reveal';
 
-/* --------------------------------------------------------------- Statement band */
-export function StatementBand() {
-  return (
-    <section className="bg-sand">
-      <div className="mx-auto max-w-5xl px-5 py-28 text-center sm:px-8 sm:py-36">
-        <Reveal>
-          <p className="display-lg text-balance">
-            The review teams aren&apos;t the enemy.
-            <span className="text-muted-foreground">
-              {' '}
-              Showing up unprepared is. Aegis gets every tool ready before the gates.
-            </span>
-          </p>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 /* ---------------------------------------------------------------- Features
  *
  * Deliberately not a grid of tinted icon cards. Nine equal cells with a lucide

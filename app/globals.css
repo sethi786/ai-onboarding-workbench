@@ -74,27 +74,30 @@
   }
   /* Confident, tightly-tracked display type — the single biggest signal of
      a hand-crafted site. */
-  /* h1/h2 carry the display serif; h3/h4 stay in the interface face so a card
-     title never competes with a section head. */
+  /* Headings default to the interface face. The display serif is opt-in via
+     .display-*, never automatic on the tag: the portal, the auth screens, and
+     the legal pages are full of small semibold h1/h2s, and a 400-weight serif
+     asked to render at 600 gets synthesised into a smeared fake bold. The two
+     voices are deliberate — editorial on the marketing side, functional in the
+     app — and this is the line between them. */
   h1,
-  h2 {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.012em;
-    text-wrap: balance;
-    color: var(--color-foreground);
-  }
+  h2,
   h3,
   h4 {
     font-weight: 600;
     letter-spacing: -0.022em;
     text-wrap: balance;
-    color: var(--color-foreground);
+    /* No colour here on purpose. Setting it directly on the element beat the
+       inherited `text-white` of any dark panel, which is why the sign-in
+       page's headline had been rendering dark-on-dark and invisible.
+       Headings inherit from body, which is the same value anyway. */
   }
   h1 {
-    line-height: 1.0;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
   }
   h2 {
+    letter-spacing: -0.03em;
     line-height: 1.06;
   }
   p {
@@ -120,6 +123,14 @@
   font-size: clamp(2.3rem, 1.5rem + 3.4vw, 3.9rem);
   line-height: 1.04;
   letter-spacing: -0.012em;
+  font-weight: 400;
+}
+/* Section heads inside a page, below the masthead. */
+.display-md {
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 1.2rem + 1.6vw, 2.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   font-weight: 400;
 }
 /* For the one or two places a line should lean — used sparingly, as emphasis

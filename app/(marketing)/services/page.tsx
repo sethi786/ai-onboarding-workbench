@@ -73,7 +73,7 @@ export default function ServicesPage() {
           <Reveal>
             <div>
               <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-electric">Outcomes</span>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+              <h2 className="display-md mt-3">
                 Onboard AI boldly — and safely
               </h2>
               <p className="mt-4 max-w-md text-muted-foreground">

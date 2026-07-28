@@ -94,7 +94,7 @@ export default function AboutPage() {
       <section className="mx-auto max-w-3xl px-5 py-20 sm:px-8">
         <Reveal>
           <div className="rounded-2xl border border-border bg-card p-8">
-            <h2 className="text-xl font-semibold tracking-tight">Where we are today</h2>
+            <h2 className="display-md">Where we are today</h2>
             <p className="mt-4 text-[15.5px] leading-relaxed text-muted-foreground">
               Aegis is early. The readiness engine, the twenty review lenses, the evidence factory,
               and the approval workflow all work today. We’re building in the open with early users

@@ -97,7 +97,7 @@ export default function SecurityPage() {
         {/* Compliance posture — honest */}
         <div className="mt-14 grid gap-8 rounded-2xl border border-border bg-surface p-8 sm:p-10 lg:grid-cols-[1fr_1fr]">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Compliance posture</h2>
+            <h2 className="display-md">Compliance posture</h2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
               Aegis is built around the controls in SOC 2, ISO 27001, NIST AI RMF, and common privacy
               regimes — it’s the subject matter of the product. We’re transparent about where we are:

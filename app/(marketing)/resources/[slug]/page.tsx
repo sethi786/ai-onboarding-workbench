@@ -43,7 +43,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
               <Clock className="h-3 w-3" /> {g.minutes} min read
             </span>
           </div>
-          <h1 className="mt-4 text-4xl font-semibold tracking-[-0.03em] sm:text-5xl sm:leading-[1.05]">
+          <h1 className="display-lg mt-4">
             {g.title}
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground sm:text-xl">{g.dek}</p>
@@ -62,7 +62,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
 
         {g.sections.map((s) => (
           <section key={s.h} className="mt-14">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-[28px]">{s.h}</h2>
+            <h2 className="display-md">{s.h}</h2>
 
             {s.body && (
               <div className="mt-5 space-y-4 text-[17px] leading-[1.75] text-foreground/85">

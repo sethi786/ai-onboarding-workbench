@@ -4,6 +4,7 @@ import { Gauge, Layers, FileCheck2, GitBranch, Boxes, LayoutDashboard, ArrowRigh
 import { PageHero } from '@/components/marketing/PageHero';
 import { Reveal } from '@/components/motion/Reveal';
 import { ProductPreview } from '@/components/marketing/ProductPreview';
+import { HowItWorks, ReviewerQuestions } from '@/components/marketing/LandingSections';
 
 export const metadata: Metadata = {
   title: 'Platform',
@@ -85,27 +86,27 @@ export default function PlatformPage() {
         <div className="space-y-6">
           {MODULES.map((m, i) => (
             <Reveal key={m.id} index={i % 2}>
+              {/* Ruled sections rather than icon-chip cards — see the note in
+                  LandingSections.FeatureGrid on why that pattern went. */}
               <div
                 id={m.id}
-                className="grid scroll-mt-24 gap-8 rounded-2xl border border-border bg-card p-8 sm:p-10 lg:grid-cols-[1.1fr_1fr] lg:items-center"
+                className="grid scroll-mt-24 gap-8 border-t border-foreground/15 pt-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-14"
               >
                 <div>
-                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-electric/10">
-                    <m.icon className="h-5 w-5 text-electric" />
-                  </div>
-                  <span className="mt-5 block text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
-                    {m.eyebrow}
-                  </span>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-[28px]">{m.title}</h2>
-                  <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">{m.body}</p>
+                  <div className="font-mono text-[13px] text-muted-foreground">{m.eyebrow}</div>
+                  <h2 className="mt-3 font-[family-name:var(--font-display)] text-[30px] font-normal leading-[1.08] tracking-[-0.01em] sm:text-[36px]">
+                    {m.title}
+                  </h2>
+                  <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
+                    {m.body}
+                  </p>
                 </div>
-                <ul className="grid gap-3">
+                <ul className="self-center">
                   {m.points.map((p) => (
                     <li
                       key={p}
-                      className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3.5 text-[14.5px] font-medium"
+                      className="border-b border-border py-2.5 text-[14.5px] first:border-t"
                     >
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-electric" />
                       {p}
                     </li>
                   ))}
@@ -115,10 +116,14 @@ export default function PlatformPage() {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-wrap items-center justify-between gap-6 rounded-2xl bg-ink px-8 py-10 sm:px-10">
+        <div className="mt-16 flex flex-wrap items-center justify-between gap-6 rounded-2xl bg-ink px-8 py-10 sm:px-10">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-white">See it run on your stack</h2>
-            <p className="mt-2 text-white/65">Start free, or watch the readiness engine score a live example.</p>
+            <h2 className="font-[family-name:var(--font-display)] text-[30px] font-normal leading-tight text-white">
+              See it run on your stack
+            </h2>
+            <p className="mt-2 text-white/65">
+              Start free, or scope a review for one of your own tools first.
+            </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -128,14 +133,17 @@ export default function PlatformPage() {
               Start free <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/#demo"
+              href="/scope"
               className="inline-flex h-12 items-center rounded-full border border-white/20 px-7 text-[15px] font-medium text-white transition-colors hover:bg-white/10"
             >
-              Try the live demo
+              Scope a review, free
             </Link>
           </div>
         </div>
       </section>
+
+      <HowItWorks />
+      <ReviewerQuestions />
     </>
   );
 }

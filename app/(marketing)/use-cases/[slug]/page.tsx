@@ -47,7 +47,7 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
       {/* What it costs today */}
       <section className="mx-auto max-w-4xl px-5 py-20 sm:px-8">
         <Reveal>
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">What it costs you today</h2>
+          <h2 className="display-md">What it costs you today</h2>
           <ul className="mt-8 space-y-3">
             {p.costs.map((c) => (
               <li
@@ -91,7 +91,7 @@ export default async function UseCasePage({ params }: { params: Promise<{ slug: 
         <div className="grid gap-10 lg:grid-cols-2">
           <Reveal>
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight">What you walk away with</h2>
+              <h2 className="display-md">What you walk away with</h2>
               <ul className="mt-6 space-y-3">
                 {p.deliverables.map((d) => (
                   <li key={d} className="flex items-start gap-3 text-[15px] leading-relaxed">

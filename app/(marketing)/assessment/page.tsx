@@ -38,7 +38,7 @@ export default function AssessmentPage() {
           ))}
         </div>
         <div className="mt-14 rounded-2xl border border-border bg-muted/40 p-10 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">See your readiness score in minutes</h2>
+          <h2 className="display-md">See your readiness score in minutes</h2>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
             Instantiate a prefilled AI tool or start from scratch, then walk each lens.
           </p>
