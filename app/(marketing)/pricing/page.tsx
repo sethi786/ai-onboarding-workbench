@@ -6,18 +6,22 @@ import { Pricing, FAQ } from '@/components/marketing/LandingSections';
 
 export const metadata: Metadata = {
   title: 'Pricing',
-  description: 'Start free. Upgrade when your tool portfolio grows. Simple, transparent plans.',
+  description: 'Take one tool all the way through, free — evidence packs and branded review document included. Upgrade when your portfolio grows.',
 };
 
+// Mirrors lib/plans.ts exactly. When these disagree, the marketing page is
+// selling something the product refuses to do — the worst kind of bug to ship.
 const MATRIX: { feature: string; starter: boolean | string; team: boolean | string; ent: boolean | string }[] = [
   { feature: 'Review lenses', starter: 'All 20', team: 'All 20', ent: 'All 20 + custom' },
-  { feature: 'Active evaluations', starter: '3', team: 'Unlimited', ent: 'Unlimited' },
+  { feature: 'Active evaluations', starter: '1', team: 'Unlimited', ent: 'Unlimited' },
+  { feature: 'Seats', starter: '3', team: '25', ent: 'Unlimited' },
   { feature: 'Readiness scoring & risk grade', starter: true, team: true, ent: true },
-  { feature: 'Evidence Factory (draft packs)', starter: 'Preview', team: true, ent: true },
-  { feature: 'Prefilled tool library', starter: false, team: true, ent: true },
-  { feature: 'Workflow & approvals', starter: false, team: true, ent: true },
-  { feature: 'Multi-tenant workspaces & roles', starter: false, team: true, ent: true },
-  { feature: 'Exports (PDF / data)', starter: 'Local', team: true, ent: true },
+  { feature: 'Prefilled tool library', starter: true, team: true, ent: true },
+  { feature: 'Evidence packs', starter: true, team: true, ent: true },
+  { feature: 'Branded review document & exports', starter: true, team: true, ent: true },
+  { feature: 'Generated diagrams', starter: true, team: true, ent: true },
+  { feature: 'Workflow & approvals', starter: true, team: true, ent: true },
+  { feature: 'Multiple workspaces', starter: false, team: true, ent: true },
   { feature: 'SSO / SCIM', starter: false, team: false, ent: true },
   { feature: 'Custom lenses & templates', starter: false, team: false, ent: true },
   { feature: 'Audit & retention controls', starter: false, team: false, ent: true },
@@ -35,7 +39,7 @@ export default function PricingPage() {
       <PageHero
         eyebrow="Pricing"
         title="Start free. Grow when you do."
-        subtitle="Governance rigor for a two-person startup up to a Fortune 500 review board. Pick the plan that matches your tool footprint."
+        subtitle="Your first tool goes all the way through on the free plan — library, evidence packs, diagrams, and the branded review document. Pay when you have a portfolio, not a pilot."
       />
 
       <Pricing />

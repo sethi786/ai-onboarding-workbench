@@ -172,9 +172,9 @@ export function ReviewerQuestions() {
 
 /* ------------------------------------------------------------------- Pricing */
 const PLANS = [
-  { name: 'Starter', price: '$0', per: 'free', desc: 'For individuals evaluating a tool or two.', cta: 'Start free', highlight: false, features: ['1 workspace', 'Up to 3 evaluations', 'All 20 review lenses', 'Evidence Factory', 'Local exports'] },
-  { name: 'Team', price: '$499', per: '/mo', desc: 'For AI program & governance teams.', cta: 'Start free trial', highlight: true, features: ['Unlimited evaluations', 'Roles & multi-tenant workspaces', 'Prefilled tool library', 'Go/No-Go packs & approvals', 'Priority support'] },
-  { name: 'Enterprise', price: 'Custom', per: '', desc: 'For regulated orgs at scale.', cta: 'Talk to us', highlight: false, features: ['SSO / SCIM', 'Audit & retention controls', 'Custom lenses & templates', 'Dedicated environment', 'Solution engineering'] },
+  { name: 'Starter', price: '$0', per: 'free', desc: 'Take one tool all the way through.', cta: 'Start free', highlight: false, features: ['1 evaluation, start to finish', '3 seats — bring your reviewers', 'Prefilled tool library', 'Evidence packs & branded review document', 'Diagrams, workflow, and approvals'] },
+  { name: 'Team', price: '$499', per: '/mo', desc: 'For everything after the first one.', cta: 'Start free trial', highlight: true, features: ['Unlimited evaluations', '25 seats and role-based access', 'Multiple workspaces', 'Full adoption history for audits', 'Priority support'] },
+  { name: 'Enterprise', price: 'Custom', per: '', desc: 'For regulated orgs at scale.', cta: 'Talk to us', highlight: false, features: ['SSO / SCIM', 'Custom lenses & templates', 'Audit & retention controls', 'Dedicated environment', 'Solution engineering'] },
 ];
 
 export function Pricing() {

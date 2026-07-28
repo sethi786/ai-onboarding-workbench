@@ -34,10 +34,18 @@ describe('toPlanId', () => {
 });
 
 describe('hasFeature', () => {
-  it('locks paid features on free', () => {
-    expect(hasFeature('free', 'evidenceFactory')).toBe(false);
-    expect(hasFeature('free', 'exports')).toBe(false);
-    expect(hasFeature('free', 'toolLibrary')).toBe(false);
+  it('lets a free workspace finish one review end to end', () => {
+    // Starter is limited by volume, not capability. A trial that can't produce
+    // the finished pack demonstrates the cost of governance and hides the value.
+    expect(hasFeature('free', 'toolLibrary')).toBe(true);
+    expect(hasFeature('free', 'evidenceFactory')).toBe(true);
+    expect(hasFeature('free', 'exports')).toBe(true);
+    expect(hasFeature('free', 'approvals')).toBe(true);
+  });
+
+  it('still reserves the org-scale features', () => {
+    expect(hasFeature('free', 'sso')).toBe(false);
+    expect(hasFeature('free', 'customLenses')).toBe(false);
   });
 
   it('includes workflow on every plan', () => {
@@ -60,20 +68,22 @@ describe('hasFeature', () => {
   });
 
   it('treats an unknown plan as free', () => {
-    expect(hasFeature('bogus', 'exports')).toBe(false);
+    // Fails closed on the features that actually cost money to honour.
+    expect(hasFeature('bogus', 'sso')).toBe(false);
+    expect(hasFeature('bogus', 'customLenses')).toBe(false);
   });
 });
 
 describe('evaluationQuota', () => {
-  it('allows creation below the free limit', () => {
-    const q = evaluationQuota('free', 2);
+  it('allows the one free evaluation', () => {
+    const q = evaluationQuota('free', 0);
     expect(q.allowed).toBe(true);
-    expect(q.limit).toBe(3);
+    expect(q.limit).toBe(1);
     expect(q.remaining).toBe(1);
   });
 
-  it('blocks creation at the limit', () => {
-    const q = evaluationQuota('free', 3);
+  it('blocks a second evaluation on free', () => {
+    const q = evaluationQuota('free', 1);
     expect(q.allowed).toBe(false);
     expect(q.remaining).toBe(0);
   });
@@ -93,9 +103,11 @@ describe('evaluationQuota', () => {
 });
 
 describe('memberQuota', () => {
-  it('caps free workspaces at a single seat', () => {
-    expect(memberQuota('free', 1).allowed).toBe(false);
-    expect(memberQuota('free', 0).allowed).toBe(true);
+  it('gives a free workspace enough seats to be a review, not a solo exercise', () => {
+    // Governance is multi-team by definition; a one-seat governance tool
+    // contradicts its own premise.
+    expect(memberQuota('free', 2).allowed).toBe(true);
+    expect(memberQuota('free', 3).allowed).toBe(false);
   });
 
   it('allows many seats on team and unlimited on enterprise', () => {

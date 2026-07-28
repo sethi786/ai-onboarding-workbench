@@ -31,19 +31,29 @@ export interface PlanDefinition {
 }
 
 export const PLANS: Record<PlanId, PlanDefinition> = {
+  /**
+   * Starter exists to let somebody finish one review end to end.
+   *
+   * It used to grant one capability of six: a trial user filled the intake by
+   * hand, worked through the whole control set alone, and received nothing at
+   * the end. That demonstrates the cost of governance and hides every reason to
+   * pay for it. The limit is now volume and collaboration — one tool, three
+   * people — not capability. Somebody who has held a finished, branded review
+   * pack knows what they're buying; somebody who bounced off a paywall does not.
+   */
   free: {
     id: 'free',
     name: 'Starter',
     price: '$0',
-    blurb: 'For individuals evaluating a tool or two.',
-    maxEvaluations: 3,
-    maxMembers: 1,
+    blurb: 'Take one tool all the way through, free.',
+    maxEvaluations: 1,
+    maxMembers: 3,
     features: {
-      evidenceFactory: false,
-      exports: false,
-      toolLibrary: false,
+      evidenceFactory: true,
+      exports: true,
+      toolLibrary: true,
       workflow: true,
-      approvals: false,
+      approvals: true,
       customLenses: false,
       sso: false,
     },
