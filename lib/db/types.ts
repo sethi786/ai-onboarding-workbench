@@ -19,6 +19,9 @@ export interface OrganizationRow {
   brand_color: string | null;
   confidentiality_label: string | null;
   document_footer: string | null;
+  // Governance controls (0008, 0009).
+  ai_enabled: boolean;
+  require_separation_of_duties: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { BrandingForm } from '@/components/portal/BrandingForm';
 import { AiSettingsForm } from '@/components/portal/AiSettingsForm';
 import { aiPolicyFor } from '@/lib/ai/governance';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function OrgSettingsPage({
   params,
@@ -15,6 +16,11 @@ export default async function OrgSettingsPage({
   const { org, role } = await requireMembership(orgSlug);
   const brand = resolveBranding(org);
   const aiPolicy = await aiPolicyFor(org.id);
+  const supabase = await createClient();
+  const { count: memberCount } = await supabase
+    .from('memberships')
+    .select('id', { count: 'exact', head: true })
+    .eq('org_id', org.id);
 
   return (
     <div className="space-y-4">
@@ -26,6 +32,8 @@ export default async function OrgSettingsPage({
           enabled={aiPolicy.enabled}
           configured={aiPolicy.configured}
           canManage={canManageOrg(role)}
+          separationOfDuties={org.require_separation_of_duties === true}
+          memberCount={memberCount ?? 0}
         />
       </div>
 

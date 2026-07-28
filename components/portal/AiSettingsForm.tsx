@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
-import { Sparkles } from 'lucide-react';
-import { updateAiSettings } from '@/lib/actions/organizations';
+import { Sparkles, UserCheck } from 'lucide-react';
+import { updateAiSettings, updateSeparationOfDuties } from '@/lib/actions/organizations';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -19,15 +19,21 @@ export function AiSettingsForm({
   enabled,
   configured,
   canManage,
+  separationOfDuties,
+  memberCount,
 }: {
   orgId: string;
   orgSlug: string;
   enabled: boolean;
   configured: boolean;
   canManage: boolean;
+  separationOfDuties: boolean;
+  memberCount: number;
 }) {
   const [on, setOn] = useState(enabled);
+  const [sod, setSod] = useState(separationOfDuties);
   const [pending, startTransition] = useTransition();
+  const [sodPending, startSod] = useTransition();
 
   return (
     <div>
@@ -73,6 +79,43 @@ export function AiSettingsForm({
           Only owners and admins can change this.
         </p>
       )}
+
+      <div className="mt-6 flex flex-wrap items-start gap-3 border-t border-border pt-6">
+        <UserCheck className="mt-0.5 h-4 w-4 shrink-0 text-electric" />
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold">Separation of duties</h3>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            When on, the reviewer who last edited an assessment cannot record its decision — someone
+            else has to sign it off. Enforced by a database trigger, so it holds even for a caller
+            going straight at the API.
+          </p>
+        </div>
+        <Button
+          variant={sod ? 'outline' : 'primary'}
+          disabled={!canManage || sodPending || (memberCount < 2 && !sod)}
+          onClick={() =>
+            startSod(async () => {
+              const next = !sod;
+              const res = await updateSeparationOfDuties(orgId, orgSlug, next);
+              if (res?.error) {
+                toast.error(res.error);
+                return;
+              }
+              setSod(next);
+              toast.success(next ? 'Separation of duties required' : 'Separation of duties relaxed');
+            })
+          }
+        >
+          {sodPending ? 'Saving…' : sod ? 'Turn off' : 'Require it'}
+        </Button>
+
+        {memberCount < 2 && !sod && (
+          <p className="w-full text-xs text-muted-foreground">
+            This workspace has one member, so nobody could sign off anybody else&rsquo;s work.
+            Invite a second reviewer first.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

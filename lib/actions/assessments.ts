@@ -33,7 +33,18 @@ export async function updateAssessment(
       { onConflict: 'evaluation_id,team_id' },
     )
     .select('id');
-  if (error) return { error: error.message };
+  if (error) {
+    // The separation-of-duties trigger raises a check violation. Surfacing the
+    // raw database text here would read as a bug rather than a control doing
+    // its job.
+    if (error.message.includes('Separation of duties')) {
+      return {
+        error:
+          'You edited this assessment, so somebody else has to record its decision. That is separation of duties — an owner or admin can change it in Settings → Organization.',
+      };
+    }
+    return { error: error.message };
+  }
   if (!data || data.length === 0) {
     return { error: 'You don\u2019t have permission to edit this evaluation.' };
   }

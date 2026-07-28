@@ -83,6 +83,8 @@ The **marketing site runs with no backend**. The portal requires Supabase (below
    supabase/migrations/0006_accept_invitation.sql
    supabase/migrations/0007_branding.sql
    supabase/migrations/0008_audit_and_ai_governance.sql
+   supabase/migrations/0009_separation_of_duties.sql
+   supabase/migrations/0010_control_assurance.sql
    ```
 4. In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your prod
    URL) as a redirect URL.
@@ -138,6 +140,29 @@ AI is governed per workspace at **Settings → Organization**:
 
 Everything except the assistant works with AI switched off — scoring, scope,
 diagrams, documents, and the regulatory mapping never call a model.
+
+## Separation of duties
+
+With `require_separation_of_duties` on, the reviewer who last edited an
+assessment cannot record its decision. Enforced by a **database trigger**, not
+by the server action — an action-level check is a suggestion, since anything
+holding a valid token can talk to PostgREST directly. Off by default because a
+solo workspace cannot satisfy it; the settings page recommends turning it on as
+soon as a second member joins.
+
+## Control assurance
+
+**Settings → Our controls** runs the platform's own controls and labels each by
+how it is known:
+
+- **verified** — read from the database catalog at page load (RLS on every
+  tenant table, audit trail has no amend policy, the duties trigger exists,
+  tenant resolution is privilege-isolated)
+- **configured** — read from this workspace's live settings
+- **attested** — an operational statement that cannot be machine-checked here
+
+That distinction is the point. Presenting all three as identical green ticks
+would be the dishonesty the product exists to catch.
 
 ## Multi-tenancy & security
 

@@ -142,6 +142,36 @@ export async function inviteMember(
  * exactly the ones who buy a tool like this. Enforced server-side in
  * lib/ai/governance.ts, not merely hidden in the UI.
  */
+export async function updateSeparationOfDuties(
+  orgId: string,
+  orgSlug: string,
+  required: boolean,
+): Promise<ActionResult> {
+  await requireUser();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('organizations')
+    .update({ require_separation_of_duties: required })
+    .eq('id', orgId)
+    .select('id');
+  if (error) return { error: error.message };
+  if (!data || data.length === 0) {
+    return { error: 'You don\u2019t have permission to change this workspace\u2019s controls.' };
+  }
+
+  await recordAudit({
+    orgId,
+    action: 'settings.updated',
+    summary: `Separation of duties ${required ? 'required' : 'no longer required'} on decisions.`,
+    subjectType: 'organization',
+    subjectId: orgId,
+    metadata: { requireSeparationOfDuties: required },
+  });
+
+  revalidatePath(`/portal/${orgSlug}`, 'layout');
+  return {};
+}
+
 export async function updateAiSettings(
   orgId: string,
   orgSlug: string,
