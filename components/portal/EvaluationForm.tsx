@@ -11,6 +11,8 @@ import {
   DATA_TYPE_OPTIONS,
 } from '@/workbench/data/constants';
 import { createEvaluation, updateEvaluation } from '@/lib/actions/evaluations';
+import { AiIntakeAssist } from '@/components/portal/AiIntakeAssist';
+import type { DraftedIntake } from '@/lib/ai/assist';
 import { Button } from '@/components/ui/button';
 import { Input, Label, Select, Textarea } from '@/components/ui/input';
 
@@ -48,11 +50,13 @@ export function EvaluationForm({
   orgSlug,
   evalId,
   initial,
+  aiAvailable = false,
 }: {
   orgId: string;
   orgSlug: string;
   evalId?: string;
   initial?: Partial<Profile>;
+  aiAvailable?: boolean;
 }) {
   const initialCategory: ToolCategory = initial?.toolCategory ?? 'SaaS application';
 
@@ -105,6 +109,40 @@ export function EvaluationForm({
     });
   }
 
+  /**
+   * Land an AI draft in the form. Category goes through changeCategory so the
+   * project type stays valid, then the drafted flags are re-applied — otherwise
+   * the category defaults would quietly overwrite what was just read from the
+   * description.
+   */
+  function applyDraft(draft: DraftedIntake) {
+    const nextCategory = (TOOL_CATEGORIES as string[]).includes(draft.toolCategory)
+      ? (draft.toolCategory as ToolCategory)
+      : category;
+    const types = PROJECT_TYPES_BY_CATEGORY[nextCategory];
+    setD((prev) => ({
+      ...prev,
+      ...CATEGORY_DEFAULTS[nextCategory],
+      toolCategory: nextCategory,
+      toolType: prev.toolType && types.includes(prev.toolType) ? prev.toolType : types[0],
+      name: draft.name || prev.name,
+      platform: draft.platform || prev.platform,
+      useCase: draft.useCase || prev.useCase,
+      targetUsers: draft.targetUsers || prev.targetUsers,
+      environment: draft.environment as Profile['environment'],
+      dataClassification: draft.dataClassification as Profile['dataClassification'],
+      dataTypes: draft.dataTypes,
+      agentEnabled: draft.agentEnabled,
+      connectorEnabled: draft.connectorEnabled,
+      ragEnabled: draft.ragEnabled,
+      externalVendor: draft.externalVendor,
+      selfHosted: draft.selfHosted,
+      pii: draft.pii,
+      clientData: draft.clientData,
+      autonomousActions: draft.autonomousActions,
+    }));
+  }
+
   const toggleDataType = (dt: string) =>
     set({
       dataTypes: d.dataTypes?.includes(dt)
@@ -136,6 +174,10 @@ export function EvaluationForm({
         <div className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
           {error}
         </div>
+      )}
+
+      {!evalId && (
+        <AiIntakeAssist orgId={orgId} available={aiAvailable} onApply={applyDraft} />
       )}
 
       <Section title="What are you adopting?">
@@ -171,11 +213,19 @@ export function EvaluationForm({
             <Input value={d.name} onChange={(e) => set({ name: e.target.value })} />
           </Field>
           <Field label="Vendor / platform">
-            <Select value={d.platform} onChange={(e) => set({ platform: e.target.value })}>
+            {/* Free text with suggestions: the preset list only covers AI
+                platforms, and this reviews any tool. */}
+            <Input
+              value={d.platform}
+              list="vendor-suggestions"
+              placeholder="e.g. Salesforce, Northwind Software, internal"
+              onChange={(e) => set({ platform: e.target.value })}
+            />
+            <datalist id="vendor-suggestions">
               {PLATFORMS.map((p) => (
-                <option key={p}>{p}</option>
+                <option key={p} value={p} />
               ))}
-            </Select>
+            </datalist>
           </Field>
           <Field label="Type">
             <Select

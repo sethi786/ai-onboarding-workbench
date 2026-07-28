@@ -1,9 +1,13 @@
 # Aegis
 
-**Get AI tools cleared for the enterprise.** Aegis is a premium, multi-tenant B2B SaaS for
-onboarding AI tools, agents, RAG apps, and connectors through enterprise review. Teams self-evaluate
-against **20 enterprise review lenses**, track controls/evidence/blockers, get a readiness score, risk
-grade, and go/no-go recommendation, and generate draft evidence packs — **before** formal review.
+**Govern every tool you adopt.** Aegis is a multi-tenant B2B SaaS for taking a tool — SaaS, cloud
+service, on-premise software, AI system, or internal build — through enterprise review. Teams
+self-evaluate against **20 review lenses**, track controls, evidence, and blockers, get a readiness
+score, risk grade, and go/no-go recommendation, and generate branded evidence packs, diagrams, and a
+print-ready review document — **before** formal review.
+
+Review scope is derived, not assumed: AI-specific lenses are skipped for tools with no AI
+capability, and build/hardening lenses are skipped for software you neither build nor host.
 
 > Aegis is a self-evaluation and readiness aid. It does not replace official enterprise approval
 > workflows. Final decisions follow your organization's formal governance processes.
@@ -40,6 +44,9 @@ lib/supabase/*    @supabase/ssr server + browser + middleware + admin (service-r
 lib/auth/*        requireUser, requireMembership
 lib/db/*          typed schema, mappers (row ↔ domain), queries, scoreEvaluation
 lib/actions/*     server actions (replace the old Zustand store)
+lib/ai/*          Anthropic client, prompts, and the four assist functions (server only)
+lib/branding.ts   workspace branding resolution + validation
+workbench/diagrams/*  generated SVG + Mermaid diagrams (pure, no dependencies)
 components/*       brand, ui primitives, marketing, portal, auth
 data/tool-templates.ts   prefilled library
 supabase/migrations/*    schema, functions, triggers, RLS
@@ -72,6 +79,9 @@ The **marketing site runs with no backend**. The portal requires Supabase (below
    supabase/migrations/0002_functions.sql
    supabase/migrations/0003_triggers.sql
    supabase/migrations/0004_rls.sql
+   supabase/migrations/0005_tool_category.sql
+   supabase/migrations/0006_accept_invitation.sql
+   supabase/migrations/0007_branding.sql
    ```
 4. In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your prod
    URL) as a redirect URL.
@@ -81,6 +91,32 @@ The **marketing site runs with no backend**. The portal requires Supabase (below
 
 > To regenerate DB types after schema changes with the Supabase CLI: `npm run gen:types` (overwrites
 > `lib/db/types.ts`, currently hand-authored to match the migrations).
+
+## AI assistance (optional)
+
+Set `ANTHROPIC_API_KEY` and the assistant appears at four points in the workflow:
+
+| Where | What it does |
+|---|---|
+| New evaluation | Reads a pasted vendor page or request email and fills the intake form, with its reasoning and an explicit list of what it couldn't determine |
+| Each review lens | Drafts that team's narrative and residual risk, flags which controls the intake data supports, and lists the questions to put to the vendor |
+| Exports | Writes the executive summary that opens the review pack |
+| Exports | Answers a reviewer's or customer's question from the recorded assessment, labelled with how well the assessment actually supports it |
+
+Nothing is applied silently — every draft is reviewed and inserted by a human, and control
+suggestions are shown as claims to verify rather than ticked for you. **Leave the key unset and the
+product works exactly as before**: each AI affordance renders an explicit "unavailable" state.
+
+## Branding & document generation
+
+Workspace branding (legal name, logo, colour, handling marking, footer) is set in
+**Settings → Organization** and stamped onto every artifact — the markdown evidence packs, the
+exports, and the print-ready HTML review document, which the browser turns into a PDF with no PDF
+dependency.
+
+Four diagrams are generated from the evaluation's own answers (data flow, trust boundary, approval
+path, readiness heatmap) as inline SVG and as Mermaid source. Because they're derived rather than
+drawn, they can't drift from the assessment they describe.
 
 ## Multi-tenancy & security
 
@@ -93,5 +129,6 @@ The **marketing site runs with no backend**. The portal requires Supabase (below
 
 ## Roadmap (post-foundation)
 
-Stripe billing (schema seam already present: `organizations.stripe_customer_id` / `plan`), invitation
-acceptance flow, richer analytics, and a larger prefilled tool library.
+Stripe billing (schema seam already present: `organizations.stripe_customer_id` / `plan`),
+transactional email for invitations (the accept flow works today; the link is handed to the inviter
+to send), richer analytics, and a larger prefilled tool library.

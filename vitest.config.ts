@@ -11,6 +11,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./', import.meta.url)),
+      // `server-only` throws outside a Next.js server bundle. It's a build-time
+      // guard, not behaviour, so tests substitute a no-op to reach the modules
+      // it protects.
+      'server-only': fileURLToPath(new URL('./test/server-only-stub.ts', import.meta.url)),
     },
   },
 });

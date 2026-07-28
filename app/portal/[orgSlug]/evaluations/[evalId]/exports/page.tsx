@@ -15,6 +15,8 @@ import { ExportsClient } from '@/components/portal/ExportsClient';
 import { toBrandedHtml } from '@/workbench/export/toBrandedHtml';
 import { buildDiagrams } from '@/workbench/diagrams';
 import { BrandedDocumentButton } from '@/components/portal/BrandedDocumentButton';
+import { AiReviewAssist } from '@/components/portal/AiReviewAssist';
+import { isAiConfigured } from '@/lib/ai/client';
 import { resolveBranding, isBranded } from '@/lib/branding';
 import { SITE } from '@/lib/site';
 import Link from 'next/link';
@@ -107,6 +109,8 @@ export default async function ExportsPage({
         </p>
         <ExportsClient bundle={bundle} />
       </div>
+
+      <AiReviewAssist evalId={evalId} available={isAiConfigured()} />
 
       <div>
         <h2 className="mb-1 font-semibold">Saved reports</h2>

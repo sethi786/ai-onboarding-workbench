@@ -9,6 +9,7 @@ import {
   addEvidenceLink,
   removeEvidenceLink,
 } from '@/lib/actions/assessments';
+import { AiLensAssist } from '@/components/portal/AiLensAssist';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input, Label, Select, Textarea } from '@/components/ui/input';
@@ -25,9 +26,10 @@ interface Props {
   orgSlug: string;
   canEdit: boolean;
   defaultOpen?: boolean;
+  aiAvailable?: boolean;
 }
 
-export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, canEdit, defaultOpen }: Props) {
+export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, canEdit, defaultOpen, aiAvailable }: Props) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   const [a, setA] = useState(assessment);
   const [, startTransition] = useTransition();
@@ -194,6 +196,25 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
                   {DECISION_OPTIONS.map((d) => <option key={d}>{d}</option>)}
                 </Select>
               </div>
+            </div>
+
+            <div className="mt-3">
+              <AiLensAssist
+                lens={lens}
+                evalId={evalId}
+                canEdit={canEdit}
+                available={Boolean(aiAvailable)}
+                // Append rather than replace: a reviewer who has already written
+                // something should never lose it to a draft.
+                onInsertNotes={(text) =>
+                  patchNotesDebounced({ notes: a.notes ? `${a.notes}\n\n${text}` : text })
+                }
+                onInsertResidualRisk={(text) =>
+                  patchNotesDebounced({
+                    residualRisk: a.residualRisk ? `${a.residualRisk}\n\n${text}` : text,
+                  })
+                }
+              />
             </div>
 
             <div className="mt-3 space-y-1.5">
