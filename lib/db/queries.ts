@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 import type { TeamAssessment, TeamId, WorkflowStage } from '@/workbench/types';
+import type { PriorAssessment } from '@/workbench/engine/memory';
 import { rowToProfile, rowToTeamAssessment, rowToWorkflowStage, makeEmptyAssessment } from './mappers';
 import type { EvaluationRow, GeneratedReportRow } from './types';
 
@@ -40,6 +41,45 @@ export async function loadAssessmentMap(
     map[row.team_id as TeamId] = rowToTeamAssessment(row, myLinks);
   }
   return map;
+}
+
+/**
+ * Every finished lens assessment in the workspace, for assessment memory.
+ *
+ * One query rather than per-lens lookups: a workspace with forty evaluations
+ * would otherwise issue hundreds of round trips to render one page. RLS scopes
+ * this to the caller's org, so a workspace can only ever recall its own answers.
+ */
+export async function loadOrgHistory(
+  orgId: string,
+  excludeEvalId?: string,
+): Promise<PriorAssessment[]> {
+  const supabase = await createClient();
+  const [{ data: evaluations }, { data: rows }] = await Promise.all([
+    supabase.from('evaluations').select('*').eq('org_id', orgId),
+    supabase.from('team_assessments').select('*').eq('org_id', orgId),
+  ]);
+
+  const byId = new Map((evaluations ?? []).map((e) => [e.id, e]));
+
+  return (rows ?? [])
+    .filter((r) => r.evaluation_id !== excludeEvalId && byId.has(r.evaluation_id))
+    .map((r) => {
+      const evalRow = byId.get(r.evaluation_id)!;
+      const a = rowToTeamAssessment(r, []);
+      return {
+        evaluationId: r.evaluation_id,
+        toolName: evalRow.name,
+        reviewedAt: r.updated_at ?? evalRow.updated_at,
+        profile: rowToProfile(evalRow),
+        teamId: r.team_id as TeamId,
+        checkedControls: a.checkedControls,
+        checkedEvidence: a.checkedEvidence,
+        notes: a.notes,
+        residualRisk: a.residualRisk,
+        decision: a.decision,
+      };
+    });
 }
 
 export async function getWorkflow(evalId: string): Promise<WorkflowStage[]> {

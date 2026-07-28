@@ -11,6 +11,8 @@ import {
   removeEvidenceLink,
 } from '@/lib/actions/assessments';
 import { AiLensAssist } from '@/components/portal/AiLensAssist';
+import { RecallPanel } from '@/components/portal/RecallPanel';
+import { applyRecall, summarizeRecall, type Recollection } from '@/workbench/engine/memory';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input, Label, Select, Textarea } from '@/components/ui/input';
@@ -30,9 +32,11 @@ interface Props {
   aiAvailable?: boolean;
   /** Needed to work out how deep this team's review goes for this tool. */
   profile: Profile;
+  /** Answers this workspace already gave for comparable tools. */
+  recollections?: Recollection[];
 }
 
-export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, canEdit, defaultOpen, aiAvailable, profile }: Props) {
+export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, canEdit, defaultOpen, aiAvailable, profile, recollections = [] }: Props) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   const [a, setA] = useState(assessment);
   const [, startTransition] = useTransition();
@@ -45,6 +49,12 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
   const evidence = evidenceAtDepth(lens, depth);
   const deferredControls = lens.requiredControls.length - controls.length;
   const deferredEvidence = lens.evidenceRequired.length - evidence.length;
+  // Recall is scoped to what this depth asks for, so a screening review is
+  // never offered answers to questions it isn't asking.
+  const asked = new Set([...controls.map((c) => c.id), ...evidence.map((e) => e.id)]);
+  const inScopeRecall = recollections.filter((r) => asked.has(r.itemId));
+  const recallSummary = summarizeRecall(inScopeRecall);
+
   const controlsDone = controls.filter((c) => a.checkedControls[c.id]).length;
   const evidenceDone = evidence.filter((e) => a.checkedEvidence[e.id]).length;
 
@@ -156,6 +166,9 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
               {controls.map((c) => (
                 <CheckRow key={c.id} checked={!!a.checkedControls[c.id]} onChange={() => doToggle('checkedControls', c.id)} disabled={!canEdit}>
                   {c.label}{c.critical && <CriticalTag />}
+                  {recallSummary.byItem[c.id] && !a.checkedControls[c.id] && (
+                    <RecallHint tool={recallSummary.byItem[c.id].source.toolName} />
+                  )}
                 </CheckRow>
               ))}
             </div>
@@ -172,6 +185,9 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
               ) : evidence.map((e) => (
                 <CheckRow key={e.id} checked={!!a.checkedEvidence[e.id]} onChange={() => doToggle('checkedEvidence', e.id)} disabled={!canEdit}>
                   {e.label}
+                  {recallSummary.byItem[e.id] && !a.checkedEvidence[e.id] && (
+                    <RecallHint tool={recallSummary.byItem[e.id].source.toolName} />
+                  )}
                 </CheckRow>
               ))}
             </div>
@@ -232,6 +248,23 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
                 </Select>
               </div>
             </div>
+
+            {inScopeRecall.length > 0 && (
+              <div className="mt-3">
+                <RecallPanel
+                  lens={lens}
+                  summary={recallSummary}
+                  recollections={inScopeRecall}
+                  canEdit={canEdit}
+                  onApply={async (recs) => {
+                    const { patch: recallPatch, appliedIds } = applyRecall(a, recs);
+                    setA((prev) => ({ ...prev, ...recallPatch }));
+                    await updateAssessment(evalId, orgId, orgSlug, lens.id, recallPatch);
+                    return { applied: appliedIds.length };
+                  }}
+                />
+              </div>
+            )}
 
             <div className="mt-3">
               <AiLensAssist
@@ -337,5 +370,17 @@ function EvidenceLinks({ links, canEdit, onAdd, onRemove }: {
         </div>
       )}
     </div>
+  );
+}
+
+/** Marks a control this workspace has answered before, without answering it. */
+function RecallHint({ tool }: { tool: string }) {
+  return (
+    <span
+      title={`Answered for ${tool} in an earlier review`}
+      className="ml-1.5 whitespace-nowrap rounded bg-trust/12 px-1.5 py-0.5 text-[10px] font-medium text-trust"
+    >
+      seen on {tool}
+    </span>
   );
 }

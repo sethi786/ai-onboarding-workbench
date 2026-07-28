@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { requireMembership } from '@/lib/auth/membership';
-import { getEvaluation, loadAssessmentMap, rowToProfile } from '@/lib/db/queries';
+import { getEvaluation, loadAssessmentMap, rowToProfile, loadOrgHistory } from '@/lib/db/queries';
 import { computeScoreFromMap } from '@/workbench/engine/scoring';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 import {
@@ -14,6 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { canEdit } from '@/lib/rbac';
 import { isAiConfigured } from '@/lib/ai/client';
+import { recallForLens, summarizeRecall } from '@/workbench/engine/memory';
 import { LensCard } from '@/components/portal/LensCard';
 import { DISCLAIMER } from '@/lib/site';
 
@@ -26,7 +27,10 @@ export default async function LensesPage({
   const { org, role } = await requireMembership(orgSlug);
   const row = await getEvaluation(evalId);
   if (!row) notFound();
-  const map = await loadAssessmentMap(evalId);
+  const [map, history] = await Promise.all([
+    loadAssessmentMap(evalId),
+    loadOrgHistory(org.id, evalId),
+  ]);
   const profile = rowToProfile(row);
   const score = computeScoreFromMap(profile, TEAM_LENSES, map);
   const editable = canEdit(role);
@@ -35,6 +39,23 @@ export default async function LensesPage({
   // Lenses that don't apply to this kind of tool are out of scope, not merely
   // optional. Listing them alongside the real work is what makes governance
   // feel like paperwork — a CRM adoption shouldn't show an AI Engineering card.
+  // What this workspace already answered for comparable tools, per lens. One
+  // history load feeds every card — the recall itself is pure and cheap.
+  const recallByLens = Object.fromEntries(
+    TEAM_LENSES.map((lens) => {
+      const depth = reviewDepth(lens, profile);
+      return [
+        lens.id,
+        recallForLens(lens, profile, history, {
+          controlIds: controlsAtDepth(lens, depth).map((c) => c.id),
+          evidenceIds: evidenceAtDepth(lens, depth).map((e) => e.id),
+        }),
+      ];
+    }),
+  );
+  const recalledTotal = Object.values(recallByLens).reduce((n, r) => n + r.length, 0);
+  const recallSources = summarizeRecall(Object.values(recallByLens).flat()).sources;
+
   const applicable = TEAM_LENSES.filter((lens) => isApplicable(lens, profile));
   const outOfScope = TEAM_LENSES.filter((lens) => !isApplicable(lens, profile));
 
@@ -74,6 +95,16 @@ export default async function LensesPage({
           . Depth follows what&rsquo;s at stake — change the environment, data classification, or
           capability flags and this recalculates.
         </p>
+
+        {recalledTotal > 0 && (
+          <p className="mt-3 rounded-md bg-trust/8 px-3 py-2 text-sm">
+            <strong className="text-foreground">{recalledTotal}</strong> of them you have already
+            answered — recalled from{' '}
+            {recallSources.slice(0, 3).map((s) => s.toolName).join(', ')}
+            {recallSources.length > 3 ? ` and ${recallSources.length - 3} more` : ''}. Each one shows
+            its source before you accept it.
+          </p>
+        )}
       </div>
 
       <p className="rounded-md border border-warning/30 bg-warning/10 p-3 text-xs text-[oklch(0.45_0.09_75)]">
@@ -92,6 +123,7 @@ export default async function LensesPage({
           canEdit={editable}
           aiAvailable={aiAvailable}
           profile={profile}
+          recollections={recallByLens[lens.id]}
         />
       ))}
 
