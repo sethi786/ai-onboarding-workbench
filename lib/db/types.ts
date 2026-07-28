@@ -13,6 +13,12 @@ export interface OrganizationRow {
   created_by: string;
   stripe_customer_id: string | null;
   plan: string;
+  // Document branding (migration 0007). Null until the workspace configures it.
+  legal_name: string | null;
+  logo_url: string | null;
+  brand_color: string | null;
+  confidentiality_label: string | null;
+  document_footer: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -1,16 +1,14 @@
 import type { ReportContext } from './reportContext';
+import { headerMeta } from './reportContext';
+import { documentHeaderLines, documentFooterLines } from './documentHeader';
 import { DISCLAIMER } from '../data/constants';
 
 export function toMarkdownReport(ctx: ReportContext): string {
   const { profile, score, teams } = ctx;
   const req = teams.filter((t) => t.required);
 
-  const lines: string[] = [];
-  lines.push('# AI Onboarding Self-Evaluation Report');
-  lines.push('');
+  const lines = documentHeaderLines('Tool Adoption Readiness Report', ctx.brand, headerMeta(ctx));
   lines.push(`> ${DISCLAIMER}`);
-  lines.push('');
-  lines.push(`_Generated: ${ctx.generatedAt}_`);
   lines.push('');
   lines.push('## Profile');
   lines.push('');
@@ -101,5 +99,6 @@ export function toMarkdownReport(ctx: ReportContext): string {
   lines.push('');
   lines.push(`**${score.recommendation}**`);
   lines.push('');
+  lines.push(...documentFooterLines(ctx.brand));
   return lines.join('\n');
 }

@@ -7,6 +7,7 @@ import { requireUser } from '@/lib/auth/require-user';
 import { assertMemberQuota, getOrgPlan } from '@/lib/auth/entitlements';
 import { slugify, randomSuffix } from '@/lib/slug';
 import { SITE } from '@/lib/site';
+import { normalizeHexColor, normalizeLogoUrl } from '@/lib/branding';
 
 export interface ActionResult {
   error?: string;
@@ -25,6 +26,61 @@ export async function createOrganization(formData: FormData): Promise<ActionResu
 
   revalidatePath('/portal');
   redirect(`/portal/${slug}/dashboard`);
+}
+
+/**
+ * Save document branding (owner/admin only, enforced by RLS).
+ *
+ * Colour and logo are normalised here rather than trusted from the form: these
+ * values are embedded into documents that leave the product, so an unparseable
+ * colour or a non-https logo is rejected outright instead of being written and
+ * silently dropped at render time.
+ */
+export async function updateBranding(
+  orgId: string,
+  orgSlug: string,
+  formData: FormData,
+): Promise<ActionResult> {
+  await requireUser();
+
+  const rawColor = String(formData.get('brand_color') ?? '').trim();
+  const color = rawColor ? normalizeHexColor(rawColor) : null;
+  if (rawColor && !color) {
+    return { error: `“${rawColor}” isn’t a valid colour. Use a hex value like #1F5F4E.` };
+  }
+
+  const rawLogo = String(formData.get('logo_url') ?? '').trim();
+  const logo = rawLogo ? normalizeLogoUrl(rawLogo) : null;
+  if (rawLogo && !logo) {
+    return { error: 'The logo must be a full https:// image URL.' };
+  }
+
+  const text = (key: string) => {
+    const v = String(formData.get(key) ?? '').trim();
+    return v || null;
+  };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('organizations')
+    .update({
+      legal_name: text('legal_name'),
+      logo_url: logo,
+      brand_color: color,
+      confidentiality_label: text('confidentiality_label'),
+      document_footer: text('document_footer'),
+    })
+    .eq('id', orgId)
+    .select('id');
+  if (error) return { error: error.message };
+  // An update blocked by RLS returns success with zero rows, so without this a
+  // member would see "Branding saved" while nothing changed.
+  if (!data || data.length === 0) {
+    return { error: 'You don’t have permission to change this workspace’s branding.' };
+  }
+
+  revalidatePath(`/portal/${orgSlug}`, 'layout');
+  return {};
 }
 
 /**

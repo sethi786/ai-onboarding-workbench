@@ -1,20 +1,14 @@
 import type { ReportContext } from './reportContext';
-import { DRAFT_BANNER } from '../data/constants';
+import { headerMeta } from './reportContext';
+import { documentHeaderLines, documentFooterLines } from './documentHeader';
 
 export function toGoNoGoReport(ctx: ReportContext): string {
-  const { profile, score, teams } = ctx;
+  const { score, teams } = ctx;
   const req = teams.filter((t) => t.required);
   const blocked = req.filter((t) => t.hasCriticalBlocker || t.activeBlockerLabels.length > 0);
   const notReady = req.filter((t) => t.normalized < 70 && !t.hasCriticalBlocker);
 
-  const lines: string[] = [];
-  lines.push('# Go / No-Go Decision Pack');
-  lines.push('');
-  lines.push(`> ${DRAFT_BANNER}`);
-  lines.push('');
-  lines.push(`**Profile:** ${profile.name} — ${profile.platform} (${profile.environment})`);
-  lines.push(`**Generated:** ${ctx.generatedAt}`);
-  lines.push('');
+  const lines = documentHeaderLines('Go / No-Go Decision Pack', ctx.brand, headerMeta(ctx));
   lines.push('## Recommendation');
   lines.push('');
   lines.push(`# ${score.recommendation}`);
@@ -55,5 +49,6 @@ export function toGoNoGoReport(ctx: ReportContext): string {
     lines.push(`| ${t.lens.title} | ${t.assessment.decision} | ${t.normalized}% |`);
   }
   lines.push('');
+  lines.push(...documentFooterLines(ctx.brand));
   return lines.join('\n');
 }

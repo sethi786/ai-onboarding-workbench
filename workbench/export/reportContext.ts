@@ -1,4 +1,11 @@
-import type { Profile, ScoreResult, TeamAssessment, TeamId, TeamLens } from '../types';
+import type {
+  DocumentBrand,
+  Profile,
+  ScoreResult,
+  TeamAssessment,
+  TeamId,
+  TeamLens,
+} from '../types';
 import { TEAM_LENSES, LENS_BY_ID } from '../data/teamLenses';
 import { DRAFT_BANNER } from '../data/constants';
 
@@ -22,6 +29,8 @@ export interface ReportContext {
   score: ScoreResult;
   teams: TeamReportRow[];
   generatedAt: string;
+  /** Undefined only in contexts with no workspace, e.g. the public landing demo. */
+  brand?: DocumentBrand;
 }
 
 export function buildReportContext(
@@ -29,6 +38,7 @@ export function buildReportContext(
   score: ScoreResult,
   getAssessment: (teamId: TeamId) => TeamAssessment,
   generatedAt: string,
+  brand?: DocumentBrand,
 ): ReportContext {
   const teams: TeamReportRow[] = TEAM_LENSES.map((lens) => {
     const a = getAssessment(lens.id);
@@ -55,7 +65,18 @@ export function buildReportContext(
     };
   });
 
-  return { profile, score, teams, generatedAt };
+  return { profile, score, teams, generatedAt, brand };
+}
+
+/** Shared header/footer inputs, so every artifact stamps the same masthead. */
+export function headerMeta(ctx: ReportContext) {
+  return {
+    toolName: ctx.profile.name,
+    platform: ctx.profile.platform,
+    environment: ctx.profile.environment,
+    classification: ctx.profile.dataClassification,
+    generatedAt: ctx.generatedAt,
+  };
 }
 
 export { DRAFT_BANNER, LENS_BY_ID };

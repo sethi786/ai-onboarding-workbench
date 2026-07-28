@@ -1,19 +1,11 @@
 import type { ReportContext, TeamReportRow } from './reportContext';
 import type { TeamId } from '../types';
-import { DRAFT_BANNER } from '../data/constants';
+import { headerMeta } from './reportContext';
+import { documentHeaderLines } from './documentHeader';
 import { toGoNoGoReport } from './toGoNoGoReport';
 
 function header(title: string, ctx: ReportContext): string[] {
-  return [
-    `# ${title}`,
-    '',
-    `> ${DRAFT_BANNER}`,
-    '',
-    `**Profile:** ${ctx.profile.name} — ${ctx.profile.platform}`,
-    `**Environment:** ${ctx.profile.environment} · **Classification:** ${ctx.profile.dataClassification}`,
-    `**Generated:** ${ctx.generatedAt}`,
-    '',
-  ];
+  return documentHeaderLines(title, ctx.brand, headerMeta(ctx));
 }
 
 function teamRow(ctx: ReportContext, teamId: TeamId): TeamReportRow {

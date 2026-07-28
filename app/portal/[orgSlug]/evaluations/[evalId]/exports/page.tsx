@@ -12,6 +12,11 @@ import { toRemediationPlan } from '@/workbench/export/toRemediationPlan';
 import { makeEmptyAssessment } from '@/workbench/types';
 import { slug } from '@/workbench/export/download';
 import { ExportsClient } from '@/components/portal/ExportsClient';
+import { toBrandedHtml } from '@/workbench/export/toBrandedHtml';
+import { BrandedDocumentButton } from '@/components/portal/BrandedDocumentButton';
+import { resolveBranding, isBranded } from '@/lib/branding';
+import { SITE } from '@/lib/site';
+import Link from 'next/link';
 import { hasFeature } from '@/lib/plans';
 import { UpgradeGate } from '@/components/portal/UpgradeGate';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +47,12 @@ export default async function ExportsPage({
   const score = computeScoreFromMap(profile, TEAM_LENSES, map);
   const getAssessment = (teamId: (typeof TEAM_LENSES)[number]['id']) =>
     map[teamId] ?? makeEmptyAssessment(teamId);
-  const ctx = buildReportContext(profile, score, getAssessment, new Date().toISOString());
+  const brand = resolveBranding(org);
+  const ctx = buildReportContext(profile, score, getAssessment, new Date().toISOString(), brand);
+  const brandedHtml = toBrandedHtml(ctx, brand, {
+    title: 'Tool Adoption Review',
+    producedWith: `Prepared with ${SITE.name}`,
+  });
 
   const bundle = {
     base: slug(row.name),
@@ -57,6 +67,31 @@ export default async function ExportsPage({
 
   return (
     <div className="space-y-6">
+      <div>
+        <h2 className="mb-1 font-semibold">Branded review document</h2>
+        <p className="mb-3 text-sm text-muted-foreground">
+          A cover-paged, print-ready document in {brand.organizationName}’s branding — the artifact
+          you attach to an approval, send to a customer’s security team, or take into a risk
+          committee.
+        </p>
+        <BrandedDocumentButton
+          html={brandedHtml}
+          fileName={`${slug(row.name)}-review.html`}
+        />
+        {!isBranded(brand) && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Using default branding.{' '}
+            <Link
+              href={`/portal/${orgSlug}/settings/organization`}
+              className="text-electric hover:underline"
+            >
+              Add your logo and colour
+            </Link>{' '}
+            and every document picks it up.
+          </p>
+        )}
+      </div>
+
       <div>
         <h2 className="mb-1 font-semibold">Download</h2>
         <p className="mb-3 text-sm text-muted-foreground">

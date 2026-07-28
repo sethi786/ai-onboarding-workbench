@@ -18,7 +18,7 @@ export const TEAM_LENSES: TeamLens[] = [
     weight: 1.5,
     alwaysRequired: true,
     reviewPurpose:
-      'Business/Product validates that the AI use case solves a real business problem, has defined owners, measurable value, realistic expectations, a user adoption plan, and funding.',
+      'Business/Product validates that the use case solves a real business problem, has defined owners, measurable value, realistic expectations, a user adoption plan, and funding.',
     scope: [
       'Business problem',
       'Target users',
@@ -320,7 +320,7 @@ export const TEAM_LENSES: TeamLens[] = [
     weight: 1,
     alwaysRequired: true,
     reviewPurpose:
-      'Solution Architecture validates whether the AI solution design is technically viable, reliable, maintainable, observable, and properly integrated.',
+      'Solution Architecture validates whether the solution design is technically viable, reliable, maintainable, observable, and properly integrated.',
     scope: [
       'System design',
       'Components',
@@ -422,7 +422,7 @@ export const TEAM_LENSES: TeamLens[] = [
     weight: 2,
     alwaysRequired: true,
     reviewPurpose:
-      'Security/SAR validates whether the AI tool protects enterprise data, prevents unauthorized access, resists AI-specific attacks, and is securely configured.',
+      'Security/SAR validates whether the tool protects enterprise data, prevents unauthorized access, resists the attacks its architecture exposes it to, and is securely configured.',
     scope: [
       'Authentication',
       'Authorization',
@@ -828,10 +828,10 @@ export const TEAM_LENSES: TeamLens[] = [
     ],
   },
 
-  /* 9 -------------------------------------------- AI DATA GOVERNANCE */
+  /* 9 ----------------------------------------------- DATA GOVERNANCE */
   {
     id: 'data-governance',
-    title: 'AI Data Governance',
+    title: 'Data Governance',
     short: 'Data Governance',
     order: 9,
     icon: '🗄️',
@@ -839,7 +839,7 @@ export const TEAM_LENSES: TeamLens[] = [
     alwaysRequired: true,
     requiredWhen: (p) => p.ragEnabled || p.clientData || p.pii,
     reviewPurpose:
-      'AI Data Governance validates source data quality, lineage, access controls, classification, lifecycle, permission trimming, and vector index governance.',
+      'Data Governance validates source data quality, lineage, access controls, classification, lifecycle, permission trimming, and — where the tool indexes content — vector index governance.',
     scope: [
       'Data sources',
       'Data owners',
@@ -1618,7 +1618,7 @@ export const TEAM_LENSES: TeamLens[] = [
     weight: 1,
     alwaysRequired: true,
     reviewPurpose:
-      'Adoption validates whether users can use the AI tool effectively, safely, and consistently with policy.',
+      'Adoption validates whether users can use the tool effectively, safely, and consistently with policy.',
     scope: [
       'Target audience',
       'Training',

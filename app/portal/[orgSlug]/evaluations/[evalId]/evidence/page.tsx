@@ -8,6 +8,7 @@ import { EVIDENCE_ARTIFACTS } from '@/workbench/export/evidenceFactory';
 import { makeEmptyAssessment } from '@/workbench/types';
 import { canEdit } from '@/lib/rbac';
 import { hasFeature } from '@/lib/plans';
+import { resolveBranding } from '@/lib/branding';
 import { UpgradeGate } from '@/components/portal/UpgradeGate';
 import { EvidenceFactoryClient } from '@/components/portal/EvidenceFactoryClient';
 
@@ -40,6 +41,7 @@ export default async function EvidencePage({
     score,
     (teamId) => map[teamId] ?? makeEmptyAssessment(teamId),
     new Date().toISOString(),
+    resolveBranding(org),
   );
 
   const artifacts = EVIDENCE_ARTIFACTS.map((a) => ({

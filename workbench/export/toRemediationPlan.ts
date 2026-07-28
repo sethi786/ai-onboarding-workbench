@@ -1,8 +1,9 @@
 import type { ReportContext } from './reportContext';
-import { DRAFT_BANNER } from '../data/constants';
+import { headerMeta } from './reportContext';
+import { documentHeaderLines, documentFooterLines } from './documentHeader';
 
 export function toRemediationPlan(ctx: ReportContext): string {
-  const { profile, teams } = ctx;
+  const { teams } = ctx;
   const items = teams.filter(
     (t) =>
       t.required &&
@@ -12,17 +13,12 @@ export function toRemediationPlan(ctx: ReportContext): string {
         t.controlsComplete < t.controlsTotal),
   );
 
-  const lines: string[] = [];
-  lines.push('# Remediation Plan');
-  lines.push('');
-  lines.push(`> ${DRAFT_BANNER}`);
-  lines.push('');
-  lines.push(`**Profile:** ${profile.name}`);
-  lines.push(`**Generated:** ${ctx.generatedAt}`);
-  lines.push('');
+  const lines = documentHeaderLines('Remediation Plan', ctx.brand, headerMeta(ctx));
 
   if (items.length === 0) {
-    lines.push('No open remediation items for required teams. 🎉');
+    lines.push('No open remediation items for required teams.');
+    lines.push('');
+    lines.push(...documentFooterLines(ctx.brand));
     return lines.join('\n');
   }
 
@@ -41,5 +37,6 @@ export function toRemediationPlan(ctx: ReportContext): string {
     );
   }
   lines.push('');
+  lines.push(...documentFooterLines(ctx.brand));
   return lines.join('\n');
 }
