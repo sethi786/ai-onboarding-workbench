@@ -1,8 +1,17 @@
 import type { ReportContext } from './reportContext';
 
+/**
+ * Quote a cell, and neutralise spreadsheet formula injection.
+ *
+ * Excel and Sheets execute any cell beginning with =, +, -, or @. The tool name
+ * and reviewer's own name land in this file, so an evaluation called
+ * `=cmd|'/c calc'!A0` would run on whoever opens the export. A leading
+ * apostrophe stops that and is invisible in the spreadsheet.
+ */
 function esc(v: string | number): string {
-  const s = String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  const raw = String(v);
+  const s = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
+  return /[",\n']/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 export function toCsv(ctx: ReportContext): string {

@@ -1,5 +1,5 @@
 import { requireMembership } from '@/lib/auth/membership';
-import { isAiConfigured } from '@/lib/ai/client';
+import { aiPolicyFor } from '@/lib/ai/governance';
 import { DiscoverClient } from '@/components/portal/DiscoverClient';
 
 export default async function DiscoverPage({
@@ -9,6 +9,7 @@ export default async function DiscoverPage({
 }) {
   const { orgSlug } = await params;
   const { org } = await requireMembership(orgSlug);
+  const aiPolicy = await aiPolicyFor(org.id);
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -18,7 +19,7 @@ export default async function DiscoverPage({
         outside IT&rsquo;s view. Start from a list you already have rather than from memory, and get
         back a queue ordered by what actually needs reviewing first.
       </p>
-      <DiscoverClient orgId={org.id} orgSlug={orgSlug} aiAvailable={isAiConfigured()} />
+      <DiscoverClient orgId={org.id} orgSlug={orgSlug} aiAvailable={aiPolicy.allowed} />
     </div>
   );
 }

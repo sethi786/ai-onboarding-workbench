@@ -82,6 +82,7 @@ The **marketing site runs with no backend**. The portal requires Supabase (below
    supabase/migrations/0005_tool_category.sql
    supabase/migrations/0006_accept_invitation.sql
    supabase/migrations/0007_branding.sql
+   supabase/migrations/0008_audit_and_ai_governance.sql
    ```
 4. In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your prod
    URL) as a redirect URL.
@@ -117,6 +118,26 @@ dependency.
 Four diagrams are generated from the evaluation's own answers (data flow, trust boundary, approval
 path, readiness heatmap) as inline SVG and as Mermaid source. Because they're derived rather than
 drawn, they can't drift from the assessment they describe.
+
+## Audit trail & AI governance
+
+Every action that changes a review is recorded: who, what, when. The table is
+**append-only at the database level** — there is deliberately no UPDATE or
+DELETE policy, and both are revoked from the `authenticated` role, because a
+trail the actors can rewrite is not evidence. Members read their own
+workspace's trail at **Settings → Audit trail** and export it as CSV.
+
+AI is governed per workspace at **Settings → Organization**:
+
+| Control | Behaviour |
+|---|---|
+| Off switch | Enforced server-side. Every AI action is refused and the refusal logged — not merely hidden in the UI. |
+| Provenance | Each call records the provider, model, input size, and a SHA-256 of exactly what was sent. The hash, not a copy, so your data isn't duplicated into a table with different retention. |
+| Rate limit | Per workspace, so one person holding down a button can't run up the model bill. |
+| Injection | Pasted vendor content is framed as untrusted data; the assistant is instructed to report an attempted injection as a finding rather than follow it. |
+
+Everything except the assistant works with AI switched off — scoring, scope,
+diagrams, documents, and the regulatory mapping never call a model.
 
 ## Multi-tenancy & security
 

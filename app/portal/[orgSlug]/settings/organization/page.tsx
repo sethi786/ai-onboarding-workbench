@@ -3,6 +3,8 @@ import { canManageOrg } from '@/lib/rbac';
 import { resolveBranding } from '@/lib/branding';
 import { Badge } from '@/components/ui/badge';
 import { BrandingForm } from '@/components/portal/BrandingForm';
+import { AiSettingsForm } from '@/components/portal/AiSettingsForm';
+import { aiPolicyFor } from '@/lib/ai/governance';
 
 export default async function OrgSettingsPage({
   params,
@@ -12,9 +14,21 @@ export default async function OrgSettingsPage({
   const { orgSlug } = await params;
   const { org, role } = await requireMembership(orgSlug);
   const brand = resolveBranding(org);
+  const aiPolicy = await aiPolicyFor(org.id);
 
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-border bg-card p-5">
+        <h2 className="mb-4 font-semibold">Data &amp; AI controls</h2>
+        <AiSettingsForm
+          orgId={org.id}
+          orgSlug={orgSlug}
+          enabled={aiPolicy.enabled}
+          configured={aiPolicy.configured}
+          canManage={canManageOrg(role)}
+        />
+      </div>
+
       <div className="rounded-lg border border-border bg-card p-5">
         <h2 className="font-semibold">Document branding</h2>
         <p className="mb-5 mt-1 text-sm text-muted-foreground">

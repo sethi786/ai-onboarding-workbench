@@ -13,7 +13,7 @@ import {
 } from '@/workbench/engine/reviewIntensity';
 import { Badge } from '@/components/ui/badge';
 import { canEdit } from '@/lib/rbac';
-import { isAiConfigured } from '@/lib/ai/client';
+import { aiPolicyFor } from '@/lib/ai/governance';
 import { recallForLens, summarizeRecall } from '@/workbench/engine/memory';
 import { LensCard } from '@/components/portal/LensCard';
 import { DISCLAIMER } from '@/lib/site';
@@ -34,7 +34,7 @@ export default async function LensesPage({
   const profile = rowToProfile(row);
   const score = computeScoreFromMap(profile, TEAM_LENSES, map);
   const editable = canEdit(role);
-  const aiAvailable = isAiConfigured();
+  const aiAvailable = (await aiPolicyFor(org.id)).allowed;
 
   // Lenses that don't apply to this kind of tool are out of scope, not merely
   // optional. Listing them alongside the real work is what makes governance

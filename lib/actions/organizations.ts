@@ -8,6 +8,7 @@ import { assertMemberQuota, getOrgPlan } from '@/lib/auth/entitlements';
 import { slugify, randomSuffix } from '@/lib/slug';
 import { SITE } from '@/lib/site';
 import { normalizeHexColor, normalizeLogoUrl } from '@/lib/branding';
+import { recordAudit } from '@/lib/audit';
 
 export interface ActionResult {
   error?: string;
@@ -79,6 +80,13 @@ export async function updateBranding(
     return { error: 'You don’t have permission to change this workspace’s branding.' };
   }
 
+  await recordAudit({
+    orgId,
+    action: 'branding.updated',
+    summary: 'Workspace document branding changed.',
+    subjectType: 'organization',
+    subjectId: orgId,
+  });
   revalidatePath(`/portal/${orgSlug}`, 'layout');
   return {};
 }
@@ -113,6 +121,54 @@ export async function inviteMember(
   if (error) return { error: error.message };
   if (!data) return { error: 'You don’t have permission to invite members here.' };
 
+  await recordAudit({
+    orgId,
+    action: 'member.invited',
+    summary: `Invited ${email} as ${role}.`,
+    subjectType: 'member',
+    subjectId: email,
+    metadata: { role },
+  });
   revalidatePath('/portal', 'layout');
   return { inviteUrl: `${SITE.url}/invite/${data.token}` };
+}
+
+
+/**
+ * Turn the AI assistant on or off for a workspace.
+ *
+ * Off is a supported configuration, not a degraded one — some organizations
+ * cannot send governance data to a third-party model at all, and they are
+ * exactly the ones who buy a tool like this. Enforced server-side in
+ * lib/ai/governance.ts, not merely hidden in the UI.
+ */
+export async function updateAiSettings(
+  orgId: string,
+  orgSlug: string,
+  enabled: boolean,
+): Promise<ActionResult> {
+  await requireUser();
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('organizations')
+    .update({ ai_enabled: enabled })
+    .eq('id', orgId)
+    .select('id');
+  if (error) return { error: error.message };
+  if (!data || data.length === 0) {
+    return { error: 'You don\u2019t have permission to change this workspace\u2019s AI settings.' };
+  }
+
+  await recordAudit({
+    orgId,
+    action: 'settings.updated',
+    summary: `AI assistance ${enabled ? 'enabled' : 'disabled'} for this workspace.`,
+    subjectType: 'organization',
+    subjectId: orgId,
+    metadata: { aiEnabled: enabled },
+  });
+
+  revalidatePath(`/portal/${orgSlug}`, 'layout');
+  return {};
 }

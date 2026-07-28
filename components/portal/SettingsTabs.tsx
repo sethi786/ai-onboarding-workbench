@@ -11,6 +11,7 @@ export function SettingsTabs({ orgSlug }: { orgSlug: string }) {
     { href: `${base}/organization`, label: 'Organization' },
     { href: `${base}/members`, label: 'Members' },
     { href: `${base}/billing`, label: 'Billing' },
+    { href: `${base}/audit`, label: 'Audit trail' },
   ];
   return (
     <nav className="mt-4 flex gap-1 border-b border-border">

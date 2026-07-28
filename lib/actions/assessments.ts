@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth/require-user';
 import { assessmentPatchToRow } from '@/lib/db/mappers';
+import { recordAudit } from '@/lib/audit';
+import { LENS_BY_ID } from '@/workbench/data/teamLenses';
 import type { TeamAssessment, TeamId } from '@/workbench/types';
 
 /** Upsert one lens's assessment row. org_id is required (denormalized + RLS). */

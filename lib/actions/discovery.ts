@@ -3,7 +3,8 @@
 import { requireUser } from '@/lib/auth/require-user';
 import { getOrgPlan } from '@/lib/auth/entitlements';
 import { createClient } from '@/lib/supabase/server';
-import { isAiConfigured, isAiFailure } from '@/lib/ai/client';
+import { isAiFailure } from '@/lib/ai/client';
+import { guardAiCall } from '@/lib/ai/governance';
 import { classifyUnknownTools } from '@/lib/ai/assist';
 import { discoverFromText, provisionalProfile, type DiscoveredTool } from '@/workbench/engine/discovery';
 import { computeRisk } from '@/workbench/engine/scoring';
@@ -61,7 +62,11 @@ export async function discoverTools(
   // Hand the leftovers to the model — the part a lookup table can't do.
   let usedAi = false;
   const unmatched = found.filter((t) => t.source === 'unmatched');
-  if (isAiConfigured() && unmatched.length > 0) {
+  const gate =
+    unmatched.length > 0
+      ? await guardAiCall(orgId, 'inventory classification', text, { type: 'organization', id: orgId })
+      : { ok: false as const };
+  if (gate.ok && unmatched.length > 0) {
     const res = await classifyUnknownTools(unmatched.slice(0, MAX_AI_LINES).map((t) => t.raw));
     if (!isAiFailure(res)) {
       usedAi = true;

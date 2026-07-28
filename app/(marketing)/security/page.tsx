@@ -42,6 +42,58 @@ export default function SecurityPage() {
           ))}
         </div>
 
+        {/* The AI subprocessor question — the one a CISO asks first about an
+            AI product, and the one most vendors bury. */}
+        <div className="mt-14 rounded-2xl border border-border bg-card p-8 sm:p-10">
+          <h2 className="text-2xl font-semibold tracking-tight">
+            What happens when you use the AI assistant
+          </h2>
+          <p className="mt-4 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">
+            Aegis reviews AI tools, so we hold ourselves to the questions we ask about them. Here is
+            the whole answer, in the order a security reviewer asks it.
+          </p>
+
+          <dl className="mt-8 grid gap-6 sm:grid-cols-2">
+            {[
+              {
+                q: 'Can we turn it off?',
+                a: 'Yes, per workspace, in Settings. Turning it off is enforced on the server — every AI action is refused and the refusal is logged, not merely hidden from the interface. Everything else keeps working: scoring, scope, diagrams, documents, and the regulatory mapping never touch a model.',
+              },
+              {
+                q: 'Where does the data go?',
+                a: 'To Anthropic\u2019s API, and nowhere else. Only the evaluation content needed for the specific request is sent — a pasted description, one lens\u2019s controls, or the recorded assessment behind a questionnaire answer.',
+              },
+              {
+                q: 'Is our data used for training?',
+                a: 'No. Anthropic does not train models on data submitted through its API. We do not retain prompts or responses beyond the request, and we do not use your governance content to improve anything we sell.',
+              },
+              {
+                q: 'Can you prove what you sent?',
+                a: 'Every AI call is written to your audit trail with the model, the provider, the size of the input, and a SHA-256 of exactly what was sent \u2014 which you can recompute. We record the fingerprint rather than a second copy of your data, on purpose.',
+              },
+              {
+                q: 'Who can trigger it?',
+                a: 'Members with edit rights, rate-limited per workspace so one person cannot run up the bill. Viewers cannot invoke it at all.',
+              },
+              {
+                q: 'What if a vendor page tries to manipulate it?',
+                a: 'Pasted content is treated as untrusted data, never as instructions. The assistant is told to report an attempted injection as a finding rather than follow it \u2014 a vendor description trying to mark its own controls satisfied is itself something a reviewer should see.',
+              },
+            ].map((item) => (
+              <div key={item.q}>
+                <dt className="font-semibold">{item.q}</dt>
+                <dd className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{item.a}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <p className="mt-8 border-t border-border pt-5 text-[15px] leading-relaxed text-muted-foreground">
+            The assistant drafts; a named human edits, owns, and submits. Nothing it produces is
+            recorded as a decision on its own \u2014 that would be the exact failure this product
+            exists to prevent.
+          </p>
+        </div>
+
         {/* Compliance posture — honest */}
         <div className="mt-14 grid gap-8 rounded-2xl border border-border bg-surface p-8 sm:p-10 lg:grid-cols-[1fr_1fr]">
           <div>
@@ -60,6 +112,8 @@ export default function SecurityPage() {
               ['ISO 27001', 'Aligned · attestation on roadmap'],
               ['NIST AI RMF', 'Mapped across the AI lenses'],
               ['GDPR / privacy', 'Data export & deletion supported'],
+              ['EU AI Act', 'Controls mapped to Articles 4, 9\u201315 and 26'],
+              ['Audit trail', 'Append-only, exportable as CSV'],
             ].map(([k, v]) => (
               <li key={k} className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3.5">
                 <span className="text-sm font-semibold">{k}</span>

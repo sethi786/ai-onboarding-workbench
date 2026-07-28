@@ -1,5 +1,5 @@
 import { requireMembership } from '@/lib/auth/membership';
-import { isAiConfigured } from '@/lib/ai/client';
+import { aiPolicyFor } from '@/lib/ai/governance';
 import { EvaluationForm } from '@/components/portal/EvaluationForm';
 
 export default async function NewEvaluationPage({
@@ -9,6 +9,7 @@ export default async function NewEvaluationPage({
 }) {
   const { orgSlug } = await params;
   const { org } = await requireMembership(orgSlug);
+  const aiPolicy = await aiPolicyFor(org.id);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -17,7 +18,7 @@ export default async function NewEvaluationPage({
         Describe the tool you’re adopting. What you record here decides which review lenses apply,
         so it’s worth a couple of minutes.
       </p>
-      <EvaluationForm orgId={org.id} orgSlug={orgSlug} aiAvailable={isAiConfigured()} />
+      <EvaluationForm orgId={org.id} orgSlug={orgSlug} aiAvailable={aiPolicy.allowed} />
     </div>
   );
 }

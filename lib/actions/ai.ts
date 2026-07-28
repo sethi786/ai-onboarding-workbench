@@ -2,7 +2,8 @@
 
 import { requireUser } from '@/lib/auth/require-user';
 import { getOrgPlan } from '@/lib/auth/entitlements';
-import { isAiConfigured, isAiFailure, type AiResult } from '@/lib/ai/client';
+import { isAiFailure, type AiResult } from '@/lib/ai/client';
+import { guardAiCall, aiPolicyFor } from '@/lib/ai/governance';
 import {
   answerFromAssessment,
   draftExecutiveSummary,
@@ -42,8 +43,8 @@ function unwrap<T>(result: AiResult<T>): ActionAiResult<T> {
 }
 
 /** Lets the UI render an honest disabled state instead of failing on click. */
-export async function aiAvailable(): Promise<boolean> {
-  return isAiConfigured();
+export async function aiAvailable(orgId: string): Promise<boolean> {
+  return (await aiPolicyFor(orgId)).allowed;
 }
 
 /**
@@ -60,6 +61,16 @@ async function requireEvaluationAccess(evalId: string) {
   const plan = await getOrgPlan(row.org_id);
   if (plan === null) return { error: 'Workspace not found.' as const };
   return { row, plan };
+}
+
+/** Policy, rate limit, and the audit record — in front of every AI call. */
+async function guard(orgId: string, kind: string, input: string, evalId?: string) {
+  return guardAiCall(
+    orgId,
+    kind,
+    input,
+    evalId ? { type: 'evaluation', id: evalId } : { type: 'organization', id: orgId },
+  );
 }
 
 export async function aiDraftIntake(
@@ -80,6 +91,9 @@ export async function aiDraftIntake(
     return { error: 'That description is too long. Trim it to the parts describing the tool.' };
   }
 
+  const gate = await guard(orgId, 'intake drafting', text);
+  if (!gate.ok) return { error: gate.error };
+
   return unwrap(await draftIntake(text));
 }
 
@@ -97,12 +111,18 @@ export async function aiDraftLens(
   const profile = rowToProfile(access.row);
   const assessment = map[teamId] ?? makeEmptyAssessment(teamId);
 
+  const gate = await guard(access.row.org_id, `${lens.title} drafting`, assessment.notes ?? '', evalId);
+  if (!gate.ok) return { error: gate.error };
+
   return unwrap(await draftLensAnswer(lens, profile, assessment));
 }
 
 export async function aiExecutiveSummary(evalId: string): Promise<ActionAiResult<string>> {
   const access = await requireEvaluationAccess(evalId);
   if ('error' in access) return { error: access.error };
+
+  const gate = await guard(access.row.org_id, 'executive summary', access.row.name, evalId);
+  if (!gate.ok) return { error: gate.error };
 
   const ctx = await contextFor(evalId, access.row);
   return unwrap(await draftExecutiveSummary(ctx));
@@ -118,6 +138,9 @@ export async function aiAnswerQuestion(
   const q = question.trim();
   if (q.length < 8) return { error: 'Ask a fuller question.' };
   if (q.length > MAX_QUESTION_CHARS) return { error: 'That question is too long.' };
+
+  const gate = await guard(access.row.org_id, 'reviewer question', q, evalId);
+  if (!gate.ok) return { error: gate.error };
 
   const ctx = await contextFor(evalId, access.row);
   return unwrap(await answerFromAssessment(ctx, q));

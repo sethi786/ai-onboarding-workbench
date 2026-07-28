@@ -21,7 +21,7 @@ import { BrandedDocumentButton } from '@/components/portal/BrandedDocumentButton
 import { AiReviewAssist } from '@/components/portal/AiReviewAssist';
 import { EssentialsNotice } from '@/components/portal/EssentialsNotice';
 import { missingEssentials } from '@/workbench/engine/essentials';
-import { isAiConfigured } from '@/lib/ai/client';
+import { aiPolicyFor } from '@/lib/ai/governance';
 import { resolveBranding, isBranded } from '@/lib/branding';
 import { SITE } from '@/lib/site';
 import Link from 'next/link';
@@ -151,7 +151,7 @@ export default async function ExportsPage({
         <ExportsClient bundle={bundle} />
       </div>
 
-      <AiReviewAssist evalId={evalId} available={isAiConfigured()} />
+      <AiReviewAssist evalId={evalId} available={(await aiPolicyFor(org.id)).allowed} />
 
       <div>
         <h2 className="mb-1 font-semibold">Saved reports</h2>

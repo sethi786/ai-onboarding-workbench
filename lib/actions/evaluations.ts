@@ -7,6 +7,7 @@ import { requireUser } from '@/lib/auth/require-user';
 import { assertEvaluationQuota, getOrgPlan } from '@/lib/auth/entitlements';
 import { profilePatchToRow } from '@/lib/db/mappers';
 import { makeDefaultWorkflow } from '@/workbench/data/workflowStages';
+import { recordAudit } from '@/lib/audit';
 import type { Profile } from '@/workbench/types';
 
 async function seedWorkflow(evalId: string, orgId: string, profile: Partial<Profile>) {
@@ -47,6 +48,14 @@ export async function createEvaluation(
   if (error || !data) return { error: error?.message ?? 'Could not create evaluation.' };
 
   await seedWorkflow(data.id, orgId, input);
+  await recordAudit({
+    orgId,
+    action: 'evaluation.created',
+    summary: `Created the evaluation for ${input.name}.`,
+    subjectType: 'evaluation',
+    subjectId: data.id,
+    metadata: { environment: input.environment, category: input.toolCategory },
+  });
   revalidatePath(`/portal/${orgSlug}/evaluations`);
   redirect(`/portal/${orgSlug}/evaluations/${data.id}`);
 }
@@ -64,11 +73,21 @@ export async function updateEvaluation(
     .from('evaluations')
     .update(profilePatchToRow(patch))
     .eq('id', evalId)
-    .select('id');
+    .select('id, org_id');
   if (error) return { error: error.message };
   if (!data || data.length === 0) {
     return { error: 'You don’t have permission to edit this evaluation.' };
   }
+  await recordAudit({
+    orgId: data[0].org_id,
+    action: 'evaluation.updated',
+    summary: `Updated the evaluation profile.`,
+    subjectType: 'evaluation',
+    subjectId: evalId,
+    // The changed field names, not their values: the trail proves what moved
+    // without making a second copy of the data.
+    metadata: { fields: Object.keys(patch) },
+  });
   revalidatePath(`/portal/${orgSlug}/evaluations/${evalId}`, 'layout');
   return {};
 }
@@ -86,11 +105,18 @@ export async function deleteEvaluation(
     .from('evaluations')
     .delete()
     .eq('id', evalId)
-    .select('id');
+    .select('id, org_id, name');
   if (error) return { error: error.message };
   if (!data || data.length === 0) {
     return { error: 'You don’t have permission to delete this evaluation.' };
   }
+  await recordAudit({
+    orgId: data[0].org_id,
+    action: 'evaluation.deleted',
+    summary: `Deleted the evaluation for ${data[0].name}.`,
+    subjectType: 'evaluation',
+    subjectId: evalId,
+  });
   revalidatePath(`/portal/${orgSlug}/evaluations`);
   redirect(`/portal/${orgSlug}/evaluations`);
 }
