@@ -38,6 +38,7 @@ export function SiteFooter() {
               { href: '/solutions', label: 'Solutions' },
               { href: '/assessment', label: 'The 20 lenses' },
               { href: '/tools', label: 'Tool reviews' },
+              { href: '/eu-ai-act', label: 'EU AI Act' },
               { href: '/pricing', label: 'Pricing' },
             ]}
           />

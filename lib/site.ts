@@ -37,6 +37,7 @@ export const MEGA_NAV: NavItem[] = [
         title: 'By tool',
         links: [
           { href: '/tools', label: 'All tool reviews', desc: 'What the review covers, tool by tool' },
+          { href: '/eu-ai-act', label: 'EU AI Act readiness', desc: 'Deployer obligations from Aug 2026' },
           { href: '/tools/m365-copilot', label: 'Microsoft 365 Copilot', desc: 'Graph oversharing, PII, connectors' },
           { href: '/tools/chatgpt-enterprise', label: 'ChatGPT Enterprise', desc: 'Retention, connectors, custom GPTs' },
           { href: '/tools/salesforce-sales-cloud', label: 'Salesforce', desc: 'Client data, integrations, access' },

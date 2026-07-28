@@ -28,6 +28,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // typing "<tool> security review" long before they've heard of us.
     entry('/tools', 0.9),
     ...TOOL_PAGES.map((t) => entry(`/tools/${t.slug}`, 0.8)),
+    // The Act's high-risk obligations land in August 2026; this is the most
+    // time-sensitive query the site can rank for.
+    entry('/eu-ai-act', 0.9),
     entry('/use-cases', 0.8),
     ...PROBLEMS.map((p) => entry(`/use-cases/${p.slug}`, 0.7)),
     entry('/solutions', 0.8),
