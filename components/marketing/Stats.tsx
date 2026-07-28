@@ -11,14 +11,14 @@ const STATS = [
 
 export function Stats() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-      <div className="grid grid-cols-2 gap-6 rounded-2xl border border-border bg-card p-8 md:grid-cols-4">
+    <section className="border-y border-border bg-paper">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-y-12 px-5 py-20 sm:px-8 md:grid-cols-4 md:py-24">
         {STATS.map((s) => (
           <div key={s.label} className="text-center">
-            <div className="text-4xl font-bold tracking-tight text-foreground">
+            <div className="text-5xl font-semibold tracking-[-0.04em] text-foreground sm:text-6xl">
               <CountUp value={s.value} suffix={s.suffix} />
             </div>
-            <div className="mt-1 text-sm text-muted-foreground">{s.label}</div>
+            <div className="mx-auto mt-3 max-w-[14ch] text-sm text-muted-foreground">{s.label}</div>
           </div>
         ))}
       </div>

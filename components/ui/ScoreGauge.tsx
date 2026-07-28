@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { motion, useMotionValue, animate } from 'framer-motion';
 
 function bandColor(v: number) {
-  if (v >= 85) return 'oklch(0.62 0.15 155)';
-  if (v >= 70) return 'oklch(0.75 0.15 80)';
-  if (v >= 50) return 'oklch(0.65 0.18 50)';
-  return 'oklch(0.6 0.22 27)';
+  if (v >= 85) return 'oklch(0.56 0.11 158)';
+  if (v >= 70) return 'oklch(0.72 0.13 74)';
+  if (v >= 50) return 'oklch(0.65 0.16 50)';
+  return 'oklch(0.58 0.2 27)';
 }
 
 /** Animated circular readiness gauge (0–100). */
@@ -43,7 +43,7 @@ export function ScoreGauge({
     return () => controls.stop();
   }, [v, circ, mv]);
 
-  const track = onDark ? 'oklch(1 0 0 / 0.1)' : 'oklch(0.92 0.01 255)';
+  const track = onDark ? 'oklch(1 0 0 / 0.1)' : 'oklch(0.905 0.006 84)';
 
   return (
     <div className="relative inline-grid place-items-center" style={{ width: size, height: size }}>

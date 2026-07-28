@@ -4,11 +4,11 @@ import { ShieldLogo } from '@/components/brand/ShieldLogo';
 function FooterCol({ title, links }: { title: string; links: { href: string; label: string }[] }) {
   return (
     <div>
-      <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{title}</h4>
-      <ul className="mt-4 space-y-2.5">
+      <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">{title}</h4>
+      <ul className="mt-4 space-y-3">
         {links.map((l) => (
           <li key={l.href}>
-            <Link href={l.href} className="text-sm text-slate-300 transition-colors hover:text-white">
+            <Link href={l.href} className="text-sm text-white/70 transition-colors hover:text-white">
               {l.label}
             </Link>
           </li>
@@ -20,21 +20,21 @@ function FooterCol({ title, links }: { title: string; links: { href: string; lab
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border/60 bg-navy-deep text-slate-300">
-      <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid gap-12 md:grid-cols-4">
-          <div className="md:col-span-1">
+    <footer className="bg-ink text-white">
+      <div className="mx-auto max-w-6xl px-6 py-20 sm:px-8">
+        <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <div>
             <ShieldLogo tone="light" />
-            <p className="mt-4 text-sm leading-relaxed text-slate-400">
-              Enterprise AI onboarding readiness — governance, security, and go/no-go evidence, before
-              formal review.
+            <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
+              Bring every AI tool to review already cleared — governance, security, and go/no-go
+              evidence, prepared before the formal gates.
             </p>
           </div>
           <FooterCol
             title="Product"
             links={[
-              { href: '/assessment', label: 'Readiness Assessment' },
-              { href: '/services', label: 'How it works' },
+              { href: '/services', label: 'Platform' },
+              { href: '/assessment', label: 'The 20 lenses' },
               { href: '/resources', label: 'Resources' },
             ]}
           />
@@ -54,9 +54,9 @@ export function SiteFooter() {
             ]}
           />
         </div>
-        <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/5 pt-6 text-xs text-slate-500 md:flex-row md:items-center">
-          <p>© {new Date().getFullYear()} Aegis. All rights reserved.</p>
-          <p className="font-mono">SOC 2 · ISO 27001 · HIPAA · NIST AI RMF-aligned</p>
+        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/40 md:flex-row md:items-center">
+          <p>© {new Date().getFullYear()} Aegis. A self-evaluation and readiness aid.</p>
+          <p className="font-mono tracking-tight">SOC 2 · ISO 27001 · HIPAA · NIST AI RMF-aligned</p>
         </div>
       </div>
     </footer>

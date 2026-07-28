@@ -3,6 +3,7 @@ import { LogoMarquee } from '@/components/marketing/LogoMarquee';
 import { Stats } from '@/components/marketing/Stats';
 import { LiveDemo } from '@/components/marketing/LiveDemo';
 import {
+  StatementBand,
   FeatureGrid,
   HowItWorks,
   Pricing,
@@ -16,10 +17,11 @@ export default function HomePage() {
     <>
       <Hero />
       <LogoMarquee />
+      <StatementBand />
       <Stats />
-      <LiveDemo />
       <FeatureGrid />
       <HowItWorks />
+      <LiveDemo />
       <Testimonials />
       <Pricing />
       <FAQ />

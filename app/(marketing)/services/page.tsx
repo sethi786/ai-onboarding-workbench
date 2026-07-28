@@ -42,13 +42,10 @@ export default function ServicesPage() {
       />
 
       {/* Product shot */}
-      <section className="relative bg-navy-deep pb-20">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="relative -mt-2">
-            <div className="pointer-events-none absolute inset-x-8 top-6 bottom-8 rounded-full bg-electric/10 blur-3xl" />
-            <div className="relative">
-              <ProductPreview />
-            </div>
+      <section className="bg-paper pb-24">
+        <div className="mx-auto max-w-5xl px-5 sm:px-8">
+          <div className="shadow-float rounded-2xl">
+            <ProductPreview />
           </div>
         </div>
       </section>

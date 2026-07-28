@@ -1,46 +1,58 @@
 @import 'tailwindcss';
 
 /* ==========================================================================
-   Clearance AI — design system (ported control-tower brand)
-   Tailwind v4 @theme tokens. Dark-navy base, electric-blue accent, trust green.
+   Aegis — design system
+   Warm-paper canvas, ink typography, a single evergreen accent.
+   Reference language: Apple (scale, restraint, air) × Wealthsimple (warmth,
+   colour-blocked sections, confident editorial type).
+   Tailwind v4 @theme tokens. Token *names* are kept stable so the whole app
+   (marketing + portal) re-skins from here.
    ========================================================================== */
 
 @theme {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
 
-  /* Brand */
-  --color-navy-deep: oklch(0.18 0.04 260);
-  --color-navy: oklch(0.24 0.05 260);
-  --color-electric: oklch(0.65 0.2 250);
-  --color-electric-soft: oklch(0.78 0.12 245);
-  --color-trust: oklch(0.72 0.14 165);
-  --color-surface: oklch(0.985 0.003 250);
+  /* Brand — repurposed:
+     "navy" is now a warm near-black ink; "electric" is now evergreen. */
+  --color-navy-deep: oklch(0.21 0.008 65);
+  --color-navy: oklch(0.27 0.01 65);
+  --color-electric: oklch(0.5 0.088 162);
+  --color-electric-soft: oklch(0.66 0.078 162);
+  --color-trust: oklch(0.56 0.1 160);
+  --color-surface: oklch(0.985 0.008 92);
 
-  /* Semantic (light) */
-  --color-background: oklch(1 0 0);
-  --color-foreground: oklch(0.18 0.04 260);
+  /* Warm section bands (Wealthsimple-style colour blocking) */
+  --color-paper: oklch(0.99 0.006 95);
+  --color-sand: oklch(0.955 0.018 82);
+  --color-sage: oklch(0.945 0.022 158);
+  --color-ink: oklch(0.21 0.008 65);
+
+  /* Semantic (light, warm) */
+  --color-background: oklch(0.99 0.006 95);
+  --color-foreground: oklch(0.22 0.009 62);
   --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.18 0.04 260);
-  --color-muted: oklch(0.96 0.008 250);
-  --color-muted-foreground: oklch(0.5 0.03 258);
-  --color-primary: oklch(0.24 0.05 260);
-  --color-primary-foreground: oklch(0.985 0.003 250);
-  --color-accent: oklch(0.65 0.2 250);
-  --color-accent-foreground: oklch(0.985 0.003 250);
-  --color-border: oklch(0.92 0.01 255);
-  --color-input: oklch(0.92 0.01 255);
-  --color-ring: oklch(0.65 0.2 250);
+  --color-card-foreground: oklch(0.22 0.009 62);
+  --color-muted: oklch(0.965 0.008 88);
+  --color-muted-foreground: oklch(0.47 0.012 66);
+  --color-primary: oklch(0.22 0.009 62);
+  --color-primary-foreground: oklch(0.99 0.006 95);
+  --color-accent: oklch(0.5 0.088 162);
+  --color-accent-foreground: oklch(0.99 0.006 95);
+  --color-border: oklch(0.905 0.006 84);
+  --color-input: oklch(0.905 0.006 84);
+  --color-ring: oklch(0.5 0.088 162);
 
   /* Status */
-  --color-success: oklch(0.62 0.15 155);
-  --color-warning: oklch(0.75 0.15 80);
-  --color-danger: oklch(0.6 0.22 27);
+  --color-success: oklch(0.56 0.11 158);
+  --color-warning: oklch(0.72 0.13 74);
+  --color-danger: oklch(0.58 0.2 27);
 }
 
 @layer base {
@@ -49,126 +61,92 @@
   }
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
+  /* Confident, tightly-tracked display type — the single biggest signal of
+     a hand-crafted site. */
   h1,
   h2,
   h3,
   h4 {
-    letter-spacing: -0.025em;
     font-weight: 600;
+    letter-spacing: -0.022em;
     text-wrap: balance;
+    color: var(--color-foreground);
   }
   h1 {
     letter-spacing: -0.035em;
+    line-height: 1.02;
+  }
+  h2 {
+    letter-spacing: -0.03em;
+    line-height: 1.06;
   }
   p {
     text-wrap: pretty;
   }
+  ::selection {
+    background: oklch(0.5 0.088 162 / 0.18);
+  }
 }
 
-/* Decorative governance grid + glow utilities (ported) */
-.bg-grid {
-  background-image:
-    linear-gradient(to right, oklch(1 0 0 / 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 0.06) 1px, transparent 1px);
-  background-size: 56px 56px;
+/* Fluid display scale used by the hero + section headers */
+.display-xl {
+  font-size: clamp(2.75rem, 1.6rem + 5.6vw, 5.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  font-weight: 620;
 }
+.display-lg {
+  font-size: clamp(2.1rem, 1.4rem + 3vw, 3.5rem);
+  line-height: 1.03;
+  letter-spacing: -0.032em;
+  font-weight: 600;
+}
+.measure {
+  max-width: 46ch;
+}
+
+/* Subtle grid textures for restrained depth */
 .bg-grid-light {
   background-image:
-    linear-gradient(to right, oklch(0.18 0.04 260 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.18 0.04 260 / 0.05) 1px, transparent 1px);
-  background-size: 56px 56px;
+    linear-gradient(to right, oklch(0.22 0.009 62 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.22 0.009 62 / 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.bg-grid-ink {
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
 .radial-fade {
-  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
-  mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 42%, transparent 78%);
+  mask-image: radial-gradient(ellipse at center, black 42%, transparent 78%);
 }
-.glow-electric {
+
+/* Soft elevation for the product shot — warm, not techy */
+.shadow-float {
   box-shadow:
-    0 0 0 1px oklch(0.65 0.2 250 / 0.4),
-    0 10px 40px -10px oklch(0.65 0.2 250 / 0.5);
+    0 1px 1px oklch(0.22 0.009 62 / 0.04),
+    0 8px 24px -12px oklch(0.22 0.009 62 / 0.18),
+    0 40px 80px -32px oklch(0.22 0.009 62 / 0.22);
 }
-.text-gradient {
-  background: linear-gradient(135deg, oklch(0.97 0.003 250) 0%, oklch(0.78 0.12 245) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.text-gradient-dark {
-  background: linear-gradient(135deg, oklch(0.24 0.05 260) 0%, oklch(0.55 0.16 250) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.shadow-soft {
+  box-shadow:
+    0 1px 2px oklch(0.22 0.009 62 / 0.05),
+    0 12px 32px -20px oklch(0.22 0.009 62 / 0.18);
 }
 
-/* ==========================================================================
-   Aegis — bold motion & premium surface utilities
-   ========================================================================== */
-
-/* Animated aurora / mesh gradient backdrop */
-@keyframes aurora-drift {
-  0%   { transform: translate3d(-6%, -4%, 0) scale(1.05) rotate(0deg); }
-  50%  { transform: translate3d(6%, 4%, 0) scale(1.15) rotate(8deg); }
-  100% { transform: translate3d(-6%, -4%, 0) scale(1.05) rotate(0deg); }
-}
-.aurora {
-  position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(40% 40% at 20% 30%, oklch(0.65 0.2 250 / 0.55), transparent 70%),
-    radial-gradient(35% 45% at 80% 20%, oklch(0.72 0.14 165 / 0.4), transparent 70%),
-    radial-gradient(45% 40% at 60% 80%, oklch(0.55 0.22 290 / 0.45), transparent 70%);
-  filter: blur(60px);
-  animation: aurora-drift 18s ease-in-out infinite;
-  will-change: transform;
-}
-
-/* Glass panel */
-.glass {
-  background: oklch(1 0 0 / 0.04);
-  border: 1px solid oklch(1 0 0 / 0.1);
-  backdrop-filter: blur(14px);
-}
-
-/* Gradient border wrapper */
-.gradient-border {
-  position: relative;
-  background: oklch(1 0 0 / 0.03);
-}
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, oklch(0.65 0.2 250 / 0.6), oklch(0.72 0.14 165 / 0.3), transparent);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* Animated gradient text */
-@keyframes text-sheen {
-  to { background-position: 200% center; }
-}
-.text-aurora {
-  background: linear-gradient(100deg, #fff 10%, oklch(0.78 0.12 245) 30%, oklch(0.8 0.14 165) 50%, #fff 70%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: text-sheen 5s linear infinite;
-}
-
-/* Infinite marquee */
+/* Infinite marquee (logo wall) */
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -176,7 +154,7 @@
 .marquee-track {
   display: inline-flex;
   min-width: 200%;
-  animation: marquee 28s linear infinite;
+  animation: marquee 40s linear infinite;
 }
 
 /* Shimmer (skeletons) */
@@ -192,11 +170,11 @@
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.08), transparent);
+  background: linear-gradient(90deg, transparent, oklch(0.22 0.009 62 / 0.06), transparent);
   animation: shimmer 1.4s infinite;
 }
 
-/* Soft pulse for status dots */
+/* Soft pulse for live status dots */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
@@ -204,7 +182,7 @@
 .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora, .marquee-track, .text-aurora, .shimmer::after, .pulse-dot {
+  .marquee-track, .shimmer::after, .pulse-dot {
     animation: none !important;
   }
   * { scroll-behavior: auto !important; }
