@@ -31,19 +31,21 @@ export function SiteFooter() {
             </p>
           </div>
           <FooterCol
-            title="Product"
+            title="Platform"
             links={[
-              { href: '/services', label: 'Platform' },
+              { href: '/platform', label: 'Overview' },
+              { href: '/solutions', label: 'Solutions' },
               { href: '/assessment', label: 'The 20 lenses' },
-              { href: '/resources', label: 'Resources' },
+              { href: '/pricing', label: 'Pricing' },
             ]}
           />
           <FooterCol
             title="Company"
             links={[
+              { href: '/why-aegis', label: 'Why Aegis' },
+              { href: '/security', label: 'Security & Trust' },
               { href: '/about', label: 'About' },
               { href: '/contact', label: 'Contact' },
-              { href: '/book', label: 'Book a demo' },
             ]}
           />
           <FooterCol
