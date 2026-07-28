@@ -12,6 +12,7 @@ export function EvalTabs({ orgSlug, evalId }: { orgSlug: string; evalId: string 
     { href: `${base}/lenses`, label: 'Self-Evaluation' },
     { href: `${base}/workflow`, label: 'Workflow' },
     { href: `${base}/approvals`, label: 'Approvals' },
+    { href: `${base}/diagrams`, label: 'Diagrams' },
     { href: `${base}/evidence`, label: 'Evidence Factory' },
     { href: `${base}/exports`, label: 'Exports' },
     { href: `${base}/edit`, label: 'Edit' },

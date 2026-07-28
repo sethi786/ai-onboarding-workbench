@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { requireMembership } from '@/lib/auth/membership';
-import { getEvaluation, loadAssessmentMap, rowToProfile, listReports } from '@/lib/db/queries';
+import { getEvaluation, loadAssessmentMap, rowToProfile, listReports, getWorkflow } from '@/lib/db/queries';
 import { computeScoreFromMap } from '@/workbench/engine/scoring';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 import { buildReportContext } from '@/workbench/export/reportContext';
@@ -13,6 +13,7 @@ import { makeEmptyAssessment } from '@/workbench/types';
 import { slug } from '@/workbench/export/download';
 import { ExportsClient } from '@/components/portal/ExportsClient';
 import { toBrandedHtml } from '@/workbench/export/toBrandedHtml';
+import { buildDiagrams } from '@/workbench/diagrams';
 import { BrandedDocumentButton } from '@/components/portal/BrandedDocumentButton';
 import { resolveBranding, isBranded } from '@/lib/branding';
 import { SITE } from '@/lib/site';
@@ -42,7 +43,7 @@ export default async function ExportsPage({
     );
   }
 
-  const map = await loadAssessmentMap(evalId);
+  const [map, stages] = await Promise.all([loadAssessmentMap(evalId), getWorkflow(evalId)]);
   const profile = rowToProfile(row);
   const score = computeScoreFromMap(profile, TEAM_LENSES, map);
   const getAssessment = (teamId: (typeof TEAM_LENSES)[number]['id']) =>
@@ -52,6 +53,13 @@ export default async function ExportsPage({
   const brandedHtml = toBrandedHtml(ctx, brand, {
     title: 'Tool Adoption Review',
     producedWith: `Prepared with ${SITE.name}`,
+    // Diagrams go into the document as inline SVG, so the PDF a reviewer
+    // receives carries them without any renderer or network access.
+    sections: buildDiagrams(ctx, stages).map((d) => ({
+      title: d.title,
+      paragraphs: [d.purpose],
+      html: d.svg,
+    })),
   });
 
   const bundle = {
