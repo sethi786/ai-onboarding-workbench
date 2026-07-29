@@ -173,3 +173,40 @@ export async function listMyOpenReviews(): Promise<OpenReview[]> {
     dueDate: r.due_date,
   }));
 }
+
+export interface ExpiringEvaluation {
+  id: string;
+  name: string;
+  platform: string;
+  environment: string;
+  validUntil: string;
+  daysRemaining: number;
+}
+
+/**
+ * Tools whose clearance has lapsed or is about to.
+ *
+ * The portfolio view is where a governance lead notices that six approvals
+ * quietly went stale, so this is a first-class query rather than something
+ * derived per row.
+ */
+export async function listExpiringEvaluations(
+  orgId: string,
+  withinDays = 30,
+): Promise<ExpiringEvaluation[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('expiring_evaluations', {
+    p_org: orgId,
+    p_within_days: withinDays,
+  });
+  if (error || !data) return [];
+  type Row = Database['public']['Functions']['expiring_evaluations']['Returns'][number];
+  return (data as Row[]).map((r) => ({
+    id: r.id,
+    name: r.name,
+    platform: r.platform,
+    environment: r.environment,
+    validUntil: r.review_valid_until,
+    daysRemaining: r.days_remaining,
+  }));
+}

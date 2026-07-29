@@ -17,6 +17,8 @@ export type AuditAction =
   | 'evaluation.updated'
   | 'evaluation.deleted'
   | 'evaluation.instantiated'
+  /** A clearance was granted, with the date it runs out. */
+  | 'evaluation.certified'
   | 'assessment.updated'
   | 'assessment.decided'
   | 'assessment.recalled'

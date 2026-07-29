@@ -108,6 +108,15 @@ function summarySection(ctx: ReportContext, brand: DocumentBrand): string {
       <div><dt>Evidence complete</dt><dd>${esc(s.evidenceCompleteness)}%</dd></div>
       <div><dt>Active blockers</dt><dd>${esc(s.blockersCount)}</dd></div>
       <div><dt>Reviews signed off</dt><dd>${esc(s.teamsSignedOff)} of ${esc(s.requiredTeams)}</dd></div>
+      ${
+        s.certification && s.certification.state !== 'not-certified'
+          ? `<div><dt>Clearance</dt><dd>${
+              s.certification.state === 'expired'
+                ? `<span class="pill pill-danger">Expired</span>`
+                : `${esc(s.certification.daysRemaining)} days remaining`
+            }</dd></div>`
+          : ''
+      }
       <div><dt>Reviews started</dt><dd>${esc(s.requiredTeams - s.teamsNotStarted)} of ${esc(s.requiredTeams)}${
         s.teamsNotStarted > 0
           ? ` <span class="muted">— readiness covers the ${esc(s.requiredTeams - s.teamsNotStarted)} reviewed</span>`

@@ -259,3 +259,52 @@ describe('computeScoreFromMap', () => {
     expect(signed.teamsSignedOff).toBe(signed.requiredTeams);
   });
 });
+
+describe('an expired clearance is not a current one', () => {
+  const p = baseProfile({ dataClassification: 'Public' });
+  const cleared = () => {
+    const map = allFull();
+    TEAM_LENSES.forEach((l) => (map[l.id].decision = 'Approved'));
+    return map;
+  };
+
+  it('reports Proceed while the clearance is current', () => {
+    const r = computeScoreFromMap(p, TEAM_LENSES, cleared(), {
+      validUntil: '2027-01-01',
+      today: '2026-07-29',
+    });
+    expect(r.certification?.state).toBe('current');
+    expect(r.recommendation).toBe('Proceed');
+  });
+
+  it('downgrades to Recertification Due once it lapses', () => {
+    // The review itself did not get worse — it stopped being current. A stale
+    // "Proceed" in an evidence pack is the failure this product is sold to
+    // prevent, so the engine forces it rather than leaving it to each surface.
+    const r = computeScoreFromMap(p, TEAM_LENSES, cleared(), {
+      validUntil: '2026-01-01',
+      today: '2026-07-29',
+    });
+    expect(r.certification?.state).toBe('expired');
+    expect(r.recommendation).toBe('Recertification Due');
+    expect(r.approvalStatus).toBe('In Progress');
+    // Readiness is unchanged: the work was done, the clearance ran out.
+    expect(r.readiness).toBeGreaterThan(0);
+  });
+
+  it('does not mask a blocker behind an expiry', () => {
+    const map = cleared();
+    const lens = TEAM_LENSES.find((l) => l.blockers.some((b) => b.critical))!;
+    const blocker = lens.blockers.find((b) => b.critical)!;
+    map[lens.id].activeBlockers[blocker.id] = true;
+    const r = computeScoreFromMap(p, TEAM_LENSES, map, {
+      validUntil: '2026-01-01',
+      today: '2026-07-29',
+    });
+    expect(r.recommendation).toBe('Blocked');
+  });
+
+  it('carries no certification when it is not tracked', () => {
+    expect(computeScoreFromMap(p, TEAM_LENSES, cleared()).certification).toBeNull();
+  });
+});

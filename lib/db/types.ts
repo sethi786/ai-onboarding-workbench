@@ -59,6 +59,10 @@ export interface EvaluationRow {
   autonomous_actions: boolean;
   self_hosted: boolean;
   status: string;
+  /** yyyy-mm-dd the current clearance expires. Null = never certified (0014). */
+  review_valid_until: string | null;
+  certified_at: string | null;
+  certified_by: string | null;
   source_template_id: string | null;
   created_by: string | null;
   created_at: string;
@@ -235,6 +239,18 @@ export type Database = {
       sso_claim_membership: {
         Args: Record<string, never>;
         Returns: string | null;
+      };
+      /** Tools whose clearance has lapsed or is about to. */
+      expiring_evaluations: {
+        Args: { p_org: string; p_within_days?: number };
+        Returns: {
+          id: string;
+          name: string;
+          platform: string;
+          environment: string;
+          review_valid_until: string;
+          days_remaining: number;
+        }[];
       };
       /** Everything assigned to the caller that is still open, across workspaces. */
       my_open_reviews: {

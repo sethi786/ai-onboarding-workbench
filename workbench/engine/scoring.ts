@@ -16,11 +16,18 @@ import {
   evidenceAtDepth,
 } from './reviewIntensity';
 import { computeRecommendation, recommendationToApproval } from './recommendation';
+import { certificationStatus, type Certification } from './recertification';
 
 export interface EngineInput {
   profile: Profile;
   lenses: TeamLens[];
   getAssessment: (teamId: TeamId) => TeamAssessment;
+  /**
+   * When the current clearance expires, and what date to judge that against.
+   * Omitted where certification isn't tracked — the public scope preview, the
+   * marketing demo — and the result then carries `certification: null`.
+   */
+  certification?: Certification;
 }
 
 /** Count how many of a lens's critical blockers are flagged active. */
@@ -189,7 +196,16 @@ export function computeScore(input: EngineInput): ScoreResult {
   const coverage = requiredTeams.length === 0 ? 0 : startedTeams.length / requiredTeams.length;
 
   const risk = computeRisk(profile, hasCriticalBlocker);
-  const recommendation = computeRecommendation(readiness, risk, hasCriticalBlocker, coverage);
+  const cert = input.certification ? certificationStatus(input.certification) : null;
+
+  // An expired clearance is not a current one. Forcing it here rather than at
+  // each call site means the document, the dashboard, and the API cannot
+  // disagree about whether a tool is still approved — a stale "Proceed" in an
+  // evidence pack is exactly the failure this product is sold to prevent.
+  let recommendation = computeRecommendation(readiness, risk, hasCriticalBlocker, coverage);
+  if (cert?.state === 'expired' && recommendation !== 'Blocked') {
+    recommendation = 'Recertification Due';
+  }
   const approvalStatus = recommendationToApproval(recommendation);
 
   // "Signed off" means a reviewer recorded a decision, which is what a reader
@@ -220,6 +236,7 @@ export function computeScore(input: EngineInput): ScoreResult {
     teamsNotStarted,
     requiredTeams: requiredTeams.length,
     coverage,
+    certification: cert,
     perTeam,
   };
 }
@@ -229,10 +246,12 @@ export function computeScoreFromMap(
   profile: Profile,
   lenses: TeamLens[],
   assessments: Record<string, TeamAssessment | undefined>,
+  certification?: Certification,
 ): ScoreResult {
   return computeScore({
     profile,
     lenses,
     getAssessment: (teamId) => assessments[teamId] ?? makeEmptyAssessment(teamId),
+    certification,
   });
 }

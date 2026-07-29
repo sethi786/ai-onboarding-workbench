@@ -1,5 +1,8 @@
 import { notFound } from 'next/navigation';
+import { requireMembership } from '@/lib/auth/membership';
+import { canEdit } from '@/lib/rbac';
 import { getEvaluation, loadAssessmentMap, rowToProfile } from '@/lib/db/queries';
+import { CertificationPanel } from '@/components/portal/CertificationPanel';
 import { computeScoreFromMap } from '@/workbench/engine/scoring';
 import { TEAM_LENSES, LENS_BY_ID } from '@/workbench/data/teamLenses';
 import { Badge } from '@/components/ui/badge';
@@ -31,16 +34,35 @@ function Stat({ label, value, hint }: { label: string; value: React.ReactNode; h
 export default async function EvaluationOverview({
   params,
 }: {
-  params: Promise<{ evalId: string }>;
+  params: Promise<{ orgSlug: string; evalId: string }>;
 }) {
-  const { evalId } = await params;
+  const { orgSlug, evalId } = await params;
+  const { org, role } = await requireMembership(orgSlug);
   const row = await getEvaluation(evalId);
-  if (!row) notFound();
+  if (!row || row.org_id !== org.id) notFound();
   const map = await loadAssessmentMap(evalId);
-  const score = computeScoreFromMap(rowToProfile(row), TEAM_LENSES, map);
+  // The clearance date goes into the engine, not just onto the page, so the
+  // document and the dashboard cannot disagree about whether this is approved.
+  const today = new Date().toISOString().slice(0, 10);
+  const score = computeScoreFromMap(rowToProfile(row), TEAM_LENSES, map, {
+    validUntil: row.review_valid_until,
+    today,
+  });
 
   return (
     <div className="space-y-6">
+      {score.certification && (
+        <CertificationPanel
+          evalId={evalId}
+          orgId={org.id}
+          orgSlug={orgSlug}
+          risk={score.risk}
+          status={score.certification}
+          validUntil={row.review_valid_until}
+          canEdit={canEdit(role)}
+        />
+      )}
+
       {score.hasCriticalBlocker && (
         <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm font-semibold text-danger">
           <Ban className="h-4 w-4 shrink-0" /> Blocked until remediated — a critical blocker is active.

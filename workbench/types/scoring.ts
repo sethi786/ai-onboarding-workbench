@@ -1,6 +1,7 @@
 import type { ReviewDepth } from './lens';
 import type { RiskLevel, ApprovalStatus } from './profile';
 import type { TeamId } from './lens';
+import type { CertificationStatus } from '../engine/recertification';
 
 export type Recommendation =
   | 'Proceed'
@@ -11,7 +12,9 @@ export type Recommendation =
   /** Nobody has opened a single required review yet — distinct from failing one. */
   | 'Not Started'
   /** Some required reviews are outstanding, so nothing can be cleared yet. */
-  | 'Review in Progress';
+  | 'Review in Progress'
+  /** Cleared once, but the clearance has run out. Not the same as failing. */
+  | 'Recertification Due';
 
 export interface TeamScore {
   teamId: TeamId;
@@ -62,5 +65,7 @@ export interface ScoreResult {
   requiredTeams: number;
   /** Required lenses started / required lenses, 0..1. */
   coverage: number;
+  /** Whether the clearance is current, due, or expired. Null when not tracked. */
+  certification: CertificationStatus | null;
   perTeam: Record<string, TeamScore>;
 }

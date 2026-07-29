@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { requireMembership } from '@/lib/auth/membership';
-import { listEvaluations, listMyOpenReviews } from '@/lib/db/queries';
+import { listEvaluations, listMyOpenReviews, listExpiringEvaluations } from '@/lib/db/queries';
 import { scoreEvaluation } from '@/lib/db/score';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -29,7 +29,11 @@ export default async function DashboardPage({
 }) {
   const { orgSlug } = await params;
   const { org } = await requireMembership(orgSlug);
-  const [rows, mine] = await Promise.all([listEvaluations(org.id), listMyOpenReviews()]);
+  const [rows, mine, expiring] = await Promise.all([
+    listEvaluations(org.id),
+    listMyOpenReviews(),
+    listExpiringEvaluations(org.id, 30),
+  ]);
   const scored = await Promise.all(rows.map(async (r) => ({ r, s: await scoreEvaluation(r) })));
 
   const total = scored.length;
@@ -86,6 +90,41 @@ export default async function DashboardPage({
                   <span className="text-xs text-muted-foreground">due {m.dueDate}</span>
                 )}
                 <Badge tone={recommendationTone(m.decision as never)}>{m.decision}</Badge>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Clearances expire, and the portfolio view is where somebody notices
+          that six approvals quietly went stale. Aegis asks its own customers
+          to run a recertification cadence; not running one itself was the
+          product failing the control it sells. */}
+      {expiring.length > 0 && (
+        <div className="rounded-lg border border-warning/40 bg-warning/[0.06]">
+          <div className="flex flex-wrap items-baseline gap-x-3 border-b border-warning/30 p-4">
+            <h2 className="font-semibold">Clearances expiring</h2>
+            <span className="text-sm text-muted-foreground">
+              {expiring.filter((e) => e.daysRemaining < 0).length} expired ·{' '}
+              {expiring.filter((e) => e.daysRemaining >= 0).length} due within 30 days
+            </span>
+          </div>
+          <div className="divide-y divide-border">
+            {expiring.map((e) => (
+              <Link
+                key={e.id}
+                href={`/portal/${orgSlug}/evaluations/${e.id}`}
+                className="flex flex-wrap items-center gap-3 px-4 py-2.5 text-sm hover:bg-card/60"
+              >
+                <span className="font-medium">{e.name}</span>
+                <span className="text-muted-foreground">{e.platform || '—'} · {e.environment}</span>
+                <span className="flex-1" />
+                <span className="text-xs text-muted-foreground">until {e.validUntil}</span>
+                <Badge tone={e.daysRemaining < 0 ? 'danger' : 'warning'}>
+                  {e.daysRemaining < 0
+                    ? `expired ${Math.abs(e.daysRemaining)}d ago`
+                    : `${e.daysRemaining}d left`}
+                </Badge>
               </Link>
             ))}
           </div>

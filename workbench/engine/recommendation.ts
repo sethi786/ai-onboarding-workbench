@@ -60,6 +60,10 @@ export function recommendationToApproval(rec: Recommendation): ApprovalStatus {
       return 'Blocked';
     case 'Not Started':
       return 'Not Started';
+    // Expired clearance is not an approval. It is also not a rejection — the
+    // review passed, it simply stopped being current.
+    case 'Recertification Due':
+      return 'In Progress';
     case 'Needs Remediation':
     case 'Not Ready for Review':
     case 'Review in Progress':

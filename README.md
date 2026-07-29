@@ -226,6 +226,38 @@ endpoint calls a `SECURITY DEFINER` function that authenticates the token hash
 itself and takes no parameter naming an organization — so a confused-deputy bug
 in a route handler cannot cross a tenant boundary.
 
+## Recertification
+
+A review is a statement about a tool at a moment: these controls were in place,
+this data was in scope, this vendor had these terms. Tools change. An approval
+signed eighteen months ago goes on reading exactly like one signed yesterday —
+and Aegis already requires its own customers to set a recertification cadence
+(`ag-ctl-8`, `cn-ctl-8`), so not doing it here was the product failing the
+control it sells.
+
+Cadence is risk-proportionate, matching the rest of the engine:
+
+| Risk | Clearance lasts |
+|---|---|
+| Critical | 3 months |
+| High | 6 months |
+| Medium | 12 months |
+| Low | 24 months |
+
+The certifier does not choose the period — letting the person granting a
+clearance also decide how long it lasts is how eighteen-month approvals on
+high-risk tools happen.
+
+Expiry is applied **inside the engine**, not at each surface, so the branded
+document, the portfolio list, and the evaluation page cannot disagree about
+whether a tool is still approved. An expired clearance reports
+`Recertification Due` rather than `Proceed`; readiness is unchanged, because
+the work was done — it simply stopped being current. A critical blocker still
+outranks it.
+
+Surfaced on the evaluation page (with a one-click renew), on the dashboard as
+*Clearances expiring*, and in the decision summary of the exported document.
+
 ## Multi-tenancy & security
 
 - Every tenant table carries `org_id`; **RLS** restricts reads to org members and writes to

@@ -27,7 +27,8 @@ import { allCoverage } from '../workbench/engine/frameworkCoverage';
 import { buildDiagrams } from '../workbench/diagrams';
 import { makeEmptyAssessment } from '../workbench/types';
 import { CONTROL_GUIDANCE, EVIDENCE_GUIDANCE } from '../workbench/data/controlGuidance';
-import { PLANS, getPlan, hasFeature, memberQuota, evaluationQuota } from '../lib/plans';
+import { getPlan, hasFeature, memberQuota, evaluationQuota } from '../lib/plans';
+import { CADENCE_MONTHS } from '../workbench/engine/recertification';
 import { missingEssentials } from '../workbench/engine/essentials';
 import type { Profile, TeamAssessment, TeamId } from '../workbench/types';
 
@@ -238,17 +239,17 @@ flag(
 );
 
 step('11. DOES A REVIEW EVER GO STALE?');
-const hasExpiry = Object.keys(PROFILE).some((k) => /valid|expir|recert/i.test(k));
-console.log(`   Evaluation carries a validity or recertification date: ${hasExpiry}`);
-const selfImposed = ['ag-ctl-8', 'cn-ctl-8'].filter((id) => CONTROL_GUIDANCE[id]);
-console.log(`   Controls where we require the customer to recertify: ${selfImposed.join(', ')}`);
-flag(
-  'MAJOR',
-  'Nothing tracks when a review expires. Aegis requires its customers to set a ' +
-    'recertification cadence — ag-ctl-8 and cn-ctl-8 are both about exactly this — and does ' +
-    'not do it itself. An approved Copilot review from eighteen months ago, since extended ' +
-    'with new connectors, is indistinguishable from one signed yesterday.',
-);
+const risk = SCORE.risk;
+console.log(`   Cadence for ${risk} risk: ${CADENCE_MONTHS[risk]} months (migration 0014)`);
+const cleared = computeScoreFromMap(PROFILE, TEAM_LENSES, stateAt(1), {
+  validUntil: '2025-01-01',
+  today: '2026-07-29',
+});
+console.log(`   A clearance from 18 months ago now reads: ${cleared.recommendation}`);
+if (cleared.recommendation !== 'Recertification Due') {
+  flag('MAJOR', 'An expired clearance still reads as current.');
+}
+console.log('   Surfaced on the evaluation, the portfolio, and in the document.');
 
 step('12. GETTING PEOPLE INTO THE WORKSPACE');
 console.log('   SCIM provisioning: yes (Enterprise)');
