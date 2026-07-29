@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
+import { Building2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { safeNext } from '@/lib/auth/safe-redirect';
@@ -17,6 +18,7 @@ function LoginInner() {
     params.get('error') ? 'Authentication failed. Please try again.' : null,
   );
   const [loading, setLoading] = useState(false);
+  const [ssoLoading, setSsoLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,6 +33,36 @@ function LoginInner() {
     }
     router.push(next);
     router.refresh();
+  }
+
+  /**
+   * Hand off to the employer's identity provider for this email's domain.
+   *
+   * Supabase resolves the domain to a registered SAML provider. When none is
+   * registered it errors, and the usual cause is somebody trying SSO before
+   * their administrator has set it up — worth saying plainly rather than
+   * surfacing a raw provider error.
+   */
+  async function onSso() {
+    const domain = email.includes('@') ? email.slice(email.lastIndexOf('@') + 1).trim() : '';
+    if (!domain) {
+      setError('Enter your work email first, then continue with SSO.');
+      return;
+    }
+    setSsoLoading(true);
+    setError(null);
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithSSO({ domain });
+    if (error || !data?.url) {
+      setError(
+        error && /no sso provider|not found/i.test(error.message)
+          ? `Single sign-on isn’t set up for ${domain}. Ask your administrator, or sign in with a password.`
+          : (error?.message ?? 'Could not start single sign-on.'),
+      );
+      setSsoLoading(false);
+      return;
+    }
+    window.location.assign(data.url);
   }
 
   return (
@@ -54,6 +86,25 @@ function LoginInner() {
         </div>
         <AuthSubmit disabled={loading}>{loading ? 'Signing in…' : 'Log in'}</AuthSubmit>
       </form>
+
+      <div className="my-5 flex items-center gap-3">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">or</span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <button
+        type="button"
+        onClick={onSso}
+        disabled={ssoLoading}
+        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border bg-card text-sm font-medium transition-colors hover:bg-muted disabled:opacity-60"
+      >
+        <Building2 className="h-4 w-4 text-muted-foreground" />
+        {ssoLoading ? 'Redirecting…' : 'Continue with SSO'}
+      </button>
+      <p className="mt-2 text-center text-xs text-muted-foreground">
+        Uses your organization&rsquo;s identity provider.
+      </p>
       <p className="mt-5 text-center text-sm text-muted-foreground">
         No account?{' '}
         <Link href="/signup" className="text-electric hover:underline">

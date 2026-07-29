@@ -164,6 +164,68 @@ how it is known:
 That distinction is the point. Presenting all three as identical green ticks
 would be the dishonesty the product exists to catch.
 
+## Enterprise identity — SSO and SCIM
+
+Enterprise plan. **Settings → SSO & SCIM.** Two separate things that get bought
+together and are worth keeping apart in your head: SSO decides *how somebody
+signs in*, SCIM decides *who is entitled to be here at all*. Only the second one
+offboards people, so SSO alone does not solve leavers.
+
+### SAML single sign-on
+
+1. Register the SAML connection with Supabase Auth (this is a project-level
+   operation, not something the app can do for you):
+
+   ```bash
+   supabase sso add --project-ref <ref> \
+     --type saml --metadata-url <your-idp-metadata-url> \
+     --domains northwind.com
+   ```
+
+2. In **Settings → SSO & SCIM**, add the same domain, choose the role new
+   arrivals get, and decide whether SCIM is required.
+3. Users click **Continue with SSO** on the sign-in page and are routed by their
+   email domain. On return, `sso_claim_membership()` places them in the
+   workspace that owns the domain.
+
+An **unverified domain admits nobody**. Public mail providers (gmail.com,
+outlook.com, …) are refused outright — claiming one would otherwise admit every
+one of its users.
+
+### SCIM 2.0 provisioning
+
+Endpoint: `https://<your-host>/api/scim/v2`
+Auth: `Authorization: Bearer <token>` — issue one in **Settings → SSO & SCIM**.
+The token is shown once and stored only as a SHA-256 hash.
+
+Implemented: `/Users` (GET list with `userName eq` filter, POST), `/Users/{id}`
+(GET, PUT, PATCH, DELETE), plus `/ServiceProviderConfig`, `/ResourceTypes`,
+and `/Schemas` for discovery.
+
+**Okta** — Applications → your app → Provisioning → Configure API Integration.
+Base URL `https://<your-host>/api/scim/v2`, unique identifier `userName`, and
+enable Create / Update / Deactivate.
+
+**Entra ID** — Enterprise applications → Provisioning. Tenant URL
+`https://<your-host>/api/scim/v2`, Secret Token as issued. Entra deactivates
+with a `PATCH` carrying the string `"False"` rather than a boolean; that is
+handled (`lib/scim/protocol.ts`, `applyPatch`).
+
+### Two deliberate design decisions
+
+**The workspace owner is invisible to the directory.** Your IdP does not know
+who holds the billing relationship, and its default role for a domain is
+usually `member`. Without this rule a routine sync silently demotes whoever
+created the workspace, and the next deactivation of anyone finds no owners left
+and locks the organization out of its own settings. This is enforced in
+`scim_sync_membership` and covered by a test.
+
+**The SCIM endpoints never touch the service-role key.** The caller is a machine
+with no session, so RLS keyed on `auth.uid()` cannot gate it. Instead each
+endpoint calls a `SECURITY DEFINER` function that authenticates the token hash
+itself and takes no parameter naming an organization — so a confused-deputy bug
+in a route handler cannot cross a tenant boundary.
+
 ## Multi-tenancy & security
 
 - Every tenant table carries `org_id`; **RLS** restricts reads to org members and writes to

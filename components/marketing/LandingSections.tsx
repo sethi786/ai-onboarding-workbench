@@ -277,7 +277,7 @@ const FAQS = [
   { q: 'How does the scoring work?', a: 'A weighted engine averages your 0–5 self-scores across the lenses required for that tool, discounts for missing controls and evidence, and forces readiness to zero if a critical blocker is active — then produces a risk grade and go/no-go recommendation.' },
   { q: 'What data do you store?', a: 'Only the evaluation content you create, scoped to your organization’s workspace with strict row-level security. You can export or delete it anytime.' },
   { q: 'Can we add our own review lenses?', a: 'The 20 lenses cover the standard enterprise gates. Custom lenses and templates are available on the Enterprise plan.' },
-  { q: 'Do you support SSO?', a: 'Yes — SSO and SCIM provisioning are available on the Enterprise plan.' },
+  { q: 'Do you support SSO and SCIM?', a: 'Yes, on the Enterprise plan. Sign-in goes through your SAML identity provider, and SCIM 2.0 provisioning connects Okta, Entra ID, or anything else that speaks the standard — so access is created when someone joins the group and removed the day they leave. Your workspace owner is deliberately outside the directory’s reach, so a bad sync can’t lock you out of your own settings.' },
 ];
 
 export function FAQ() {

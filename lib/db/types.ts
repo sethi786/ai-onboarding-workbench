@@ -137,6 +137,51 @@ export interface ToolTemplateRow {
   sort_order: number;
 }
 
+/** Enterprise identity (migration 0011). */
+export interface SsoDomainRow {
+  id: string;
+  org_id: string;
+  domain: string;
+  verified_at: string | null;
+  verification_token: string;
+  default_role: OrgRole;
+  /**
+   * When true a verified domain alone admits nobody — SCIM must have
+   * provisioned them and left them active. This is the setting that makes
+   * central offboarding real rather than advisory.
+   */
+  require_scim: boolean;
+  created_by: string | null;
+  created_at: string;
+}
+
+export interface ScimTokenRow {
+  id: string;
+  org_id: string;
+  name: string;
+  token_prefix: string;
+  /** SHA-256 hex. The secret itself is never stored. */
+  token_hash: string;
+  created_by: string | null;
+  created_at: string;
+  last_used_at: string | null;
+  revoked_at: string | null;
+}
+
+export interface ScimUserRow {
+  id: string;
+  org_id: string;
+  external_id: string | null;
+  user_name: string;
+  given_name: string | null;
+  family_name: string | null;
+  display_name: string | null;
+  active: boolean;
+  role: OrgRole;
+  created_at: string;
+  updated_at: string;
+}
+
 type TableConfig<Row> = {
   Row: Row;
   Insert: Partial<Row>;
@@ -165,12 +210,20 @@ export type Database = {
       workflow_stages: TableConfig<WorkflowStageRow>;
       generated_reports: TableConfig<GeneratedReportRow>;
       tool_templates: TableConfig<ToolTemplateRow>;
+      sso_domains: TableConfig<SsoDomainRow>;
+      scim_tokens: TableConfig<ScimTokenRow>;
+      scim_users: TableConfig<ScimUserRow>;
     };
     Views: { [_ in never]: never };
     Functions: {
       create_organization: {
         Args: { p_name: string; p_slug: string };
         Returns: string;
+      };
+      /** Admits an SSO caller to the workspace for their verified email domain. */
+      sso_claim_membership: {
+        Args: Record<string, never>;
+        Returns: string | null;
       };
     };
     Enums: { org_role: OrgRole };

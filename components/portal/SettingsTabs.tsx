@@ -10,6 +10,7 @@ export function SettingsTabs({ orgSlug }: { orgSlug: string }) {
   const tabs = [
     { href: `${base}/organization`, label: 'Organization' },
     { href: `${base}/members`, label: 'Members' },
+    { href: `${base}/identity`, label: 'SSO & SCIM' },
     { href: `${base}/billing`, label: 'Billing' },
     { href: `${base}/audit`, label: 'Audit trail' },
     { href: `${base}/assurance`, label: 'Our controls' },

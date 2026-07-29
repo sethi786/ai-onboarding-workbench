@@ -27,7 +27,13 @@ export type AuditAction =
   | 'branding.updated'
   | 'settings.updated'
   | 'ai.invoked'
-  | 'ai.refused';
+  | 'ai.refused'
+  // Identity configuration. An auditor asking "who could sign in, and since
+  // when" is asking about exactly these four.
+  | 'sso.domain_added'
+  | 'sso.domain_removed'
+  | 'scim.token_created'
+  | 'scim.token_revoked';
 
 export interface AuditEntry {
   orgId: string;
