@@ -29,3 +29,21 @@ What it proves, and why each one is here:
 | T5 | Deactivation actually removes the membership — offboarding is real, not cosmetic. |
 | T6 | The workspace owner survives a directory sync. Caught a genuine bug: the domain's default role of `member` demoted the owner, which then let the next deactivation strip the last owner and lock the workspace out of its own settings. |
 | T7 | A revoked token is dead immediately. |
+
+## seat_limits.sql
+
+Proves the seat cap holds on the two paths a machine uses. Found by auditing a
+3,000-user Copilot rollout: `assertMemberQuota` is called from exactly one
+place — inviting a member by hand — so SCIM provisioning and SSO just-in-time
+membership both created memberships without limit. Reachable on downgrade,
+where an Enterprise workspace drops to Team and keeps its live domains and
+tokens.
+
+| | Claim |
+|---|---|
+| 1 | The free plan reports 3 seats and counts pending invitations toward them. |
+| 2 | SCIM fills the plan, then refuses the next user **loudly** — a silent skip would leave the directory believing somebody has access they don't. |
+| 3 | SSO just-in-time membership refuses too, rather than routing around SCIM. |
+| 4 | Seat count is unchanged after both refusals. |
+| 5 | An existing member re-syncing is never blocked by the cap. |
+| 6 | Enterprise has no cap. |

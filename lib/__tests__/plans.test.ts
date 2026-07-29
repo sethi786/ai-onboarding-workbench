@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import {
   toPlanId,
@@ -146,5 +147,37 @@ describe('plan definitions', () => {
   it('resolves definitions by raw value', () => {
     expect(getPlan('team').name).toBe('Team');
     expect(getPlan(null).name).toBe('Starter');
+  });
+});
+
+/**
+ * The seat cap is enforced twice: here for humans inviting each other, and in
+ * SQL (`org_seat_limit`, migration 0012) for the paths a machine uses — SCIM
+ * provisioning and SSO just-in-time membership, which have no session and
+ * cannot call into this module. Two copies of a number is a drift risk, so
+ * this reads the migration and fails if they ever disagree.
+ */
+describe('seat caps agree with the database', () => {
+  const sql = readFileSync(
+    new URL('../../supabase/migrations/0012_seat_limits_on_machine_paths.sql', import.meta.url),
+    'utf8',
+  );
+
+  const sqlLimitFor = (plan: string): number | null => {
+    const m = new RegExp(`when '${plan}'\\s+then\\s+(null|\\d+)`, 'i').exec(sql);
+    if (!m) throw new Error(`org_seat_limit has no branch for "${plan}"`);
+    return m[1].toLowerCase() === 'null' ? null : Number(m[1]);
+  };
+
+  it('matches lib/plans.ts for every plan', () => {
+    for (const [id, plan] of Object.entries(PLANS)) {
+      expect(sqlLimitFor(id), `seat cap for ${id}`).toBe(plan.maxMembers);
+    }
+  });
+
+  it('falls back to the most restrictive cap for an unknown plan', () => {
+    const fallback = /else\s+(\d+)\s+--/.exec(sql);
+    expect(fallback, 'org_seat_limit needs an else branch').not.toBeNull();
+    expect(Number(fallback![1])).toBe(PLANS.free.maxMembers);
   });
 });

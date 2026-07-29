@@ -60,6 +60,13 @@ export async function withScim(
     if (/userName is required/i.test(message)) {
       return scimFail(400, 'userName is required.', 'invalidValue');
     }
+    // Out of seats. 409 rather than 500 so the provider records a per-user
+    // provisioning failure the administrator can see and act on, instead of
+    // retrying against what looks like an outage. The detail carries the
+    // numbers, because "add seats" is the only useful next step.
+    if (/seat limit reached/i.test(message)) {
+      return scimFail(409, message.replace(/^scim:\s*/, ''), 'uniqueness');
+    }
     return scimFail(500, message);
   }
 }
