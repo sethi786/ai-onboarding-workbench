@@ -65,11 +65,21 @@ export interface EvaluationRow {
   updated_at: string;
 }
 
+export interface ProfileRow {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface TeamAssessmentRow {
   id: string;
   org_id: string;
   evaluation_id: string;
   team_id: string;
+  /** Assigned reviewer. A reference, not the free-text `owner` label. */
+  owner_user_id: string | null;
   score: number;
   checked_controls: Record<string, boolean>;
   checked_evidence: Record<string, boolean>;
@@ -210,6 +220,7 @@ export type Database = {
       workflow_stages: TableConfig<WorkflowStageRow>;
       generated_reports: TableConfig<GeneratedReportRow>;
       tool_templates: TableConfig<ToolTemplateRow>;
+      profiles: TableConfig<ProfileRow>;
       sso_domains: TableConfig<SsoDomainRow>;
       scim_tokens: TableConfig<ScimTokenRow>;
       scim_users: TableConfig<ScimUserRow>;
@@ -224,6 +235,20 @@ export type Database = {
       sso_claim_membership: {
         Args: Record<string, never>;
         Returns: string | null;
+      };
+      /** Everything assigned to the caller that is still open, across workspaces. */
+      my_open_reviews: {
+        Args: Record<string, never>;
+        Returns: {
+          org_slug: string;
+          org_name: string;
+          evaluation_id: string;
+          evaluation_name: string;
+          team_id: string;
+          decision: string;
+          due_date: string;
+          updated_at: string;
+        }[];
       };
     };
     Enums: { org_role: OrgRole };

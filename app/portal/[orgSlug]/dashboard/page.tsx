@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import { requireMembership } from '@/lib/auth/membership';
-import { listEvaluations } from '@/lib/db/queries';
+import { listEvaluations, listMyOpenReviews } from '@/lib/db/queries';
 import { scoreEvaluation } from '@/lib/db/score';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { riskTone, recommendationTone } from '@/components/portal/status';
+import { LENS_BY_ID } from '@/workbench/data/teamLenses';
+import type { TeamId } from '@/workbench/types';
 import { ScoreGauge } from '@/components/ui/ScoreGauge';
 import { DISCLAIMER } from '@/lib/site';
 
@@ -27,7 +29,7 @@ export default async function DashboardPage({
 }) {
   const { orgSlug } = await params;
   const { org } = await requireMembership(orgSlug);
-  const rows = await listEvaluations(org.id);
+  const [rows, mine] = await Promise.all([listEvaluations(org.id), listMyOpenReviews()]);
   const scored = await Promise.all(rows.map(async (r) => ({ r, s: await scoreEvaluation(r) })));
 
   const total = scored.length;
@@ -56,6 +58,39 @@ export default async function DashboardPage({
           New evaluation
         </Link>
       </div>
+
+      {/* The first question a reviewer has on signing in is "what needs me?".
+          Until reviews could be assigned to a person rather than to a string,
+          there was no way to answer it and fifteen review teams coordinated in
+          email — the work this product exists to replace. */}
+      {mine.length > 0 && (
+        <div className="rounded-lg border border-electric/30 bg-electric/[0.04]">
+          <div className="flex flex-wrap items-baseline gap-x-3 border-b border-electric/20 p-4">
+            <h2 className="font-semibold">Assigned to you</h2>
+            <span className="text-sm text-muted-foreground">
+              {mine.length} review{mine.length === 1 ? '' : 's'} waiting
+            </span>
+          </div>
+          <div className="divide-y divide-border">
+            {mine.map((m) => (
+              <Link
+                key={`${m.evaluationId}-${m.teamId}`}
+                href={`/portal/${m.orgSlug}/evaluations/${m.evaluationId}/lenses`}
+                className="flex flex-wrap items-center gap-3 px-4 py-2.5 text-sm hover:bg-card/60"
+              >
+                <span className="font-medium">{LENS_BY_ID[m.teamId as TeamId]?.title ?? m.teamId}</span>
+                <span className="text-muted-foreground">{m.evaluationName}</span>
+                {m.orgSlug !== orgSlug && <Badge tone="outline">{m.orgName}</Badge>}
+                <span className="flex-1" />
+                {m.dueDate && (
+                  <span className="text-xs text-muted-foreground">due {m.dueDate}</span>
+                )}
+                <Badge tone={recommendationTone(m.decision as never)}>{m.decision}</Badge>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* One panel, not five. The gauge and the four counters answer the same
           question and belong in the same frame; boxing each of them separately

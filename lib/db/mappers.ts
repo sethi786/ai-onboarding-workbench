@@ -93,6 +93,7 @@ export function rowToTeamAssessment(
     requiresFormalApproval: r.requires_formal_approval,
     notes: r.notes,
     owner: r.owner,
+    ownerUserId: r.owner_user_id ?? null,
     dueDate: r.due_date,
     residualRisk: r.residual_risk,
     decision: r.decision as TeamAssessment['decision'],
@@ -111,6 +112,7 @@ export function assessmentPatchToRow(p: Partial<TeamAssessment>): Partial<TeamAs
   if (p.requiresFormalApproval !== undefined) out.requires_formal_approval = p.requiresFormalApproval;
   if (p.notes !== undefined) out.notes = p.notes;
   if (p.owner !== undefined) out.owner = p.owner;
+  if (p.ownerUserId !== undefined) out.owner_user_id = p.ownerUserId;
   if (p.dueDate !== undefined) out.due_date = p.dueDate;
   if (p.residualRisk !== undefined) out.residual_risk = p.residualRisk;
   if (p.decision !== undefined) out.decision = p.decision;

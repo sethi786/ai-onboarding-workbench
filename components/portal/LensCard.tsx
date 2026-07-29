@@ -35,9 +35,11 @@ interface Props {
   profile: Profile;
   /** Answers this workspace already gave for comparable tools. */
   recollections?: Recollection[];
+  /** Workspace members this review can be assigned to. */
+  members?: { userId: string; label: string }[];
 }
 
-export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, canEdit, defaultOpen, aiAvailable, profile, recollections = [] }: Props) {
+export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, canEdit, defaultOpen, aiAvailable, profile, recollections = [], members = [] }: Props) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   const [a, setA] = useState(assessment);
   const [, startTransition] = useTransition();
@@ -247,8 +249,30 @@ export function LensCard({ lens, assessment, teamScore, evalId, orgId, orgSlug, 
 
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               <div className="space-y-1.5">
-                <Label>Owner</Label>
-                <Input value={a.owner} disabled={!canEdit} onChange={(e) => patchNotesDebounced({ owner: e.target.value })} />
+                <Label>Assigned to</Label>
+                {/* A member reference, so the reviewer sees this on their own
+                    dashboard. Falls back to the free-text field when the
+                    person doing the review isn't in the workspace. */}
+                {members.length > 0 ? (
+                  <Select
+                    value={a.ownerUserId ?? ''}
+                    disabled={!canEdit}
+                    onChange={(e) => {
+                      const id = e.target.value || null;
+                      patch({
+                        ownerUserId: id,
+                        owner: id ? (members.find((m) => m.userId === id)?.label ?? '') : a.owner,
+                      });
+                    }}
+                  >
+                    <option value="">Unassigned</option>
+                    {members.map((m) => (
+                      <option key={m.userId} value={m.userId}>{m.label}</option>
+                    ))}
+                  </Select>
+                ) : (
+                  <Input value={a.owner} disabled={!canEdit} onChange={(e) => patchNotesDebounced({ owner: e.target.value })} />
+                )}
               </div>
               <div className="space-y-1.5">
                 <Label>Due date</Label>

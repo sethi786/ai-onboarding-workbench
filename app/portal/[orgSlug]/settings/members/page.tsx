@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { InviteMemberForm } from '@/components/portal/InviteMemberForm';
 import { UpgradeNotice } from '@/components/portal/UpgradeGate';
 import { memberQuota, getPlan } from '@/lib/plans';
+import { listWorkspaceMembers } from '@/lib/db/queries';
 
 export default async function MembersPage({
   params,
@@ -19,6 +20,9 @@ export default async function MembersPage({
     supabase.from('invitations').select('id, email, role, accepted_at').eq('org_id', org.id),
   ]);
   const manage = canManageOrg(role);
+  // Rendered from `profiles`, because auth.users is not readable through RLS —
+  // this list used to show a truncated UUID for every person.
+  const people = await listWorkspaceMembers(org.id);
 
   // Seats in use = accepted members + invitations still outstanding, which is
   // what the server-side guard counts when someone tries to invite.
@@ -58,9 +62,9 @@ export default async function MembersPage({
           <h2 className="font-semibold">Members</h2>
         </div>
         <div className="divide-y divide-border">
-          {(members ?? []).map((m) => (
-            <div key={m.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
-              <span className="font-mono text-xs text-muted-foreground">{m.user_id.slice(0, 8)}…</span>
+          {people.map((m) => (
+            <div key={m.userId} className="flex items-center gap-3 px-4 py-2.5 text-sm">
+              <span className="font-medium">{m.label}</span>
               <Badge tone="electric" className="ml-auto">{m.role}</Badge>
             </div>
           ))}

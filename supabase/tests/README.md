@@ -47,3 +47,21 @@ tokens.
 | 4 | Seat count is unchanged after both refusals. |
 | 5 | An existing member re-syncing is never blocked by the cap. |
 | 6 | Enterprise has no cap. |
+
+## profiles_and_assignment.sql
+
+Proves people can be seen and work can be routed to them. Found by auditing
+the same 3,000-user rollout from the organization's side rather than the
+engine's: `auth.users` is not readable through RLS, so the members screen
+rendered `a3f9c2b1…` for every person — and because nobody could be named,
+a review's owner was free text that connected to nothing.
+
+| | Claim |
+|---|---|
+| 1 | A profile appears automatically for every auth user, including names from SSO metadata. |
+| 2 | A colleague is visible by name and email. |
+| 3 | **Cross-tenant.** Someone in another workspace is not visible. An email address is personal data, and leaking our own users' addresses across tenants would fail the review we sell. |
+| 4 | `my_open_reviews()` returns exactly what is assigned to the caller and still open — an approved review is not outstanding. |
+| 5 | A second user sees only their own. |
+| 6 | A user in another workspace sees none of this one's work. |
+| 7 | Losing membership removes the assignment from view immediately. |

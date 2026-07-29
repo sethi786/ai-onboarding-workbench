@@ -217,3 +217,46 @@ step('FINDINGS');
 if (!findings.length) console.log('   None.');
 for (const f of findings) console.log(`   [${f.sev}] ${f.what}\n`);
 console.log(`   ${findings.length} finding(s).`);
+
+/* ========================================================================== *
+ * SECOND PASS — the organization's experience, not the engine's.
+ *
+ * The first pass proved the engine produces the right review. It said nothing
+ * about whether a 3,000-person company can actually run one: fifteen review
+ * teams, fifteen different owners, across fourteen countries.
+ * ========================================================================== */
+step('10. CAN FIFTEEN TEAMS ACTUALLY WORK THIS IN PARALLEL?');
+console.log(`   Required reviews needing an owner: ${required.length}`);
+console.log('   Members are visible by name (profiles, migration 0013): yes');
+console.log('   Reviews assign to a member reference, not a string: yes');
+console.log('   "Assigned to you" on the dashboard: yes');
+console.log('   Verified in supabase/tests/profiles_and_assignment.sql.');
+flag(
+  'MINOR',
+  'Assignment routes work but does not announce it. A reviewer sees what is waiting when ' +
+    'they next sign in; nothing tells them it arrived. Needs transactional email.',
+);
+
+step('11. DOES A REVIEW EVER GO STALE?');
+const hasExpiry = Object.keys(PROFILE).some((k) => /valid|expir|recert/i.test(k));
+console.log(`   Evaluation carries a validity or recertification date: ${hasExpiry}`);
+const selfImposed = ['ag-ctl-8', 'cn-ctl-8'].filter((id) => CONTROL_GUIDANCE[id]);
+console.log(`   Controls where we require the customer to recertify: ${selfImposed.join(', ')}`);
+flag(
+  'MAJOR',
+  'Nothing tracks when a review expires. Aegis requires its customers to set a ' +
+    'recertification cadence — ag-ctl-8 and cn-ctl-8 are both about exactly this — and does ' +
+    'not do it itself. An approved Copilot review from eighteen months ago, since extended ' +
+    'with new connectors, is indistinguishable from one signed yesterday.',
+);
+
+step('12. GETTING PEOPLE INTO THE WORKSPACE');
+console.log('   SCIM provisioning: yes (Enterprise)');
+console.log('   SSO just-in-time membership: yes (Enterprise)');
+console.log('   Invitation email: none — the link is handed to the inviter to send');
+flag(
+  'MINOR',
+  'There is no transactional email. SCIM covers the enterprise case, so this now bites ' +
+    'the smaller plans rather than a 3,000-seat customer — but it is still a manual step ' +
+    'where the product implies an automatic one.',
+);

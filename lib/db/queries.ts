@@ -3,7 +3,7 @@ import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 import type { TeamAssessment, TeamId, WorkflowStage } from '@/workbench/types';
 import type { PriorAssessment } from '@/workbench/engine/memory';
 import { rowToProfile, rowToTeamAssessment, rowToWorkflowStage, makeEmptyAssessment } from './mappers';
-import type { EvaluationRow, GeneratedReportRow } from './types';
+import type { Database, EvaluationRow, GeneratedReportRow } from './types';
 
 export async function listEvaluations(orgId: string): Promise<EvaluationRow[]> {
   const supabase = await createClient();
@@ -103,3 +103,73 @@ export async function listReports(evalId: string): Promise<GeneratedReportRow[]>
 }
 
 export { rowToProfile };
+
+export interface WorkspaceMember {
+  userId: string;
+  label: string;
+  role: string;
+}
+
+/**
+ * Everyone in the workspace, by name rather than by id.
+ *
+ * `auth.users` is not readable through RLS, which is why the members screen
+ * used to render `a3f9c2b1…` for every person and why a review could not be
+ * assigned to anybody. `profiles` (migration 0013) mirrors the identity fields
+ * a colleague is allowed to see, and is visible only to people who share a
+ * workspace with them.
+ */
+export async function listWorkspaceMembers(orgId: string): Promise<WorkspaceMember[]> {
+  const supabase = await createClient();
+  const { data: members } = await supabase
+    .from('memberships')
+    .select('user_id, role')
+    .eq('org_id', orgId);
+  if (!members?.length) return [];
+
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, email, full_name')
+    .in('id', members.map((m) => m.user_id));
+
+  const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
+  return members
+    .map((m) => {
+      const p = byId.get(m.user_id);
+      return {
+        userId: m.user_id,
+        // Falls back to a short id rather than an empty row: a member whose
+        // profile has not synced yet is still assignable.
+        label: p?.full_name || p?.email || `${m.user_id.slice(0, 8)}…`,
+        role: m.role,
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export interface OpenReview {
+  orgSlug: string;
+  orgName: string;
+  evaluationId: string;
+  evaluationName: string;
+  teamId: string;
+  decision: string;
+  dueDate: string;
+}
+
+/** Reviews assigned to the caller and not yet signed off, across all workspaces. */
+export async function listMyOpenReviews(): Promise<OpenReview[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('my_open_reviews');
+  if (error || !data) return [];
+  type Row = Database['public']['Functions']['my_open_reviews']['Returns'][number];
+  return (data as Row[]).map((r) => ({
+    orgSlug: r.org_slug,
+    orgName: r.org_name,
+    evaluationId: r.evaluation_id,
+    evaluationName: r.evaluation_name,
+    teamId: r.team_id,
+    decision: r.decision,
+    dueDate: r.due_date,
+  }));
+}

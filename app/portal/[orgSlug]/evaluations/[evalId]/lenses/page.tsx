@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { requireMembership } from '@/lib/auth/membership';
-import { getEvaluation, loadAssessmentMap, rowToProfile, loadOrgHistory } from '@/lib/db/queries';
+import { getEvaluation, loadAssessmentMap, rowToProfile, loadOrgHistory, listWorkspaceMembers } from '@/lib/db/queries';
 import { computeScoreFromMap } from '@/workbench/engine/scoring';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 import {
@@ -27,9 +27,10 @@ export default async function LensesPage({
   const { org, role } = await requireMembership(orgSlug);
   const row = await getEvaluation(evalId);
   if (!row) notFound();
-  const [map, history] = await Promise.all([
+  const [map, history, members] = await Promise.all([
     loadAssessmentMap(evalId),
     loadOrgHistory(org.id, evalId),
+    listWorkspaceMembers(org.id),
   ]);
   const profile = rowToProfile(row);
   const score = computeScoreFromMap(profile, TEAM_LENSES, map);
@@ -124,6 +125,7 @@ export default async function LensesPage({
           aiAvailable={aiAvailable}
           profile={profile}
           recollections={recallByLens[lens.id]}
+          members={members}
         />
       ))}
 

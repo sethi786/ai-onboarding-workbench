@@ -29,6 +29,9 @@ export interface TeamAssessment {
   requiresFormalApproval: boolean;
   notes: string;
   owner: string;
+  /** Assigned reviewer's user id. The `owner` string stays as a label for
+   *  people who are not workspace members. */
+  ownerUserId: string | null;
   dueDate: string;
   residualRisk: string;
   decision: Decision;
@@ -48,6 +51,7 @@ export function makeEmptyAssessment(teamId: TeamId): TeamAssessment {
     requiresFormalApproval: false,
     notes: '',
     owner: '',
+    ownerUserId: null,
     dueDate: '',
     residualRisk: '',
     decision: 'Not Reviewed',
