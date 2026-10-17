@@ -4,6 +4,7 @@ import { GeistMono } from 'geist/font/mono';
 import { Toaster } from 'sonner';
 import './globals.css';
 import { SITE } from '@/lib/site';
+import { MotionPreferences } from '@/components/motion/MotionPreferences';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -35,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
-        {children}
+        <MotionPreferences>{children}</MotionPreferences>
         <Toaster
           richColors
           position="top-right"

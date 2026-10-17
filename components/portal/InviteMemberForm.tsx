@@ -3,7 +3,13 @@ import { useState, useTransition } from 'react';
 import { inviteMember } from '@/lib/actions/organizations';
 import { Button } from '@/components/ui/button';
 import { Input, Label, Select } from '@/components/ui/input';
-export function InviteMemberForm({ orgId }: { orgId: string }) {
+export function InviteMemberForm({
+  orgId,
+  canInviteAdmin = false,
+}: {
+  orgId: string;
+  canInviteAdmin?: boolean;
+}) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState('');
   const [link, setLink] = useState('');
@@ -25,7 +31,7 @@ export function InviteMemberForm({ orgId }: { orgId: string }) {
       }
       className="flex flex-wrap items-end gap-3"
     >
-      <div className="min-w-56 flex-1">
+      <div className="min-w-0 basis-56 flex-1">
         <Label htmlFor="invite-email">Teammate email</Label>
         <Input
           id="invite-email"
@@ -41,7 +47,7 @@ export function InviteMemberForm({ orgId }: { orgId: string }) {
         <Select id="invite-role" name="role" defaultValue="member">
           <option value="member">Member</option>
           <option value="viewer">Viewer</option>
-          <option value="admin">Admin (owner only)</option>
+          {canInviteAdmin && <option value="admin">Admin</option>}
         </Select>
       </div>
       <Button disabled={pending} type="submit">

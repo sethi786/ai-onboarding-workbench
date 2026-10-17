@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Aegis \u2014 AI governance readiness, evidence, and review workflows.",
+  "description": "Aegis — AI governance readiness, evidence, and review workflows.",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/clean-build.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint app components data lib workbench scripts --ext .ts,.tsx",

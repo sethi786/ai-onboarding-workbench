@@ -3,6 +3,10 @@ import { PageHero } from '@/components/marketing/PageHero';
 export const metadata = { title: 'Security & trust' };
 const controls = [
   [
+    'Workspace activity',
+    'Database triggers record changes to evaluations, evidence, review decisions, invitations, and member roles. Workspace members can read the history; application users cannot edit or delete events. Authorized database operators retain administrative access.',
+  ],
+  [
     'Workspace isolation',
     'Database row-level policies and server-side membership checks restrict workspace records. Owners, admins, members, and viewers have different permissions.',
   ],

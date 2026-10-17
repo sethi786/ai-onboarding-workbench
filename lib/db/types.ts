@@ -26,6 +26,26 @@ export interface MembershipRow {
   created_at: string;
 }
 
+export interface WorkspaceActivityRow {
+  id: string;
+  org_id: string;
+  evaluation_id: string | null;
+  actor_id: string | null;
+  entity_type: string;
+  entity_id: string;
+  action: 'created' | 'updated' | 'deleted';
+  changed_fields: string[];
+  created_at: string;
+}
+
+export interface WorkspaceMember {
+  id: string;
+  user_id: string;
+  email: string;
+  role: OrgRole;
+  created_at: string;
+}
+
 export interface EvaluationRow {
   scope_revision: number;
   id: string;
@@ -144,6 +164,7 @@ type TableConfig<Row> = {
 export type Database = {
   public: {
     Tables: {
+      workspace_activity: TableConfig<WorkspaceActivityRow>;
       billing_checkout_locks: TableConfig<{
         org_id: string;
         token: string;
@@ -186,6 +207,10 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      list_workspace_members: {
+        Args: { p_org: string };
+        Returns: WorkspaceMember[];
+      };
       claim_checkout: {
         Args: { p_org: string; p_token: string };
         Returns: boolean;

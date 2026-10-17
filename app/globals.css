@@ -10,8 +10,10 @@
    ========================================================================== */
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
@@ -64,6 +66,7 @@
     -webkit-text-size-adjust: 100%;
   }
   body {
+    margin: 0;
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
@@ -80,7 +83,7 @@
     font-weight: 600;
     letter-spacing: -0.022em;
     text-wrap: balance;
-    color: var(--color-foreground);
+    color: inherit;
   }
   h1 {
     letter-spacing: -0.035em;
@@ -95,6 +98,84 @@
   }
   ::selection {
     background: oklch(0.5 0.088 162 / 0.18);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
+  }
+  button:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+  input,
+  select,
+  textarea {
+    accent-color: var(--color-electric);
+  }
+  [id] {
+    scroll-margin-top: 6rem;
+  }
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  border-radius: 0.5rem;
+  background: var(--color-ink);
+  color: white;
+  padding: 0.75rem 1rem;
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* Tables become labelled records on phones so editing never depends on a
+   wide, off-screen spreadsheet. Native table layout is preserved on desktop. */
+@media (max-width: 767px) {
+  .responsive-record-table,
+  .responsive-record-table tbody {
+    display: block;
+  }
+  .responsive-record-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .responsive-record-table tr {
+    display: block;
+    padding: 1rem;
+  }
+  .responsive-record-table td {
+    display: grid;
+    grid-template-columns: minmax(70px, 0.35fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+  }
+  .responsive-record-table td::before {
+    content: attr(data-label);
+    color: var(--color-muted-foreground);
+    font-size: 0.75rem;
+    padding-top: 0.4rem;
+  }
+  .responsive-record-table input,
+  .responsive-record-table select {
+    min-width: 0;
+    width: 100%;
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .responsive-record-table td > button {
+    min-height: 44px;
+  }
+  .responsive-record-table td > div {
+    min-width: 0;
+    flex-wrap: wrap;
   }
 }
 
@@ -129,7 +210,11 @@
   background-size: 60px 60px;
 }
 .radial-fade {
-  -webkit-mask-image: radial-gradient(ellipse at center, black 42%, transparent 78%);
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    black 42%,
+    transparent 78%
+  );
   mask-image: radial-gradient(ellipse at center, black 42%, transparent 78%);
 }
 
@@ -148,8 +233,12 @@
 
 /* Infinite marquee (logo wall) */
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 .marquee-track {
   display: inline-flex;
@@ -159,7 +248,9 @@
 
 /* Shimmer (skeletons) */
 @keyframes shimmer {
-  100% { transform: translateX(100%); }
+  100% {
+    transform: translateX(100%);
+  }
 }
 .shimmer {
   position: relative;
@@ -170,20 +261,36 @@
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, oklch(0.22 0.009 62 / 0.06), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(0.22 0.009 62 / 0.06),
+    transparent
+  );
   animation: shimmer 1.4s infinite;
 }
 
 /* Soft pulse for live status dots */
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
 }
-.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track, .shimmer::after, .pulse-dot {
+  .marquee-track,
+  .shimmer::after,
+  .pulse-dot {
     animation: none !important;
   }
-  * { scroll-behavior: auto !important; }
+  * {
+    scroll-behavior: auto !important;
+  }
 }

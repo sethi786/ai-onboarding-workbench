@@ -78,6 +78,8 @@ The **marketing site runs with no backend**. The portal requires Supabase (below
    supabase/migrations/0004_rls.sql
    supabase/migrations/0005_tool_category.sql
    supabase/migrations/0006_governance_integrity.sql
+   supabase/migrations/0007_launch_commerce.sql
+   supabase/migrations/0008_workspace_operations.sql
    ```
 4. In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your prod
    URL) as a redirect URL.
@@ -85,7 +87,7 @@ The **marketing site runs with no backend**. The portal requires Supabase (below
    static module, so this is only needed if you later query/extend templates in the DB.
 6. `npm run dev`, sign up, create a workspace, and start an evaluation.
 
-For existing installations, apply migration 0006 before deploying this version.
+For existing installations, back up first and apply only unapplied migrations through 0008 before deploying this version.
 Existing notes and links are retained; earlier assessments and unassigned legacy
 references require review before they contribute to readiness. See the methodology
 document for upgrade behavior and staging verification steps.
@@ -127,3 +129,11 @@ acceptance tests remain deployment gates. Keep credentials out of git and client
 Verification: `npm test`, `npm run typecheck`, `npm run lint`, `npm audit --omit=dev`, `npm run build`.
 For the isolated no-credentials HTTP smoke suite, start the production build on port 3001 and run
 `npm run test:smoke -- http://localhost:3001`. The checked-in CI workflow runs these checks on PRs.
+
+## Workspace operations release
+
+Migration `0008_workspace_operations.sql` adds tenant-scoped activity history, a manager-only member directory, workspace name validation, review recency updates, hardened function search paths, and protection against orphaning billing when a workspace is deleted through the API. The application adds owner-controlled member access changes, editable workspace names, portfolio search/filters, overdue-review indicators, mobile review forms, navigation/save guards, and the public `/demo` route.
+
+`npm run build` now clears generated `.next` output before rebuilding, including stale route-cache entries. Do not run a build in the same working directory as a production server that must stay online; deployments should use a fresh checkout/build directory.
+
+Activity records begin when migration 0008 is applied. They contain field names and actor/record identifiers, not before/after notes, evidence documents, or invitation tokens. Application users cannot edit the history; authorized database operators manage retention. Configure and verify the retention policy before launch.

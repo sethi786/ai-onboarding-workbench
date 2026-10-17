@@ -45,6 +45,7 @@ export function SiteFooter() {
             title="Platform"
             links={[
               { href: '/platform', label: 'Overview' },
+              { href: '/demo', label: 'Interactive demo' },
               { href: '/use-cases', label: 'Use cases' },
               { href: '/solutions', label: 'Solutions' },
               { href: '/assessment', label: 'The 20 lenses' },

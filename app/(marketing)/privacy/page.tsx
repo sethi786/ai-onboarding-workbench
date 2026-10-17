@@ -5,7 +5,7 @@ export const metadata = { title: 'Privacy notice' };
 const sections = [
   [
     'Information processed',
-    'Account email and authentication information; workspace membership; tool profiles, scores, notes, decisions, evidence URLs and generated reports; enquiry details you submit; and operational request information handled by our hosting providers. Please avoid putting personal or confidential information into evidence URL parameters.',
+    'Account email and authentication information; workspace membership; tool profiles, scores, notes, decisions, evidence URLs and generated reports; enquiry details you submit; workspace activity records (actor identifiers, event times, record identifiers, and changed field names); and operational request information handled by our hosting providers. Please avoid putting personal or confidential information into evidence URL parameters.',
   ],
   [
     'Purpose',
@@ -25,7 +25,7 @@ const sections = [
   ],
   [
     'Retention and deletion',
-    'Evaluation records remain in a workspace until deleted by an authorized owner or admin. Billing and enquiry records may be retained for operational, accounting, or legal needs. Backup retention depends on deployment configuration. The operator must confirm its retention schedule before production launch.',
+    'Evaluation records remain in a workspace until deleted by an authorized owner or admin. Activity metadata can remain after an evaluation is deleted; it does not copy the deleted evaluation’s notes or evidence contents. Billing and enquiry records may be retained for operational, accounting, or legal needs. Backup retention depends on deployment configuration. The operator must confirm its retention schedule before production launch.',
   ],
   [
     'Your requests',

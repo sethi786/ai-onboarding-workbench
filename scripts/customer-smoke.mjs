@@ -15,6 +15,7 @@ for (let i = 0; i < 40; i++) {
 }
 const routes = new Set([
   '/',
+  '/demo',
   '/tools',
   '/assessments',
   '/pricing',
@@ -33,17 +34,48 @@ const catalogue = await (await fetch(`${origin}/tools`)).text();
 for (const match of catalogue.matchAll(/href="(\/tools\/[^"?#]+)"/g))
   routes.add(match[1]);
 let checked = 0;
+const anchors = new Map();
+const anchorLinks = [];
 for (const path of routes) {
+  assert.ok(routes.size < 300, 'Public route discovery stays bounded');
   const response = await fetch(`${origin}${path}`);
   assert.equal(response.status, 200, path);
   assert.equal(response.headers.get('x-content-type-options'), 'nosniff', path);
   assert.equal(response.headers.get('x-frame-options'), 'DENY', path);
   const body = await response.text();
-  if (path === '/')
-    assert.ok(
-      body.includes('Know your AI risks.'),
-      'Homepage value proposition',
+  if (!path.endsWith('.txt') && !path.endsWith('.xml')) {
+    anchors.set(
+      path,
+      new Set([...body.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1])),
     );
+    for (const match of body.matchAll(/<a\b[^>]*\bhref="(\/[^"\s]*)"/g)) {
+      const target = new URL(match[1].replaceAll('&amp;', '&'), origin);
+      if (
+        target.origin !== origin ||
+        /^\/(portal|auth|api|login|signup|forgot-password|reset-password|invite)(\/|$)/.test(
+          target.pathname,
+        )
+      )
+        continue;
+      routes.add(target.pathname);
+      if (target.hash)
+        anchorLinks.push({
+          from: path,
+          path: target.pathname,
+          hash: decodeURIComponent(target.hash.slice(1)),
+        });
+    }
+  }
+  if (path === '/')
+    assert.ok(body.includes('Move AI forward.'), 'Homepage value proposition');
+  if (path === '/demo') {
+    assert.ok(body.includes('Try the readiness engine. No signup.'));
+    assert.ok(
+      body.includes(
+        'Stops a ready recommendation while preserving completed work',
+      ),
+    );
+  }
   if (path === '/pricing') {
     assert.ok(body.includes('$99'));
     assert.ok(!body.includes('$499'));
@@ -61,6 +93,11 @@ for (const path of routes) {
     assert.ok(body.includes('Disallow: /'), 'Preview is not indexed');
   checked++;
 }
+for (const target of anchorLinks)
+  assert.ok(
+    anchors.get(target.path)?.has(target.hash),
+    `Broken section link from ${target.from}: ${target.path}#${target.hash}`,
+  );
 for (const path of [
   '/signup',
   '/login',
@@ -96,5 +133,5 @@ for (const path of [
 assert.equal((await fetch(`${origin}/tools/not-a-real-tool`)).status, 404);
 assert.equal((await fetch(`${origin}/api/health`)).status, 503);
 console.log(
-  `PASS: ${checked} public routes, tool signup intent, preview indexing, security headers, unavailable-service paths, and unknown-tool 404.`,
+  `PASS: ${checked} public routes, ${anchorLinks.length} section links, tool signup intent, preview indexing, security headers, unavailable-service paths, and unknown-tool 404.`,
 );

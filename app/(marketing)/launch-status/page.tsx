@@ -10,10 +10,7 @@ export default function LaunchStatusPage() {
         subtitle="Workspace registration is not open on this deployment yet. You can explore the product without entering personal or payment details."
       />
       <div className="mx-auto flex max-w-xl flex-wrap justify-center gap-6 px-5 pb-24">
-        <Link
-          className="rounded-full bg-ink px-6 py-3 text-paper"
-          href="/#demo"
-        >
+        <Link className="rounded-full bg-ink px-6 py-3 text-paper" href="/demo">
           Try the interactive demo
         </Link>
         <Link

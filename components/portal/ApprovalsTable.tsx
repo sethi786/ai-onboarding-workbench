@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useGovernanceSave } from './useGovernanceSave';
-import type { Decision, TeamAssessment, TeamId, ScoreResult } from '@/workbench/types';
+import { useDirtyForm } from './UnsavedChanges';
+import type {
+  Decision,
+  TeamAssessment,
+  TeamId,
+  ScoreResult,
+} from '@/workbench/types';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 import { DECISION_OPTIONS } from '@/workbench/data/constants';
 import { updateAssessment } from '@/lib/actions/assessments';
@@ -30,24 +36,42 @@ export function ApprovalsTable({
   const [state, setState] = useState(assessments);
   const { save, pending, error } = useGovernanceSave();
   const [dirty, setDirty] = useState<string[]>([]);
-  useEffect(() => { if (!dirty.length) setState(assessments); }, [assessments, dirty]);
+  useDirtyForm(dirty.length > 0);
+  useEffect(() => {
+    if (!dirty.length) setState(assessments);
+  }, [assessments, dirty]);
 
   const patch = (teamId: TeamId, p: Partial<TeamAssessment>) => {
     if (!canEdit || pending) return;
-    setDirty((prev) => prev.includes(teamId) ? prev : [...prev, teamId]);
+    setDirty((prev) => (prev.includes(teamId) ? prev : [...prev, teamId]));
     setState((prev) => ({ ...prev, [teamId]: { ...prev[teamId], ...p } }));
-
   };
 
   const persist = (teamId: TeamId) => {
     const { decision, owner, dueDate } = state[teamId];
-    save(() => updateAssessment(evalId, orgId, orgSlug, teamId, { decision, owner, dueDate }), () => setDirty((prev) => prev.filter((id) => id !== teamId)));
+    save(
+      () =>
+        updateAssessment(evalId, orgId, orgSlug, teamId, {
+          decision,
+          owner,
+          dueDate,
+        }),
+      () => setDirty((prev) => prev.filter((id) => id !== teamId)),
+    );
   };
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-card">
-      {error && <p role="alert" className="p-3 text-sm text-danger">Not saved: {error}</p>}
-      {!!dirty.length && <p role="status" className="p-3 text-xs text-muted-foreground">Unsaved changes in {dirty.length} row(s). Use each row’s Save button.</p>}
-      <table className="w-full text-sm">
+      {error && (
+        <p role="alert" className="p-3 text-sm text-danger">
+          Not saved: {error}
+        </p>
+      )}
+      {!!dirty.length && (
+        <p role="status" className="p-3 text-xs text-muted-foreground">
+          Unsaved changes in {dirty.length} row(s). Use each row’s Save button.
+        </p>
+      )}
+      <table className="responsive-record-table w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/40 text-left text-xs text-muted-foreground">
             <th className="p-2 pl-3">Team</th>
@@ -55,7 +79,8 @@ export function ApprovalsTable({
             <th className="p-2 w-40">Readiness</th>
             <th className="p-2">Self-reported decision</th>
             <th className="p-2">Owner</th>
-            <th className="p-2">Due</th><th className="p-2">Save</th>
+            <th className="p-2">Due</th>
+            <th className="p-2">Save</th>
           </tr>
         </thead>
         <tbody>
@@ -63,26 +88,81 @@ export function ApprovalsTable({
             const ts = score.perTeam[lens.id];
             const a = state[lens.id];
             return (
-              <tr key={lens.id} className="border-b border-border last:border-0">
-                <td className="p-2 pl-3 font-medium">
+              <tr
+                key={lens.id}
+                className="border-b border-border last:border-0"
+              >
+                <td data-label="Team" className="p-2 pl-3 font-medium">
                   <span className="flex items-center gap-2">
-                    <LensIcon id={lens.id} className="h-3.5 w-3.5 text-muted-foreground" />
+                    <LensIcon
+                      id={lens.id}
+                      className="h-3.5 w-3.5 text-muted-foreground"
+                    />
                     {lens.title}
                   </span>
                 </td>
-                <td className="p-2">{ts.required ? <Badge tone="electric">Required</Badge> : <span className="text-muted-foreground">—</span>}</td>
-                <td className="p-2"><Progress value={ts.normalized} showLabel /></td>
-                <td className="p-2">
+                <td data-label="Review scope" className="p-2">
+                  {ts.required ? (
+                    <Badge tone="electric">Required</Badge>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </td>
+                <td data-label="Readiness" className="p-2">
+                  <Progress value={ts.normalized} showLabel />
+                </td>
+                <td data-label="Decision" className="p-2">
                   <div className="flex items-center gap-2">
-                    <Select value={a.decision} disabled={!canEdit || pending} onChange={(e) => patch(lens.id, { decision: e.target.value as Decision })} className="h-8 min-w-[160px]">
-                      {DECISION_OPTIONS.map((d) => <option key={d}>{d}</option>)}
+                    <Select
+                      aria-label={`Decision for ${lens.title}`}
+                      value={a.decision}
+                      disabled={!canEdit || pending}
+                      onChange={(e) =>
+                        patch(lens.id, { decision: e.target.value as Decision })
+                      }
+                      className="h-8 min-w-[160px]"
+                    >
+                      {DECISION_OPTIONS.map((d) => (
+                        <option key={d}>{d}</option>
+                      ))}
                     </Select>
                     <Badge tone={decisionTone(a.decision)}>{a.decision}</Badge>
                   </div>
                 </td>
-                <td className="p-2"><Input value={a.owner} disabled={!canEdit || pending} className="h-8 min-w-[110px]" onChange={(e) => patch(lens.id, { owner: e.target.value })} /></td>
-                <td className="p-2"><Input type="date" value={a.dueDate} disabled={!canEdit || pending} className="h-8" onChange={(e) => patch(lens.id, { dueDate: e.target.value })} /></td>
-                <td className="p-2"><button disabled={!canEdit || pending || !dirty.includes(lens.id)} onClick={() => persist(lens.id)} className="rounded border px-2 py-1 disabled:opacity-50">{pending ? 'Saving…' : dirty.includes(lens.id) ? 'Save changes' : 'Saved'}</button></td>
+                <td data-label="Owner" className="p-2">
+                  <Input
+                    aria-label={`Owner for ${lens.title}`}
+                    value={a.owner}
+                    disabled={!canEdit || pending}
+                    className="h-8 min-w-[110px]"
+                    onChange={(e) => patch(lens.id, { owner: e.target.value })}
+                  />
+                </td>
+                <td data-label="Due date" className="p-2">
+                  <Input
+                    type="date"
+                    aria-label={`Due date for ${lens.title}`}
+                    value={a.dueDate}
+                    disabled={!canEdit || pending}
+                    className="h-8"
+                    onChange={(e) =>
+                      patch(lens.id, { dueDate: e.target.value })
+                    }
+                  />
+                </td>
+                <td data-label="Save" className="p-2">
+                  <button
+                    disabled={!canEdit || pending || !dirty.includes(lens.id)}
+                    onClick={() => persist(lens.id)}
+                    className="rounded border px-2 py-1 disabled:opacity-50"
+                  >
+                    {pending
+                      ? 'Saving…'
+                      : dirty.includes(lens.id)
+                        ? 'Save changes'
+                        : 'Saved'}
+                  </button>
+                </td>
               </tr>
             );
           })}

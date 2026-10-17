@@ -26,11 +26,18 @@ export function PortalHeader({
       <PortalMobileNav orgSlug={activeSlug} orgName={orgName} role={role} />
       <OrgSwitcher orgs={orgs} activeSlug={activeSlug} />
       <div className="flex-1" />
-      <span className="hidden text-sm text-muted-foreground md:inline">{userEmail}</span>
-      <form action="/auth/signout" method="post" onSubmit={() => setTimeout(() => router.refresh(), 300)}>
+      <span className="hidden max-w-64 truncate text-sm text-muted-foreground md:inline">
+        {userEmail}
+      </span>
+      <form
+        action="/auth/signout"
+        method="post"
+        onSubmit={() => setTimeout(() => router.refresh(), 300)}
+      >
         <button
           type="submit"
-          className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-medium text-muted-foreground hover:bg-muted sm:px-3"
+          aria-label="Sign out"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-medium text-muted-foreground hover:bg-muted sm:px-3"
         >
           <LogOut className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Sign out</span>

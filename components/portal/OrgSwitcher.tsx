@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Building2, ChevronsUpDown } from 'lucide-react';
+import { useConfirmNavigation } from './UnsavedChanges';
 
 export function OrgSwitcher({
   orgs,
@@ -11,6 +12,7 @@ export function OrgSwitcher({
   activeSlug: string;
 }) {
   const router = useRouter();
+  const confirmNavigation = useConfirmNavigation();
 
   return (
     <div className="relative inline-flex items-center">
@@ -20,6 +22,7 @@ export function OrgSwitcher({
         aria-label="Switch organization"
         value={activeSlug}
         onChange={(e) => {
+          if (!confirmNavigation()) return;
           if (e.target.value === '__new__') router.push('/portal/onboarding');
           else router.push(`/portal/${e.target.value}/dashboard`);
         }}

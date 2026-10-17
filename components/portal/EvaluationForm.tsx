@@ -1,9 +1,22 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import {
+  useState,
+  useTransition,
+  useId,
+  Children,
+  cloneElement,
+  isValidElement,
+} from 'react';
+import { unstable_rethrow } from 'next/navigation';
+import { useDirtyForm } from './UnsavedChanges';
 import { toast } from 'sonner';
 import type { Profile, ToolCategory } from '@/workbench/types';
-import { TOOL_CATEGORIES, PROJECT_TYPES_BY_CATEGORY, isAiTool } from '@/workbench/types';
+import {
+  TOOL_CATEGORIES,
+  PROJECT_TYPES_BY_CATEGORY,
+  isAiTool,
+} from '@/workbench/types';
 import {
   PLATFORMS,
   DATA_CLASSIFICATIONS,
@@ -20,18 +33,50 @@ type FlagDef = { key: keyof Profile; label: string; hint: string };
 
 /** Flags that matter regardless of what kind of tool this is. */
 const UNIVERSAL_FLAGS: FlagDef[] = [
-  { key: 'externalVendor', label: 'Third-party vendor', hint: 'Supplied by an outside company' },
-  { key: 'pii', label: 'Personal data', hint: 'Processes personal or employee data' },
-  { key: 'clientData', label: 'Client data', hint: 'Touches customer or client data' },
-  { key: 'connectorEnabled', label: 'Integrations', hint: 'Connects to other systems via API or OAuth' },
-  { key: 'selfHosted', label: 'Self-hosted', hint: 'You run it — you own patching and hardening' },
+  {
+    key: 'externalVendor',
+    label: 'Third-party vendor',
+    hint: 'Supplied by an outside company',
+  },
+  {
+    key: 'pii',
+    label: 'Personal data',
+    hint: 'Processes personal or employee data',
+  },
+  {
+    key: 'clientData',
+    label: 'Client data',
+    hint: 'Touches customer or client data',
+  },
+  {
+    key: 'connectorEnabled',
+    label: 'Integrations',
+    hint: 'Connects to other systems via API or OAuth',
+  },
+  {
+    key: 'selfHosted',
+    label: 'Self-hosted',
+    hint: 'You run it — you own patching and hardening',
+  },
 ];
 
 /** Flags that only make sense for AI/ML capability. */
 const AI_FLAGS: FlagDef[] = [
-  { key: 'agentEnabled', label: 'Agent capability', hint: 'Can plan and call tools' },
-  { key: 'ragEnabled', label: 'RAG / retrieval', hint: 'Retrieves from your documents' },
-  { key: 'autonomousActions', label: 'Autonomous actions', hint: 'Acts without human approval each time' },
+  {
+    key: 'agentEnabled',
+    label: 'Agent capability',
+    hint: 'Can plan and call tools',
+  },
+  {
+    key: 'ragEnabled',
+    label: 'RAG / retrieval',
+    hint: 'Retrieves from your documents',
+  },
+  {
+    key: 'autonomousActions',
+    label: 'Autonomous actions',
+    hint: 'Acts without human approval each time',
+  },
 ];
 
 /** Sensible starting flags per category, so the form matches the tool. */
@@ -54,13 +99,15 @@ export function EvaluationForm({
   evalId?: string;
   initial?: Partial<Profile>;
 }) {
-  const initialCategory: ToolCategory = initial?.toolCategory ?? 'SaaS application';
+  const initialCategory: ToolCategory =
+    initial?.toolCategory ?? 'SaaS application';
 
   const [d, setD] = useState<Draft>({
     name: initial?.name ?? '',
     platform: initial?.platform ?? PLATFORMS[0],
     toolCategory: initialCategory,
-    toolType: initial?.toolType ?? PROJECT_TYPES_BY_CATEGORY[initialCategory][0],
+    toolType:
+      initial?.toolType ?? PROJECT_TYPES_BY_CATEGORY[initialCategory][0],
     model: initial?.model ?? '',
     useCase: initial?.useCase ?? '',
     businessOwner: initial?.businessOwner ?? '',
@@ -77,11 +124,17 @@ export function EvaluationForm({
     clientData: initial?.clientData ?? false,
     pii: initial?.pii ?? false,
     autonomousActions: initial?.autonomousActions ?? false,
-    selfHosted: initial?.selfHosted ?? CATEGORY_DEFAULTS[initialCategory].selfHosted ?? false,
+    selfHosted:
+      initial?.selfHosted ??
+      CATEGORY_DEFAULTS[initialCategory].selfHosted ??
+      false,
   });
+  const [savedDraft, setSavedDraft] = useState(() => JSON.stringify(d));
+  useDirtyForm(JSON.stringify(d) !== savedDraft);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const set = (patch: Partial<Draft>) => setD((prev) => ({ ...prev, ...patch }));
+  const set = (patch: Partial<Draft>) =>
+    setD((prev) => ({ ...prev, ...patch }));
 
   const category = (d.toolCategory ?? 'SaaS application') as ToolCategory;
   const projectTypes = PROJECT_TYPES_BY_CATEGORY[category];
@@ -119,21 +172,38 @@ export function EvaluationForm({
         setError('Name is required.');
         return;
       }
-      const res = evalId
-        ? await updateEvaluation(evalId, orgSlug, d)
-        : await createEvaluation(orgId, orgSlug, d);
-      if (res?.error) {
-        setError(res.error);
-        toast.error(res.error);
-      } else if (evalId) {
-        toast.success('Changes saved');
+      try {
+        const res = evalId
+          ? await updateEvaluation(evalId, orgSlug, d)
+          : await createEvaluation(orgId, orgSlug, d);
+        if (res?.error) {
+          setError(res.error);
+          toast.error(res.error);
+        } else if (evalId) {
+          setSavedDraft(JSON.stringify(d));
+          toast.success('Changes saved');
+        }
+      } catch (cause) {
+        unstable_rethrow(cause);
+        setError(
+          'Could not save. Your changes are still here. Check your connection and try again.',
+        );
       }
     });
 
   return (
-    <div className="space-y-6">
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        submit();
+      }}
+      className="space-y-6"
+    >
       {error && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+        <div
+          role="alert"
+          className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+        >
           {error}
         </div>
       )}
@@ -147,6 +217,7 @@ export function EvaluationForm({
                 <button
                   type="button"
                   key={c}
+                  aria-pressed={on}
                   onClick={() => changeCategory(c)}
                   className={
                     'rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors ' +
@@ -161,27 +232,44 @@ export function EvaluationForm({
             })}
           </div>
           <p className="pt-2 text-xs text-muted-foreground">
-            This decides which review lenses apply. AI-specific reviews are skipped for tools that
-            aren’t AI; build and hardening reviews are skipped for software you don’t run yourself.
+            This decides which review lenses apply. AI-specific reviews are
+            skipped for tools that aren’t AI; build and hardening reviews are
+            skipped for software you don’t run yourself.
           </p>
         </Field>
 
         <Grid>
           <Field label="Name">
-            <Input value={d.name} onChange={(e) => set({ name: e.target.value })} />
+            <Input
+              required
+              maxLength={200}
+              value={d.name}
+              onChange={(e) => set({ name: e.target.value })}
+            />
           </Field>
           <Field label="Vendor / platform">
-            <Select value={d.platform} onChange={(e) => set({ platform: e.target.value })}>
-              {PLATFORMS.map((p) => (
-                <option key={p}>{p}</option>
+            <Input
+              list="platform-suggestions"
+              maxLength={200}
+              value={d.platform}
+              onChange={(e) => set({ platform: e.target.value })}
+            />
+            <datalist id="platform-suggestions">
+              {PLATFORMS.map((platform) => (
+                <option key={platform} value={platform} />
               ))}
-            </Select>
+            </datalist>
           </Field>
           <Field label="Type">
             <Select
               value={d.toolType}
-              onChange={(e) => set({ toolType: e.target.value as Profile['toolType'] })}
+              onChange={(e) =>
+                set({ toolType: e.target.value as Profile['toolType'] })
+              }
             >
+              {d.toolType && !projectTypes.includes(d.toolType) && (
+                <option value={d.toolType}>{d.toolType}</option>
+              )}
               {projectTypes.map((t) => (
                 <option key={t}>{t}</option>
               ))}
@@ -191,30 +279,45 @@ export function EvaluationForm({
             <Field label="Model">
               <Input
                 value={d.model}
-                placeholder="e.g. GPT-4o, Claude, Gemini"
+                placeholder="Model and version used by your team"
                 onChange={(e) => set({ model: e.target.value })}
               />
             </Field>
           )}
         </Grid>
         <Field label="Use case">
-          <Textarea value={d.useCase} onChange={(e) => set({ useCase: e.target.value })} />
+          <Textarea
+            value={d.useCase}
+            onChange={(e) => set({ useCase: e.target.value })}
+          />
         </Field>
       </Section>
 
       <Section title="Ownership">
         <Grid>
           <Field label="Business owner">
-            <Input value={d.businessOwner} onChange={(e) => set({ businessOwner: e.target.value })} />
+            <Input
+              value={d.businessOwner}
+              onChange={(e) => set({ businessOwner: e.target.value })}
+            />
           </Field>
           <Field label="Technical owner">
-            <Input value={d.technicalOwner} onChange={(e) => set({ technicalOwner: e.target.value })} />
+            <Input
+              value={d.technicalOwner}
+              onChange={(e) => set({ technicalOwner: e.target.value })}
+            />
           </Field>
           <Field label="Executive sponsor">
-            <Input value={d.executiveSponsor} onChange={(e) => set({ executiveSponsor: e.target.value })} />
+            <Input
+              value={d.executiveSponsor}
+              onChange={(e) => set({ executiveSponsor: e.target.value })}
+            />
           </Field>
           <Field label="Target users">
-            <Input value={d.targetUsers} onChange={(e) => set({ targetUsers: e.target.value })} />
+            <Input
+              value={d.targetUsers}
+              onChange={(e) => set({ targetUsers: e.target.value })}
+            />
           </Field>
         </Grid>
       </Section>
@@ -224,7 +327,12 @@ export function EvaluationForm({
           <Field label="Data classification">
             <Select
               value={d.dataClassification}
-              onChange={(e) => set({ dataClassification: e.target.value as Profile['dataClassification'] })}
+              onChange={(e) =>
+                set({
+                  dataClassification: e.target
+                    .value as Profile['dataClassification'],
+                })
+              }
             >
               {DATA_CLASSIFICATIONS.map((c) => (
                 <option key={c}>{c}</option>
@@ -234,7 +342,9 @@ export function EvaluationForm({
           <Field label="Environment">
             <Select
               value={d.environment}
-              onChange={(e) => set({ environment: e.target.value as Profile['environment'] })}
+              onChange={(e) =>
+                set({ environment: e.target.value as Profile['environment'] })
+              }
             >
               {ENVIRONMENTS.map((c) => (
                 <option key={c}>{c}</option>
@@ -250,6 +360,7 @@ export function EvaluationForm({
                 <button
                   type="button"
                   key={dt}
+                  aria-pressed={on}
                   onClick={() => toggleDataType(dt)}
                   className={
                     'rounded-md border px-2.5 py-1 text-xs font-medium ' +
@@ -277,11 +388,11 @@ export function EvaluationForm({
       )}
 
       <div className="flex justify-end">
-        <Button variant="electric" size="lg" onClick={submit} disabled={pending}>
+        <Button type="submit" variant="electric" size="lg" disabled={pending}>
           {pending ? 'Saving…' : evalId ? 'Save changes' : 'Create evaluation'}
         </Button>
       </div>
-    </div>
+    </form>
   );
 }
 
@@ -305,11 +416,15 @@ function FlagGrid({
             type="checkbox"
             className="mt-0.5"
             checked={Boolean(draft[f.key])}
-            onChange={(e) => set({ [f.key]: e.target.checked } as Partial<Draft>)}
+            onChange={(e) =>
+              set({ [f.key]: e.target.checked } as Partial<Draft>)
+            }
           />
           <span>
             <span className="block text-sm font-medium">{f.label}</span>
-            <span className="block text-xs text-muted-foreground">{f.hint}</span>
+            <span className="block text-xs text-muted-foreground">
+              {f.hint}
+            </span>
           </span>
         </label>
       ))}
@@ -317,7 +432,13 @@ function FlagGrid({
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <fieldset className="rounded-lg border border-border p-4">
       <legend className="px-2 text-xs font-semibold uppercase tracking-wide text-electric">
@@ -330,11 +451,28 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Grid({ children }: { children: React.ReactNode }) {
   return <div className="grid gap-3 sm:grid-cols-2">{children}</div>;
 }
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  const id = useId();
+  const childList = Children.toArray(children);
+  const control = childList.find(
+    (child) =>
+      isValidElement(child) &&
+      [Input, Select, Textarea].includes(child.type as typeof Input),
+  );
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
+      <Label htmlFor={control ? id : undefined}>{label}</Label>
+      {childList.map((child) =>
+        child === control && isValidElement<{ id?: string }>(child)
+          ? cloneElement(child, { id })
+          : child,
+      )}
     </div>
   );
 }

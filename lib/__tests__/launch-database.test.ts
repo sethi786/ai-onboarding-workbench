@@ -46,6 +46,183 @@ afterAll(async () => {
 });
 
 describe('launch database security and commercial boundaries', () => {
+  it('prevents a direct owner deletion from orphaning a billing customer', async () => {
+    await user(owner);
+    await expect(
+      db.query('delete from organizations where id=$1', [org]),
+    ).rejects.toThrow('billing history');
+  });
+  it('updates portfolio recency after a review without changing the scope', async () => {
+    await user(owner);
+    const { rows } = await db.query<{ id: string; scope_revision: number }>(
+      "insert into evaluations(org_id,name) values($1,'Review recency') returning id,scope_revision",
+      [org],
+    );
+    await db.query(
+      "insert into team_assessments(org_id,evaluation_id,team_id,score) values($1,$2,'security-sar',2)",
+      [org, rows[0].id],
+    );
+    const result = await db.query(
+      'select scope_revision from evaluations where id=$1',
+      [rows[0].id],
+    );
+    expect(result.rows[0]).toEqual({ scope_revision: rows[0].scope_revision });
+    const events = await db.query(
+      "select * from workspace_activity where entity_id=$1 and action='updated'",
+      [rows[0].id],
+    );
+    expect(events.rows).toHaveLength(0);
+  });
+  it('returns teammate emails only to managers in that workspace', async () => {
+    await user(admin);
+    const result = await db.query<{ email: string }>(
+      'select email from list_workspace_members($1)',
+      [org],
+    );
+    expect(result.rows.map((row) => row.email).sort()).toEqual([
+      'admin@example.test',
+      'owner@example.test',
+    ]);
+  });
+  it('does not disclose the user directory to an outsider', async () => {
+    await user(guest);
+    await expect(
+      db.query('select * from list_workspace_members($1)', [org]),
+    ).rejects.toThrow('Not authorized');
+  });
+  it('does not disclose the user directory to a viewer', async () => {
+    await db.query(
+      "insert into memberships(org_id,user_id,role) values($1,$2,'viewer')",
+      [org, guest],
+    );
+    await user(guest);
+    await expect(
+      db.query('select * from list_workspace_members($1)', [org]),
+    ).rejects.toThrow('Not authorized');
+  });
+  it('records the authenticated actor and changed field names without private values', async () => {
+    await user(owner);
+    const { rows } = await db.query<{ id: string }>(
+      "insert into evaluations(org_id,name) values($1,'Confidential pilot name') returning id",
+      [org],
+    );
+    await db.query(
+      "update evaluations set use_case='Private customer information' where id=$1",
+      [rows[0].id],
+    );
+    const events = await db.query<{
+      actor_id: string;
+      changed_fields: string[];
+    }>(
+      "select actor_id,changed_fields from workspace_activity where entity_id=$1 and action='updated'",
+      [rows[0].id],
+    );
+    expect(events.rows).toEqual([
+      { actor_id: owner, changed_fields: ['scope_revision', 'use_case'] },
+    ]);
+    const full = await db.query(
+      'select * from workspace_activity where entity_id=$1',
+      [rows[0].id],
+    );
+    expect(JSON.stringify(full.rows)).not.toContain(
+      'Private customer information',
+    );
+    expect(JSON.stringify(full.rows)).not.toContain('Confidential pilot name');
+  });
+  it('preserves an evaluation deletion record without retaining assessment contents', async () => {
+    await user(owner);
+    const { rows } = await db.query<{ id: string }>(
+      "insert into evaluations(org_id,name) values($1,'Delete me') returning id",
+      [org],
+    );
+    await db.query('delete from evaluations where id=$1', [rows[0].id]);
+    const events = await db.query(
+      'select action from workspace_activity where entity_id=$1 order by created_at',
+      [rows[0].id],
+    );
+    expect(events.rows).toEqual([{ action: 'created' }, { action: 'deleted' }]);
+  });
+  it('does not expose another workspace activity to outsiders', async () => {
+    await user(other);
+    expect(
+      (await db.query('select * from workspace_activity')).rows,
+    ).toHaveLength(0);
+  });
+  it('prevents customers from forging history even when broad table grants exist', async () => {
+    await user(owner);
+    await expect(
+      db.query(
+        "insert into workspace_activity(org_id,entity_type,entity_id,action) values($1,'organizations',$1,'updated')",
+        [org],
+      ),
+    ).rejects.toThrow('row-level security');
+  });
+  it('prevents customers from rewriting or deleting recorded history', async () => {
+    await user(owner);
+    expect(
+      (
+        await db.query(
+          'update workspace_activity set actor_id=$1 returning id',
+          [other],
+        )
+      ).rows,
+    ).toHaveLength(0);
+    expect(
+      (await db.query('delete from workspace_activity returning id')).rows,
+    ).toHaveLength(0);
+  });
+  it('records access changes made by an owner', async () => {
+    await user(owner);
+    const member = await db.query<{ id: string }>(
+      "update memberships set role='viewer' where user_id=$1 returning id",
+      [admin],
+    );
+    const events = await db.query(
+      "select actor_id,changed_fields from workspace_activity where entity_id=$1 and action='updated'",
+      [member.rows[0].id],
+    );
+    expect(events.rows).toEqual([
+      { actor_id: owner, changed_fields: ['role'] },
+    ]);
+  });
+  it('records invitation changes without copying email addresses or tokens', async () => {
+    await user(owner);
+    const token = (
+      await db.query<{ token: string }>(
+        "select create_workspace_invitation($1,'guest@example.test','member') token",
+        [org],
+      )
+    ).rows[0].token;
+    const events = await db.query(
+      "select * from workspace_activity where entity_type='invitations'",
+    );
+    expect(events.rows).toHaveLength(1);
+    expect(JSON.stringify(events.rows)).not.toContain(token);
+    expect(JSON.stringify(events.rows)).not.toContain('guest@example.test');
+  });
+  it('rejects malformed workspace names from direct RPC callers', async () => {
+    await user(owner);
+    await expect(
+      db.query("select create_organization('  ','valid-name')"),
+    ).rejects.toThrow('workspace name');
+  });
+  it('rejects malformed workspace addresses from direct RPC callers', async () => {
+    await user(owner);
+    await expect(
+      db.query("select create_organization('My workspace','../../bad')"),
+    ).rejects.toThrow('workspace address');
+  });
+  it('keeps workspace URLs stable when the display name changes', async () => {
+    await user(admin);
+    await db.query(
+      "update organizations set name='New display name' where id=$1",
+      [org],
+    );
+    expect(
+      (await db.query('select name,slug from organizations where id=$1', [org]))
+        .rows,
+    ).toEqual([{ name: 'New display name', slug: 'team' }]);
+  });
   it('rejects a direct plan upgrade by the owner', async () => {
     await user(owner);
     await expect(

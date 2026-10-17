@@ -41,8 +41,8 @@ export function StatementBand() {
 const FEATURES = [
   {
     icon: ScanEye,
-    t: 'Deep-dive review simulator',
-    d: 'Walk all 20 lenses — Security, Privacy, Legal, Risk, Data Governance, Agent & Connector Governance — with the exact controls and evidence each team inspects.',
+    t: 'Guided assessments',
+    d: 'Walk all 20 lenses — Security, Privacy, Legal, Risk, Data Governance, Agent & Connector Governance — with structured controls and evidence prompts for your team to review.',
   },
   {
     icon: GitBranch,
@@ -66,7 +66,7 @@ const FEATURES = [
   },
   {
     icon: Users,
-    t: 'One tower for every stakeholder',
+    t: 'One workspace for every reviewer',
     d: 'AI Program, Security, Privacy, Legal, Risk, Platform, and leadership — shared readiness, owners, and blockers in a single view.',
   },
 ];
@@ -80,7 +80,7 @@ export function FeatureGrid() {
             The platform
           </span>
           <h2 className="display-lg mt-4 max-w-2xl">
-            Everything a review team asks for, prepared in advance.
+            A clear path from question to evidence.
           </h2>
         </Reveal>
         <div className="mt-14 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
@@ -125,7 +125,7 @@ const STEPS = [
   {
     n: '04',
     t: 'Generate evidence',
-    d: 'Produce draft SAR, PIA, architecture, and go/no-go packs for the real reviews. Walk in prepared.',
+    d: 'Produce draft SAR, PIA, architecture, and go/no-go packs to support your organization’s formal review.',
   },
 ];
 
@@ -138,7 +138,7 @@ export function HowItWorks() {
             How it works
           </span>
           <h2 className="display-lg mt-4 max-w-2xl">
-            From intake to go/no-go in four moves.
+            From a new tool to a reviewable decision.
           </h2>
         </Reveal>
         <div className="mt-14 grid gap-x-10 gap-y-12 sm:grid-cols-2">
@@ -280,7 +280,9 @@ export function Pricing() {
             <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
               Pricing
             </span>
-            <h2 className="display-lg mt-4">Start free. Grow when you do.</h2>
+            <h2 className="display-lg mt-4">
+              Simple plans. A clear starting point.
+            </h2>
             <p className="mt-4 text-sm text-muted-foreground">
               USD per workspace. Team is billed monthly; taxes may apply. Cancel
               through billing management. Paid upgrades open after launch setup
