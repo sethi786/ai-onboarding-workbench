@@ -1,6 +1,7 @@
 import 'server-only';
 import Stripe from 'stripe';
 import { launchChecks } from '@/lib/launch/readiness';
+import { stripeEnvironmentAllowed } from './mode';
 
 export function billingConfigured() {
   const checks = launchChecks();
@@ -15,8 +16,8 @@ export function billingConfigured() {
 }
 
 export function stripeClient() {
-  if (!process.env.STRIPE_SECRET_KEY) throw new Error('Billing unavailable');
-  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+  if (!stripeEnvironmentAllowed()) throw new Error('Billing unavailable');
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
     maxNetworkRetries: 2,
     timeout: 15000,
   });

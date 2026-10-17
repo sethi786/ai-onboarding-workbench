@@ -10,6 +10,7 @@ import { makeEmptyAssessment } from '@/workbench/types';
 const subscription = (status: string, price = 'price_team') =>
   ({
     status,
+    latest_invoice: { status: 'paid' },
     items: { data: [{ price: { id: price } }] },
   }) as Stripe.Subscription;
 describe('commercial readiness rules', () => {

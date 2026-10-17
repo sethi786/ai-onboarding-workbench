@@ -1,3 +1,5 @@
+import { stripeEnvironmentAllowed } from '@/lib/billing/mode';
+
 /** Deployment checks expose only booleans, never credential values. */
 export function launchChecks() {
   return {
@@ -6,7 +8,7 @@ export function launchChecks() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     ),
     payments: Boolean(
-      process.env.STRIPE_SECRET_KEY &&
+      stripeEnvironmentAllowed() &&
         process.env.STRIPE_TEAM_PRICE_ID &&
         process.env.STRIPE_WEBHOOK_SECRET,
     ),

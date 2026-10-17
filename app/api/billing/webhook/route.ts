@@ -1,5 +1,6 @@
 import type Stripe from 'stripe';
 import { stripeClient } from '@/lib/billing/config';
+import { stripeEnvironmentAllowed, stripeLiveMode } from '@/lib/billing/mode';
 import { subscriptionPlan } from '@/lib/billing/subscription';
 import { serviceClient } from '@/lib/server/service-client';
 import { readBody } from '@/lib/server/request-body';
@@ -8,6 +9,12 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 const supported = new Set([
   'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+  'checkout.session.async_payment_failed',
+  'invoice.paid',
+  'invoice.payment_failed',
+  'invoice.payment_action_required',
+  'invoice.finalization_failed',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
@@ -17,7 +24,7 @@ const supported = new Set([
 export async function POST(request: Request) {
   if (
     !process.env.STRIPE_WEBHOOK_SECRET ||
-    !process.env.STRIPE_SECRET_KEY ||
+    !stripeEnvironmentAllowed() ||
     !process.env.STRIPE_TEAM_PRICE_ID ||
     !process.env.SUPABASE_SERVICE_ROLE_KEY
   )
@@ -36,9 +43,12 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  if (event.livemode !== stripeLiveMode())
+    return Response.json({ error: 'Billing mode mismatch' }, { status: 400 });
   if (!supported.has(event.type)) return Response.json({ received: true });
   const object = event.data.object as
     | Stripe.Subscription
+    | Stripe.Invoice
     | Stripe.Checkout.Session;
   const customer =
     typeof object.customer === 'string' ? object.customer : object.customer?.id;
@@ -48,7 +58,7 @@ export async function POST(request: Request) {
     const db = serviceClient();
     const org = await db
       .from('organizations')
-      .select('id')
+      .select('id, plan')
       .eq('stripe_customer_id', customer)
       .maybeSingle();
     if (org.error) throw org.error;
@@ -60,13 +70,16 @@ export async function POST(request: Request) {
       customer,
       status: 'all',
       limit: 100,
+      expand: ['data.latest_invoice'],
     }))
       subscriptions.push(subscription);
     // Retrieve current provider state: event order and the success URL never grant access.
     const result = await db.rpc('apply_billing_event', {
       p_event: event.id,
       p_customer: customer,
-      p_plan: subscriptionPlan(subscriptions, process.env.STRIPE_TEAM_PRICE_ID),
+      p_plan: subscriptionPlan(subscriptions, process.env.STRIPE_TEAM_PRICE_ID, {
+        previousPlan: org.data.plan,
+      }),
       p_observed_at: observedAt,
     });
     if (result.error) throw result.error;

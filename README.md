@@ -123,6 +123,8 @@ It protects billing fields, enforces database quotas, restricts membership manag
 invitation, lead-intake and billing RPCs. Public API clients cannot execute service-only RPCs.
 
 Read **[the customer audit and launch runbook](docs/launch-readiness.md)** before opening sales.
+Follow **[Stripe setup and purchase acceptance](docs/stripe-setup.md)** for sandbox isolation,
+the full invoice/delayed-payment event list, tax and portal configuration, and buyer tests.
 `LAUNCH_APPROVED=false` is the default. Missing services show an honest preview/unavailable state.
 No domain or paid infrastructure is purchased by this change; production legal terms and real provider
 acceptance tests remain deployment gates. Keep credentials out of git and client-side environment variables.

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 import {
   billingConfigured,
   stripeClient,
@@ -9,6 +9,7 @@ import { billingWorkspace } from '@/lib/billing/access';
 import { serviceClient } from '@/lib/server/service-client';
 import { readBody } from '@/lib/server/request-body';
 import { TEAM_MONTHLY_CENTS } from '@/lib/plans';
+import { stripeLiveMode } from '@/lib/billing/mode';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
     const price = await stripe.prices.retrieve(priceId);
     if (
       !price.active ||
+      price.livemode !== stripeLiveMode() ||
       price.currency !== 'usd' ||
       price.unit_amount !== TEAM_MONTHLY_CENTS ||
       price.recurring?.interval !== 'month' ||
@@ -101,13 +103,41 @@ export async function POST(request: Request) {
     const sessions = await stripe.checkout.sessions.list({
       customer,
       status: 'open',
-      limit: 1,
+      limit: 100,
+      expand: ['data.line_items'],
     });
-    if (sessions.data[0]?.url)
-      return Response.json({ url: sessions.data[0].url });
     const path = `${siteOrigin()}/portal/${access.org.slug}/settings/billing`;
+    const existing = sessions.data[0];
+    if (
+      sessions.has_more ||
+      sessions.data.length > 1 ||
+      (existing && (
+        existing.livemode !== stripeLiveMode() ||
+        existing.mode !== 'subscription' ||
+        existing.client_reference_id !== access.org.id ||
+        existing.success_url !== `${path}?checkout=success` ||
+        existing.cancel_url !== `${path}?checkout=canceled` ||
+        existing.line_items?.has_more ||
+        existing.line_items?.data.length !== 1 ||
+        existing.line_items.data[0].price?.id !== priceId ||
+        existing.line_items.data[0].quantity !== 1 ||
+        !existing.url
+      ))
+    )
+      return Response.json(
+        {
+          error:
+            'An incompatible checkout is already open. Contact support before retrying.',
+        },
+        { status: 409 },
+      );
+    if (existing?.url) return Response.json({ url: existing.url });
     const session = await stripe.checkout.sessions.create(
       {
+        integration_identifier: `aegis-team-${Array.from(
+          { length: 8 },
+          () => String.fromCharCode(97 + randomInt(26)),
+        ).join('')}`,
         customer,
         mode: 'subscription',
         line_items: [{ price: priceId, quantity: 1 }],
