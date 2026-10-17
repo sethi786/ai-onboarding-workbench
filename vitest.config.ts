@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 // Covers the framework-agnostic engine (regression anchor) and the pure
 // entitlement logic that gates paid features.
 export default defineConfig({
+  oxc: { jsx: { runtime: 'automatic' } },
   test: {
     environment: 'node',
     include: ['workbench/**/*.test.ts', 'lib/**/*.test.ts'],

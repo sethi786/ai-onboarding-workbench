@@ -27,6 +27,7 @@ export default async function LensesPage({
       </p>
       {TEAM_LENSES.map((lens) => (
         <LensCard
+            scopeRevision={row.scope_revision ?? 1}
           key={lens.id}
           lens={lens}
           assessment={map[lens.id]}

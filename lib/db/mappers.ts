@@ -8,6 +8,7 @@ import type {
 import type { TeamAssessment, TeamId, EvidenceLink } from '@/workbench/types';
 import type { WorkflowStage } from '@/workbench/types';
 import { makeEmptyAssessment } from '@/workbench/types';
+import { LENS_BY_ID } from '@/workbench/data/teamLenses';
 import type {
   EvaluationRow,
   TeamAssessmentRow,
@@ -18,6 +19,7 @@ import type {
 /** DB evaluation row → domain Profile (the shape the engine consumes). */
 export function rowToProfile(r: EvaluationRow): Profile {
   return {
+    scopeRevision: r.scope_revision ?? 1,
     id: r.id,
     name: r.name,
     platform: r.platform,
@@ -68,6 +70,7 @@ export function profilePatchToRow(p: Partial<Profile>): Partial<EvaluationRow> {
   if (p.clientData !== undefined) out.client_data = p.clientData;
   if (p.pii !== undefined) out.pii = p.pii;
   if (p.autonomousActions !== undefined) out.autonomous_actions = p.autonomousActions;
+  if (p.selfHosted !== undefined) out.self_hosted = p.selfHosted;
   return out;
 }
 
@@ -76,17 +79,24 @@ export function rowToTeamAssessment(
   r: TeamAssessmentRow,
   links: EvidenceLinkRow[],
 ): TeamAssessment {
+  const lens = LENS_BY_ID[r.team_id as TeamId];
+  const knownFlags = (flags: Record<string, boolean> | null, ids: string[]) =>
+    Object.fromEntries(ids.filter((id) => flags?.[id] === true).map((id) => [id, true]));
   const evidenceLinks: EvidenceLink[] = links.map((l) => ({
     id: l.id,
     label: l.label,
     url: l.url,
+    evidenceId: l.evidence_id,
+    scopeRevision: l.scope_revision,
+    expiresOn: l.expires_on ?? '',
   }));
   return {
     teamId: r.team_id as TeamId,
+    scopeRevision: r.scope_revision ?? 0,
     score: r.score,
-    checkedControls: r.checked_controls ?? {},
-    checkedEvidence: r.checked_evidence ?? {},
-    activeBlockers: r.active_blockers ?? {},
+    checkedControls: knownFlags(r.checked_controls, lens?.requiredControls.map((c) => c.id) ?? []),
+    checkedEvidence: knownFlags(r.checked_evidence, lens?.evidenceRequired.map((e) => e.id) ?? []),
+    activeBlockers: knownFlags(r.active_blockers, lens?.blockers.map((b) => b.id) ?? []),
     evidenceLinks,
     markedLearned: r.marked_learned,
     needsRemediation: r.needs_remediation,

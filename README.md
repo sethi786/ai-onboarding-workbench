@@ -26,7 +26,9 @@ grade, and go/no-go recommendation, and generate draft evidence packs — **befo
 
 Next.js (App Router) · TypeScript (strict) · Tailwind v4 · Supabase (Auth + Postgres + RLS) ·
 server components + server actions. The framework-agnostic scoring engine, exports, 20-lens data, and
-types are ported **verbatim** into `workbench/` and reused unchanged — the engine never touches Supabase.
+types live in `workbench/` — the engine never touches Supabase. Read the
+[versioned governance methodology](docs/governance-methodology.md) for scoring,
+evidence validity, scope changes, and the distinction between readiness and approval.
 
 ## Project structure
 
@@ -35,7 +37,7 @@ app/(marketing)   public marketing pages
 app/(auth)        login / signup / password reset
 app/auth/*        OAuth/magic-link callback + signout route handlers
 app/portal/*      authenticated, org-scoped client portal
-workbench/*       ported pure engine, export builders, 20-lens data, types (unchanged)
+workbench/*       pure scoring engine, export builders, 20-lens data, types
 lib/supabase/*    @supabase/ssr server + browser + middleware + admin (service-role, scripts only)
 lib/auth/*        requireUser, requireMembership
 lib/db/*          typed schema, mappers (row ↔ domain), queries, scoreEvaluation
@@ -48,11 +50,13 @@ scripts/seed-templates.ts  optional: seed tool_templates table (service role)
 
 ## Local development
 
+Use Node.js 22.12 or newer for the development and test tools.
+
 ```bash
 npm install
 npm run dev        # http://localhost:3000  (marketing works with no backend)
 npm run build      # production build (succeeds without a live Supabase project)
-npm test           # ported scoring-engine unit tests (Vitest)
+npm test           # scoring, reports, actions, UI saves, and Postgres/RLS regression tests
 npm run typecheck
 ```
 
@@ -72,12 +76,19 @@ The **marketing site runs with no backend**. The portal requires Supabase (below
    supabase/migrations/0002_functions.sql
    supabase/migrations/0003_triggers.sql
    supabase/migrations/0004_rls.sql
+   supabase/migrations/0005_tool_category.sql
+   supabase/migrations/0006_governance_integrity.sql
    ```
 4. In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your prod
    URL) as a redirect URL.
 5. (Optional) Seed the tool-template table: `npm run seed:templates`. The library also renders from the
    static module, so this is only needed if you later query/extend templates in the DB.
 6. `npm run dev`, sign up, create a workspace, and start an evaluation.
+
+For existing installations, apply migration 0006 before deploying this version.
+Existing notes and links are retained; earlier assessments and unassigned legacy
+references require review before they contribute to readiness. See the methodology
+document for upgrade behavior and staging verification steps.
 
 > To regenerate DB types after schema changes with the Supabase CLI: `npm run gen:types` (overwrites
 > `lib/db/types.ts`, currently hand-authored to match the migrations).

@@ -1,3 +1,4 @@
+import { METHODOLOGY_NOTE } from '../engine/scoring';
 import type { ReportContext } from './reportContext';
 import { DRAFT_BANNER } from '../data/constants';
 
@@ -6,14 +7,14 @@ export function toRemediationPlan(ctx: ReportContext): string {
   const items = teams.filter(
     (t) =>
       t.required &&
-      (t.activeBlockerLabels.length > 0 ||
-        t.assessment.needsRemediation ||
-        t.missingEvidence.length > 0 ||
-        t.controlsComplete < t.controlsTotal),
+      ctx.score.perTeam[t.lens.id].gateReasons.length > 0,
   );
 
   const lines: string[] = [];
   lines.push('# Remediation Plan');
+  lines.push('');
+  lines.push(`Methodology: ${ctx.score.methodologyVersion} · Evaluated: ${ctx.score.evaluatedAt}`);
+  lines.push(METHODOLOGY_NOTE);
   lines.push('');
   lines.push(`> ${DRAFT_BANNER}`);
   lines.push('');
@@ -29,7 +30,7 @@ export function toRemediationPlan(ctx: ReportContext): string {
   lines.push('| Team | Gap | Owner | Due | Suggested Actions |');
   lines.push('|---|---|---|---|---|');
   for (const t of items) {
-    const gaps: string[] = [];
+    const gaps: string[] = [...ctx.score.perTeam[t.lens.id].gateReasons];
     if (t.activeBlockerLabels.length) gaps.push(`Blockers: ${t.activeBlockerLabels.join('; ')}`);
     if (t.controlsComplete < t.controlsTotal)
       gaps.push(`${t.controlsTotal - t.controlsComplete} controls open`);

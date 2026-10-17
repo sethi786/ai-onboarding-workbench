@@ -1,12 +1,18 @@
 import type { ReportContext } from './reportContext';
 
 function esc(v: string | number): string {
-  const s = String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  const raw = String(v);
+  // Prevent spreadsheet software from treating user text as a formula.
+  const s = typeof v === 'string' && /^[\s]*[=+@-]/.test(raw) ? `'${raw}` : raw;
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 export function toCsv(ctx: ReportContext): string {
   const header = [
+    'MethodologyVersion',
+    'EvaluatedAt',
+    'SelfReportedDecisionStatus',
+    'Recommendation',
     'Profile',
     'Team',
     'Required',
@@ -24,6 +30,10 @@ export function toCsv(ctx: ReportContext): string {
   ];
   const rows = ctx.teams.map((t) =>
     [
+      ctx.score.methodologyVersion,
+      ctx.score.evaluatedAt,
+      ctx.score.approvalStatus,
+      ctx.score.recommendation,
       ctx.profile.name,
       t.lens.title,
       t.required ? 'Yes' : 'No',

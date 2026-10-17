@@ -46,7 +46,7 @@ export default async function ExportsPage({
 
   const bundle = {
     base: slug(row.name),
-    json: toProfileJson(profile, getAssessment),
+    json: toProfileJson(profile, getAssessment, score.evaluatedAt),
     csv: toCsv(ctx),
     markdown: toMarkdownReport(ctx),
     gonogo: toGoNoGoReport(ctx),

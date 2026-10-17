@@ -1,4 +1,4 @@
-import type { RiskLevel, ApprovalStatus, Recommendation } from '../types';
+import type { RiskLevel, Recommendation } from '../types';
 
 const RISK_ORDER: Record<RiskLevel, number> = {
   Low: 0,
@@ -21,22 +21,9 @@ export function computeRecommendation(
   hasCriticalBlocker: boolean,
 ): Recommendation {
   if (hasCriticalBlocker) return 'Blocked';
+  if (!Number.isFinite(readiness)) return 'Not Ready for Review';
   if (readiness >= 85 && RISK_ORDER[risk] <= RISK_ORDER.Medium) return 'Proceed';
   if (readiness >= 70) return 'Proceed with Conditions';
   if (readiness >= 50) return 'Needs Remediation';
   return 'Not Ready for Review';
-}
-
-export function recommendationToApproval(rec: Recommendation): ApprovalStatus {
-  switch (rec) {
-    case 'Proceed':
-      return 'Approved';
-    case 'Proceed with Conditions':
-      return 'Approved with Conditions';
-    case 'Blocked':
-      return 'Blocked';
-    case 'Needs Remediation':
-    case 'Not Ready for Review':
-      return 'In Progress';
-  }
 }

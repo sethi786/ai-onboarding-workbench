@@ -5,51 +5,7 @@ import { TEAM_LENSES, LENS_BY_ID } from '../../data/teamLenses';
 import { makeEmptyAssessment } from '../../types';
 import type { Profile, TeamAssessment, TeamId } from '../../types';
 
-function baseProfile(over: Partial<Profile> = {}): Profile {
-  return {
-    id: 'p1',
-    name: 'Test',
-    platform: 'Internal AI App',
-    toolCategory: 'AI / ML system',
-    toolType: 'Internal AI application',
-    useCase: '',
-    businessOwner: '',
-    technicalOwner: '',
-    executiveSponsor: '',
-    targetUsers: '',
-    dataTypes: [],
-    dataClassification: 'Internal',
-    environment: 'Sandbox',
-    model: '',
-    agentEnabled: false,
-    connectorEnabled: false,
-    ragEnabled: false,
-    externalVendor: false,
-    clientData: false,
-    pii: false,
-    autonomousActions: false,
-    selfHosted: false,
-    createdAt: '',
-    updatedAt: '',
-    ...over,
-  };
-}
-
-/** Fully-complete assessment: score 5, all controls & evidence checked. */
-function fullAssessment(teamId: TeamId): TeamAssessment {
-  const lens = LENS_BY_ID[teamId];
-  const a = makeEmptyAssessment(teamId);
-  a.score = 5;
-  lens.requiredControls.forEach((c) => (a.checkedControls[c.id] = true));
-  lens.evidenceRequired.forEach((e) => (a.checkedEvidence[e.id] = true));
-  return a;
-}
-
-function allFull(): Record<string, TeamAssessment> {
-  const map: Record<string, TeamAssessment> = {};
-  TEAM_LENSES.forEach((l) => (map[l.id] = fullAssessment(l.id)));
-  return map;
-}
+import { baseProfile, allFull } from './fixtures';
 
 describe('computeRisk', () => {
   it('is Low for a benign sandbox profile', () => {
@@ -95,13 +51,13 @@ describe('computeScoreFromMap', () => {
     expect(r.hasCriticalBlocker).toBe(false);
   });
 
-  it('forces readiness to 0 when a critical blocker is active', () => {
+  it('preserves progress while blocking the recommendation', () => {
     const p = baseProfile({ dataClassification: 'Public' });
     const map = allFull();
     // Activate a critical Security blocker (hardcoded secrets)
     map['security-sar'].activeBlockers['sar-b2'] = true;
     const r = computeScoreFromMap(p, TEAM_LENSES, map);
-    expect(r.readiness).toBe(0);
+    expect(r.readiness).toBe(100);
     expect(r.hasCriticalBlocker).toBe(true);
     expect(r.recommendation).toBe('Blocked');
     expect(r.approvalStatus).toBe('Blocked');
@@ -124,6 +80,7 @@ describe('computeScoreFromMap', () => {
     const map: Record<string, TeamAssessment> = {};
     TEAM_LENSES.forEach((l) => {
       const a = makeEmptyAssessment(l.id);
+      a.scopeRevision = 1;
       a.score = 5; // strong self-score but no controls/evidence checked
       map[l.id] = a;
     });

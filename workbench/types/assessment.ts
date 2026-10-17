@@ -11,6 +11,9 @@ export interface EvidenceLink {
   id: string;
   label: string;
   url: string;
+  evidenceId?: string;
+  scopeRevision?: number;
+  expiresOn?: string;
 }
 
 /**
@@ -18,6 +21,7 @@ export interface EvidenceLink {
  * Lazily created via makeEmptyAssessment — never pre-populated.
  */
 export interface TeamAssessment {
+  scopeRevision?: number;
   teamId: TeamId;
   score: number; // 0..5, -1 = not set
   checkedControls: Record<string, boolean>;

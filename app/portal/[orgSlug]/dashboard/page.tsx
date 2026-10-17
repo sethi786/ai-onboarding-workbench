@@ -38,7 +38,7 @@ export default async function DashboardPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Governance Control Tower</h1>
-          <p className="text-sm text-muted-foreground">{org.name} · AI onboarding portfolio</p>
+          <p className="text-sm text-muted-foreground">{org.name} · Tool governance portfolio</p>
         </div>
         <Link
           href={`/portal/${orgSlug}/evaluations/new`}
@@ -53,8 +53,8 @@ export default async function DashboardPage({
           <ScoreGauge value={avg} size={140} label="Avg readiness" />
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Stat label="AI tools in flight" value={total} />
-          <Stat label="Cleared to proceed" value={ready} />
+          <Stat label="Tools in flight" value={total} />
+          <Stat label="Ready for formal review" value={ready} />
           <Stat label="Blocked" value={blocked} />
         </div>
       </div>

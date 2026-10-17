@@ -1,9 +1,14 @@
+import { computeScoreFromMap, METHODOLOGY_NOTE } from '../engine/scoring';
+import { TEAM_LENSES } from '../data/teamLenses';
+import type { ScoreResult } from '../types';
 import type { Profile, TeamAssessment, TeamId } from '../types';
 import { TEAM_IDS } from '../data/teamLenses';
 
 export interface ProfileExport {
   kind: 'ai-workbench-profile';
-  version: 1;
+  version: 2;
+  methodologyNote: string;
+  score: ScoreResult;
   profile: Profile;
   assessments: Record<string, TeamAssessment>;
 }
@@ -11,6 +16,7 @@ export interface ProfileExport {
 export function toProfileJson(
   profile: Profile,
   getAssessment: (teamId: TeamId) => TeamAssessment,
+  asOf?: string,
 ): string {
   const assessments: Record<string, TeamAssessment> = {};
   TEAM_IDS.forEach((id) => {
@@ -18,17 +24,11 @@ export function toProfileJson(
   });
   const payload: ProfileExport = {
     kind: 'ai-workbench-profile',
-    version: 1,
+    version: 2,
+    methodologyNote: METHODOLOGY_NOTE,
+    score: computeScoreFromMap(profile, TEAM_LENSES, assessments, asOf),
     profile,
     assessments,
   };
   return JSON.stringify(payload, null, 2);
-}
-
-export function parseProfileJson(text: string): ProfileExport {
-  const data = JSON.parse(text);
-  if (data?.kind !== 'ai-workbench-profile' || !data.profile) {
-    throw new Error('Not a valid AI Workbench profile export.');
-  }
-  return data as ProfileExport;
 }

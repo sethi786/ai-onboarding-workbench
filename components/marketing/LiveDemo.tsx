@@ -49,10 +49,12 @@ export function LiveDemo() {
     const map = {} as Record<TeamId, TeamAssessment>;
     for (const lens of TEAM_LENSES) {
       const a = makeEmptyAssessment(lens.id);
+      a.scopeRevision = 1;
       a.score = score;
       if (controlsComplete) {
         lens.requiredControls.forEach((c) => (a.checkedControls[c.id] = true));
         lens.evidenceRequired.forEach((e) => (a.checkedEvidence[e.id] = true));
+        a.evidenceLinks = lens.evidenceRequired.map((e) => ({ id: e.id, evidenceId: e.id, scopeRevision: 1, label: 'Illustrative demo reference', url: 'https://example.com/demo-evidence' }));
       }
       map[lens.id] = a;
     }
@@ -70,12 +72,12 @@ export function LiveDemo() {
         <div className="text-center">
           <span className="inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
             <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-electric" />
-            Live · runs in your browser
+            Illustrative demo · runs in your browser
           </span>
           <h2 className="display-lg mt-4">Try the readiness engine. No signup.</h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground">
             This is the real Aegis scoring engine evaluating a sample AI agent. Change the inputs and
-            watch readiness, risk, and the go/no-go call update instantly.
+            watch readiness, risk, and the go/no-go call update instantly. All evidence and controls here are simulated examples; no tests or verification are performed.
           </p>
         </div>
 
@@ -120,7 +122,7 @@ export function LiveDemo() {
                 onClick={() => setControlsComplete((v) => !v)}
                 icon={<CheckCheck className="h-4 w-4" />}
                 label="Complete all controls & evidence"
-                hint="Attach every required control and evidence item"
+                hint="Simulate current references for all required evidence items"
               />
               <Toggle
                 on={blocker}

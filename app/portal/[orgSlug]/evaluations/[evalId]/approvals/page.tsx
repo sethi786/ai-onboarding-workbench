@@ -21,7 +21,7 @@ export default async function ApprovalsPage({
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        Sign-off matrix across all review lenses. Record the self-evaluation decision per team.
+        Record self-reported decisions per team. These entries are not authenticated reviewer sign-offs or permission to deploy. Formal approval remains in your organization’s approval process.
       </p>
       <ApprovalsTable
         assessments={map}

@@ -26,6 +26,7 @@ export interface MembershipRow {
 }
 
 export interface EvaluationRow {
+  scope_revision: number;
   id: string;
   org_id: string;
   name: string;
@@ -57,6 +58,7 @@ export interface EvaluationRow {
 }
 
 export interface TeamAssessmentRow {
+  scope_revision: number;
   id: string;
   org_id: string;
   evaluation_id: string;
@@ -77,6 +79,9 @@ export interface TeamAssessmentRow {
 }
 
 export interface EvidenceLinkRow {
+  evidence_id: string;
+  scope_revision: number;
+  expires_on: string | null;
   id: string;
   org_id: string;
   evaluation_id: string;

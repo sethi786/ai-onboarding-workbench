@@ -21,9 +21,16 @@ export interface TeamScore {
   activeBlockers: number;
   hasCriticalBlocker: boolean;
   completeness: number; // 0..1
+  scopeCurrent: boolean;
+  readyForReview: boolean;
+  missingEvidenceIds: string[];
+  gateReasons: string[];
 }
 
 export interface ScoreResult {
+  methodologyVersion: string;
+  evaluatedAt: string;
+  gateReasons: string[];
   readiness: number; // 0..100
   risk: RiskLevel;
   recommendation: Recommendation;

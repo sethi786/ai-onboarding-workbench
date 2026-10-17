@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { METHODOLOGY_NOTE } from '@/workbench/engine/scoring';
 import { notFound } from 'next/navigation';
 import { getEvaluation, loadAssessmentMap, rowToProfile } from '@/lib/db/queries';
 import { computeScoreFromMap } from '@/workbench/engine/scoring';
@@ -23,9 +25,9 @@ function Stat({ label, value, hint }: { label: string; value: React.ReactNode; h
 export default async function EvaluationOverview({
   params,
 }: {
-  params: Promise<{ evalId: string }>;
+  params: Promise<{ evalId: string; orgSlug: string }>;
 }) {
-  const { evalId } = await params;
+  const { evalId, orgSlug } = await params;
   const row = await getEvaluation(evalId);
   if (!row) notFound();
   const map = await loadAssessmentMap(evalId);
@@ -51,17 +53,26 @@ export default async function EvaluationOverview({
             <div className="mt-2"><Badge tone={recommendationTone(score.recommendation)}>{score.recommendation}</Badge></div>
           </div>
           <div>
-            <div className="text-xs font-medium text-muted-foreground">Evidence complete</div>
+            <div className="text-xs font-medium text-muted-foreground">Evidence supported</div>
             <div className="mt-1 text-2xl font-semibold">{score.evidenceCompleteness}%</div>
           </div>
         </div>
       </div>
 
+      <p className="text-xs text-muted-foreground">{score.methodologyVersion} · {METHODOLOGY_NOTE}</p>
+      <div className="rounded-lg border border-border bg-card p-4">
+        <h2 className="font-semibold">Next actions</h2>
+        <p className="mt-1 text-sm">Self-reported decisions: {score.approvalStatus}. Formal approval is recorded through your organization’s process.</p>
+        <ul className="mt-3 space-y-2 text-sm">
+          {Object.values(score.perTeam).filter((t) => t.required && t.gateReasons.length).map((t) => <li key={t.teamId}><Link className="text-electric hover:underline" href={`/portal/${orgSlug}/evaluations/${evalId}/lenses#${t.teamId}`}>{LENS_BY_ID[t.teamId].title}</Link>: {t.gateReasons.join(' ')}</li>)}
+          {!score.gateReasons.length && <li>The evidence pack is ready for formal review. <Link className="text-electric hover:underline" href={`/portal/${orgSlug}/evaluations/${evalId}/exports`}>Export the review pack</Link>.</li>}
+        </ul>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Evidence complete" value={`${score.evidenceCompleteness}%`} />
+        <Stat label="Evidence supported" value={`${score.evidenceCompleteness}%`} />
         <Stat label="Blockers" value={score.blockersCount} />
         <Stat label="Controls remaining" value={score.controlsRemaining} />
-        <Stat label="Teams ready" value={score.teamsReady} hint={`of ${score.requiredTeams} required`} />
+        <Stat label="Teams ready for review" value={score.teamsReady} hint={`of ${score.requiredTeams} required`} />
         <Stat label="Teams blocked" value={score.teamsBlocked} />
       </div>
 

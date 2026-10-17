@@ -130,6 +130,8 @@ export const PROJECT_TYPES_BY_CATEGORY: Record<ToolCategory, ProjectType[]> = {
  * engine/reviewIntensity.ts.
  */
 export interface Profile {
+  /** Database-controlled revision of the evaluated scope. */
+  scopeRevision?: number;
   id: string;
   name: string;
   platform: string;
