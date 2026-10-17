@@ -1,6 +1,6 @@
 # Authentication, database and administration setup
 
-These are deployment requirements, not evidence that the hosted services have been configured. On 17 October 2026, Vercel project inspection returned 403 for `sethi786s-projects`; the working environment had no Supabase credentials. No hosted migration, account signup, email delivery or payment was verified.
+These are deployment requirements, not evidence that the complete customer journey passes. A free Supabase staging project now has migrations 0001–0009 installed and basic hosted SQL checks passing. An additional hardening migration remains pending after provider request-expiry errors. Vercel access is still blocked by a 403. No real signup, email delivery or payment was verified. See the current [hosted acceptance record](hosted-acceptance.md).
 
 ## Connect the existing services
 
@@ -8,7 +8,7 @@ Use the existing Aegis repository and its Vercel project `ai-onboarding-workbenc
 
 Set the matching project's `NEXT_PUBLIC_SUPABASE_URL` and public anon/publishable key in `NEXT_PUBLIC_SUPABASE_ANON_KEY` on the intended Vercel environment. Store `SUPABASE_SERVICE_ROLE_KEY` only as a server secret. Set `NEXT_PUBLIC_SITE_URL` to the canonical HTTPS origin without a path. Rebuild after public variables change: Next.js embeds them in the browser bundle at build time. Never commit or paste keys into chat, logs or this document.
 
-Back up the database and verify the restore procedure. Apply only unapplied migrations, in order, through `0009_database_access.sql`. This last migration explicitly installs table/RPC privileges instead of relying on Supabase project defaults. It preserves records and RLS, removes anonymous access to application tables, restricts activity to customer reads, and restricts invitations to validated RPCs. It does not add data or accounts. If another integration writes directly to invitation/activity tables, adapt it to the supported RPCs before applying the migration.
+Back up the database and verify the restore procedure. Apply only unapplied migrations in order, including `20261017162202_hosted_database_hardening.sql` after `0009_database_access.sql`. Migration 0009 explicitly installs table/RPC privileges instead of relying on project defaults. It preserves records and RLS, removes anonymous table access, restricts activity to customer reads, and restricts invitations to validated RPCs. The final migration hardens trigger-function grants and lookup paths, and improves policy/index coverage. Neither adds data or accounts. Adapt integrations that write directly to invitation/activity tables to the supported RPCs first. See the hosted acceptance record before switching the existing staging project's migration deployment method.
 
 ## Enable reliable email authentication
 

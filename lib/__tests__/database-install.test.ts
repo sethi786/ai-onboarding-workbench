@@ -15,8 +15,10 @@ beforeAll(async () => {
   await db.exec(`create schema auth; create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
     create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
-    grant usage on schema auth to authenticated,service_role;`);
-  // No blanket public table/function grants: the migrations must supply them.
+    grant usage on schema auth to authenticated,service_role;
+    alter default privileges in schema public grant execute on functions to anon,authenticated,service_role;`);
+  // No blanket table grants: migrations must supply them. Function defaults
+  // reproduce Supabase's direct client grants so revocation regressions surface.
   for (const file of readdirSync('supabase/migrations').sort())
     await db.exec(readFileSync(`supabase/migrations/${file}`, 'utf8'));
   await db.query(
@@ -113,6 +115,35 @@ it('keeps anonymous visitors away from tables and privileged setup RPCs', async 
       )
     ).rows,
   ).toEqual([{ allowed: false }]);
+});
+it('removes hosted default API grants from internal trigger functions', async () => {
+  const { rows } = await db.query(
+    `select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+     where n.nspname='public' and p.prorettype='trigger'::regtype
+       and (has_function_privilege('anon',p.oid,'EXECUTE')
+         or has_function_privilege('authenticated',p.oid,'EXECUTE'))`,
+  );
+  expect(rows).toEqual([]);
+});
+it('keeps a viewer read-only across every assessment child table', async () => {
+  const evaluation = (
+    await db.query<{ id: string }>(
+      "insert into evaluations(org_id,name) values($1,'Viewer review') returning id",
+      [org],
+    )
+  ).rows[0].id;
+  await db.query("insert into team_assessments(org_id,evaluation_id,team_id) values($1,$2,'security-sar')", [org,evaluation]);
+  await db.query("insert into evidence_links(org_id,evaluation_id,team_id,url) values($1,$2,'security-sar','https://example.test/evidence')", [org,evaluation]);
+  await db.query("insert into generated_reports(org_id,evaluation_id,title,kind,content) values($1,$2,'Report','readiness','Test')", [org,evaluation]);
+  await db.exec('reset role');
+  await db.query("update organizations set plan='team' where id=$1", [org]);
+  await db.query("insert into memberships(org_id,user_id,role) values($1,$2,'viewer')", [org,outsider]);
+  await asUser(outsider);
+  for (const table of ['team_assessments','evidence_links','workflow_stages','generated_reports']) {
+    expect((await db.query(`select id from ${table}`)).rows.length).toBeGreaterThan(0);
+    expect((await db.query(`update ${table} set org_id=org_id returning id`)).rows).toHaveLength(0);
+    expect((await db.query(`delete from ${table} returning id`)).rows).toHaveLength(0);
+  }
 });
 it('requires validated invitation RPCs and service-only billing/lead operations', async () => {
   expect(
