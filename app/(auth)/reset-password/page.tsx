@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { AuthInput, AuthLabel, AuthError, AuthSubmit } from '@/components/auth/auth-ui';
+import {
+  AuthInput,
+  AuthLabel,
+  AuthError,
+  AuthSubmit,
+} from '@/components/auth/auth-ui';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -15,28 +20,48 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) {
-      setError(error.message);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+      router.push('/portal');
+      router.refresh();
+    } catch {
+      setError('We could not update your password. Please retry.');
+    } finally {
       setLoading(false);
-      return;
     }
-    router.push('/portal');
-    router.refresh();
   }
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-foreground">Set a new password</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Choose a strong password to finish.</p>
+      <h1 className="text-lg font-semibold text-foreground">
+        Set a new password
+      </h1>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Choose a strong password to finish.
+      </p>
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <AuthError message={error} />
         <div>
           <AuthLabel htmlFor="password">New password</AuthLabel>
-          <AuthInput id="password" type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <AuthInput
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            minLength={8}
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
-        <AuthSubmit disabled={loading}>{loading ? 'Saving…' : 'Update password'}</AuthSubmit>
+        <AuthSubmit disabled={loading}>
+          {loading ? 'Saving…' : 'Update password'}
+        </AuthSubmit>
       </form>
     </div>
   );

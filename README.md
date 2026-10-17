@@ -100,9 +100,30 @@ document for upgrade behavior and staging verification steps.
 - Orgs are created via the `create_organization` RPC (atomic org + owner membership) to avoid the
   RLS insert chicken-and-egg.
 - Auth decisions always use `getUser()` (verifies the JWT); the session is refreshed in `middleware.ts`.
-- The service-role client (`lib/supabase/admin.ts`) is ESLint-fenced to `scripts/` only.
+- The seed client (`lib/supabase/admin.ts`) is ESLint-fenced to `scripts/` only. A separate
+  server-only service client is used by verified billing and validated lead handlers.
 
-## Roadmap (post-foundation)
+## Remaining product roadmap
 
-Stripe billing (schema seam already present: `organizations.stripe_customer_id` / `plan`), invitation
-acceptance flow, richer analytics, and a larger prefilled tool library.
+SSO/SCIM, custom lens authoring, independent signed approval records, live vendor monitoring,
+and richer analytics are not part of the current release.
+
+## Commercial launch release
+
+The launch release adds a public 40-tool catalogue, six assessment starters, US$99/month Team pricing,
+Stripe-hosted checkout and billing management, signed webhook reconciliation, persistent enquiry
+intake with Turnstile, and expiring shareable workspace invitations. Starter includes three evaluations,
+one member, and exports. Every template starts unreviewed.
+
+Apply **`supabase/migrations/0007_launch_commerce.sql`** after the governance-integrity migration.
+It protects billing fields, enforces database quotas, restricts membership management, and adds
+invitation, lead-intake and billing RPCs. Public API clients cannot execute service-only RPCs.
+
+Read **[the customer audit and launch runbook](docs/launch-readiness.md)** before opening sales.
+`LAUNCH_APPROVED=false` is the default. Missing services show an honest preview/unavailable state.
+No domain or paid infrastructure is purchased by this change; production legal terms and real provider
+acceptance tests remain deployment gates. Keep credentials out of git and client-side environment variables.
+
+Verification: `npm test`, `npm run typecheck`, `npm run lint`, `npm audit --omit=dev`, `npm run build`.
+For the isolated no-credentials HTTP smoke suite, start the production build on port 3001 and run
+`npm run test:smoke -- http://localhost:3001`. The checked-in CI workflow runs these checks on PRs.

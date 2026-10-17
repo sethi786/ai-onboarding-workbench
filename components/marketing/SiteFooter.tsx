@@ -1,14 +1,25 @@
 import Link from 'next/link';
 import { ShieldLogo } from '@/components/brand/ShieldLogo';
 
-function FooterCol({ title, links }: { title: string; links: { href: string; label: string }[] }) {
+function FooterCol({
+  title,
+  links,
+}: {
+  title: string;
+  links: { href: string; label: string }[];
+}) {
   return (
     <div>
-      <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">{title}</h4>
+      <h4 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/40">
+        {title}
+      </h4>
       <ul className="mt-4 space-y-3">
         {links.map((l) => (
           <li key={l.href}>
-            <Link href={l.href} className="text-sm text-white/70 transition-colors hover:text-white">
+            <Link
+              href={l.href}
+              className="text-sm text-white/70 transition-colors hover:text-white"
+            >
               {l.label}
             </Link>
           </li>
@@ -26,8 +37,8 @@ export function SiteFooter() {
           <div>
             <ShieldLogo tone="light" />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
-              Governance for every tool you adopt — SaaS, PaaS, on-prem, and AI. Security, privacy,
-              legal, and risk review as one workflow.
+              Governance for every tool you adopt — SaaS, PaaS, on-prem, and AI.
+              Security, privacy, legal, and risk review as one workflow.
             </p>
           </div>
           <FooterCol
@@ -37,6 +48,8 @@ export function SiteFooter() {
               { href: '/use-cases', label: 'Use cases' },
               { href: '/solutions', label: 'Solutions' },
               { href: '/assessment', label: 'The 20 lenses' },
+              { href: '/tools', label: 'Tool catalogue' },
+              { href: '/assessments', label: 'Assessment starters' },
               { href: '/pricing', label: 'Pricing' },
             ]}
           />
@@ -59,8 +72,13 @@ export function SiteFooter() {
           />
         </div>
         <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/40 md:flex-row md:items-center">
-          <p>© {new Date().getFullYear()} Aegis. A self-evaluation and readiness aid.</p>
-          <p className="font-mono tracking-tight">SOC 2 · ISO 27001 · HIPAA · NIST AI RMF-aligned</p>
+          <p>
+            © {new Date().getFullYear()} Aegis. A self-evaluation and readiness
+            aid.
+          </p>
+          <p className="font-mono tracking-tight">
+            Self-assessment · Evidence · Review readiness
+          </p>
         </div>
       </div>
     </footer>

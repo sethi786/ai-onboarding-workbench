@@ -1,3 +1,4 @@
+import { ASSESSMENT_TEMPLATES } from './assessment-templates';
 import type { Profile, TeamId, TeamAssessment } from '@/workbench/types';
 
 /**
@@ -18,11 +19,13 @@ export interface ToolTemplate {
   defaults: Partial<Profile>;
   suggested: Partial<Record<TeamId, Partial<TeamAssessment>>>;
   sortOrder: number;
+  sourceUrl?: string;
+  updatedOn?: string;
 }
 
 const note = (notes: string): Partial<TeamAssessment> => ({ notes });
 
-export const TOOL_TEMPLATES: ToolTemplate[] = [
+const EXISTING_TEMPLATES: ToolTemplate[] = [
   {
     id: 'chatgpt-enterprise',
     name: 'ChatGPT Enterprise',
@@ -30,7 +33,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'ChatGPT Enterprise',
     toolType: 'Enterprise SaaS AI platform',
     category: 'Assistant',
-    summary: 'General-purpose enterprise assistant with SSO/SCIM, no training on your data, connectors and custom GPTs.',
+    summary:
+      'General-purpose enterprise assistant with SSO/SCIM, no training on your data, connectors and custom GPTs.',
     defaults: {
       model: 'GPT-4o',
       dataClassification: 'Confidential',
@@ -41,9 +45,15 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       pii: true,
     },
     suggested: {
-      'vendor-risk': note('Confirm SOC 2 Type II, DPA, and no-training-on-data terms for the Enterprise tier.'),
-      'privacy-pia': note('Prompts may contain PII from pasted content; confirm retention and residency.'),
-      'security-sar': note('Enforce SSO + SCIM; scope connectors; validate DLP on uploads.'),
+      'vendor-risk': note(
+        'Confirm SOC 2 Type II, DPA, and no-training-on-data terms for the Enterprise tier.',
+      ),
+      'privacy-pia': note(
+        'Prompts may contain PII from pasted content; confirm retention and residency.',
+      ),
+      'security-sar': note(
+        'Enforce SSO + SCIM; scope connectors; validate DLP on uploads.',
+      ),
     },
     sortOrder: 1,
   },
@@ -54,7 +64,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Microsoft 365 Copilot',
     toolType: 'Internal productivity assistant',
     category: 'Assistant',
-    summary: 'Graph-grounded productivity across Word, Excel, Outlook, Teams. Respects existing M365 permissions.',
+    summary:
+      'Graph-grounded productivity across Word, Excel, Outlook, Teams. Respects existing M365 permissions.',
     defaults: {
       model: 'GPT-4o (Copilot)',
       dataClassification: 'Confidential',
@@ -65,9 +76,15 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       pii: true,
     },
     suggested: {
-      'data-governance': note('Oversharing risk via Graph — run a permissions/sensitivity-label review before rollout.'),
-      'privacy-pia': note('Copilot can surface personal data in mail/docs; validate scope and retention.'),
-      'iam': note('Confirm Entra ID conditional access and license assignment governance.'),
+      'data-governance': note(
+        'Oversharing risk via Graph — run a permissions/sensitivity-label review before rollout.',
+      ),
+      'privacy-pia': note(
+        'Copilot can surface personal data in mail/docs; validate scope and retention.',
+      ),
+      iam: note(
+        'Confirm Entra ID conditional access and license assignment governance.',
+      ),
     },
     sortOrder: 2,
   },
@@ -78,7 +95,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Copilot Studio',
     toolType: 'Copilot Studio agent',
     category: 'Agent',
-    summary: 'Low-code custom agents with connectors, knowledge sources, and actions across Power Platform.',
+    summary:
+      'Low-code custom agents with connectors, knowledge sources, and actions across Power Platform.',
     defaults: {
       model: 'GPT-4o (Copilot)',
       dataClassification: 'Confidential',
@@ -90,9 +108,15 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       pii: true,
     },
     suggested: {
-      'agent-governance': note('Register the agent; define owner, tool/action allowlist, human approval, and a kill switch.'),
-      'connector-governance': note('Review each connector’s OAuth scopes, credential storage, and DLP policy.'),
-      'security-sar': note('Test prompt injection via connected knowledge sources.'),
+      'agent-governance': note(
+        'Register the agent; define owner, tool/action allowlist, human approval, and a kill switch.',
+      ),
+      'connector-governance': note(
+        'Review each connector’s OAuth scopes, credential storage, and DLP policy.',
+      ),
+      'security-sar': note(
+        'Test prompt injection via connected knowledge sources.',
+      ),
     },
     sortOrder: 3,
   },
@@ -103,7 +127,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Gemini Enterprise',
     toolType: 'Enterprise SaaS AI platform',
     category: 'Assistant',
-    summary: 'Google Workspace-grounded assistant with enterprise controls and connectors.',
+    summary:
+      'Google Workspace-grounded assistant with enterprise controls and connectors.',
     defaults: {
       model: 'Gemini 2.5 Pro',
       dataClassification: 'Confidential',
@@ -113,8 +138,12 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       pii: true,
     },
     suggested: {
-      'privacy-pia': note('Confirm data residency and Workspace grounding permission scope.'),
-      'vendor-risk': note('Obtain Google Cloud DPA and security documentation.'),
+      'privacy-pia': note(
+        'Confirm data residency and Workspace grounding permission scope.',
+      ),
+      'vendor-risk': note(
+        'Obtain Google Cloud DPA and security documentation.',
+      ),
     },
     sortOrder: 4,
   },
@@ -125,7 +154,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Claude Enterprise',
     toolType: 'Enterprise SaaS AI platform',
     category: 'Assistant',
-    summary: 'Long-context reasoning and analysis with SSO/SCIM, Projects, and no training on your data.',
+    summary:
+      'Long-context reasoning and analysis with SSO/SCIM, Projects, and no training on your data.',
     defaults: {
       model: 'Claude',
       dataClassification: 'Confidential',
@@ -134,8 +164,12 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       externalVendor: true,
     },
     suggested: {
-      'vendor-risk': note('Confirm SOC 2, DPA, and data-retention/no-training terms.'),
-      'ai-engineering': note('Define prompt versioning and evaluation for Projects used in workflows.'),
+      'vendor-risk': note(
+        'Confirm SOC 2, DPA, and data-retention/no-training terms.',
+      ),
+      'ai-engineering': note(
+        'Define prompt versioning and evaluation for Projects used in workflows.',
+      ),
     },
     sortOrder: 5,
   },
@@ -146,7 +180,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Azure AI Foundry',
     toolType: 'RAG assistant',
     category: 'RAG',
-    summary: 'Custom RAG apps on your Azure tenant with private networking and managed identities.',
+    summary:
+      'Custom RAG apps on your Azure tenant with private networking and managed identities.',
     defaults: {
       model: 'GPT-4o (Azure)',
       dataClassification: 'Confidential',
@@ -157,9 +192,15 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       clientData: true,
     },
     suggested: {
-      'data-governance': note('Prove permission trimming and vector lifecycle (deletes propagate to the index).'),
-      'security-sar': note('Private endpoints, Key Vault secrets, and prompt-injection tests on retrieved content.'),
-      'platform-cloud': note('Confirm approved region, environment separation, and cost controls.'),
+      'data-governance': note(
+        'Prove permission trimming and vector lifecycle (deletes propagate to the index).',
+      ),
+      'security-sar': note(
+        'Private endpoints, Key Vault secrets, and prompt-injection tests on retrieved content.',
+      ),
+      'platform-cloud': note(
+        'Confirm approved region, environment separation, and cost controls.',
+      ),
     },
     sortOrder: 6,
   },
@@ -170,7 +211,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Google Vertex AI',
     toolType: 'Knowledge search platform',
     category: 'RAG',
-    summary: 'Enterprise knowledge search / GenAI apps on GCP with VPC-SC and org policy.',
+    summary:
+      'Enterprise knowledge search / GenAI apps on GCP with VPC-SC and org policy.',
     defaults: {
       model: 'Gemini 2.5 (Vertex)',
       dataClassification: 'Confidential',
@@ -179,7 +221,9 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       externalVendor: true,
     },
     suggested: {
-      'data-governance': note('Document sources, owners, classification, and citation/grounding design.'),
+      'data-governance': note(
+        'Document sources, owners, classification, and citation/grounding design.',
+      ),
       'platform-cloud': note('Confirm region, VPC-SC perimeter, and quotas.'),
     },
     sortOrder: 7,
@@ -191,7 +235,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'AWS Bedrock',
     toolType: 'Client-facing AI app',
     category: 'RAG',
-    summary: 'Model-choice GenAI apps with Knowledge Bases, Agents, and Guardrails on AWS.',
+    summary:
+      'Model-choice GenAI apps with Knowledge Bases, Agents, and Guardrails on AWS.',
     defaults: {
       model: 'Claude on Bedrock',
       dataClassification: 'Restricted',
@@ -203,9 +248,15 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       pii: true,
     },
     suggested: {
-      'legal': note('Client-facing + client data — confirm client contract permits AI processing.'),
-      'qrm-risk': note('Client-impacting outputs require human-in-the-loop and residual-risk acceptance.'),
-      'security-sar': note('Configure Bedrock Guardrails; least-privilege IAM; encryption.'),
+      legal: note(
+        'Client-facing + client data — confirm client contract permits AI processing.',
+      ),
+      'qrm-risk': note(
+        'Client-impacting outputs require human-in-the-loop and residual-risk acceptance.',
+      ),
+      'security-sar': note(
+        'Configure Bedrock Guardrails; least-privilege IAM; encryption.',
+      ),
     },
     sortOrder: 8,
   },
@@ -216,7 +267,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Claude Enterprise',
     toolType: 'Coding agent',
     category: 'Agent',
-    summary: 'Repo-aware coding agent for engineering with tool access and optional autonomous actions.',
+    summary:
+      'Repo-aware coding agent for engineering with tool access and optional autonomous actions.',
     defaults: {
       model: 'Claude',
       dataClassification: 'Confidential',
@@ -227,9 +279,15 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       externalVendor: true,
     },
     suggested: {
-      'agent-governance': note('Scope tools to read-only by default; require approval for writes; add a kill switch.'),
-      'secure-sdlc': note('Enforce branch protection, code review, and secret scanning on agent-authored changes.'),
-      'security-sar': note('Restrict repo/token scopes; audit all agent actions.'),
+      'agent-governance': note(
+        'Scope tools to read-only by default; require approval for writes; add a kill switch.',
+      ),
+      'secure-sdlc': note(
+        'Enforce branch protection, code review, and secret scanning on agent-authored changes.',
+      ),
+      'security-sar': note(
+        'Restrict repo/token scopes; audit all agent actions.',
+      ),
     },
     sortOrder: 9,
   },
@@ -248,8 +306,10 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       externalVendor: true,
     },
     suggested: {
-      'legal': note('Review code IP/licensing terms for generated code.'),
-      'secure-sdlc': note('Keep to non-production; scan generated dependencies.'),
+      legal: note('Review code IP/licensing terms for generated code.'),
+      'secure-sdlc': note(
+        'Keep to non-production; scan generated dependencies.',
+      ),
     },
     sortOrder: 10,
   },
@@ -268,7 +328,9 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       externalVendor: true,
     },
     suggested: {
-      'security-sar': note('No production secrets or sensitive data in sandboxes; SSO on team plan.'),
+      'security-sar': note(
+        'No production secrets or sensitive data in sandboxes; SSO on team plan.',
+      ),
     },
     sortOrder: 11,
   },
@@ -287,8 +349,10 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       externalVendor: true,
     },
     suggested: {
-      'legal': note('Enable duplication filter; review IP indemnity terms.'),
-      'secure-sdlc': note('Keep secret scanning + review; treat suggestions as untrusted input.'),
+      legal: note('Enable duplication filter; review IP indemnity terms.'),
+      'secure-sdlc': note(
+        'Keep secret scanning + review; treat suggestions as untrusted input.',
+      ),
     },
     sortOrder: 12,
   },
@@ -299,7 +363,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Internal AI App',
     toolType: 'Knowledge search platform',
     category: 'RAG',
-    summary: 'Enterprise search + assistant over connected SaaS with permission-aware retrieval.',
+    summary:
+      'Enterprise search + assistant over connected SaaS with permission-aware retrieval.',
     defaults: {
       dataClassification: 'Confidential',
       environment: 'Pilot',
@@ -309,8 +374,12 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       pii: true,
     },
     suggested: {
-      'connector-governance': note('Inventory every connector and its scope; verify permission-aware results.'),
-      'data-governance': note('Confirm document-level permissions are respected end to end.'),
+      'connector-governance': note(
+        'Inventory every connector and its scope; verify permission-aware results.',
+      ),
+      'data-governance': note(
+        'Confirm document-level permissions are respected end to end.',
+      ),
     },
     sortOrder: 13,
   },
@@ -329,8 +398,12 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       externalVendor: true,
     },
     suggested: {
-      'vendor-risk': note('Obtain SOC 2 and DPA; confirm data-retention and no-training terms.'),
-      'qrm-risk': note('Cite-your-sources reduces but does not remove hallucination risk; require human review.'),
+      'vendor-risk': note(
+        'Obtain SOC 2 and DPA; confirm data-retention and no-training terms.',
+      ),
+      'qrm-risk': note(
+        'Cite-your-sources reduces but does not remove hallucination risk; require human review.',
+      ),
     },
     sortOrder: 14,
   },
@@ -349,8 +422,12 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       externalVendor: true,
     },
     suggested: {
-      'agent-governance': note('Understand agent autonomy over the codebase; require review of agent edits.'),
-      'security-sar': note('Enable privacy mode; confirm no code retention; scope repo access.'),
+      'agent-governance': note(
+        'Understand agent autonomy over the codebase; require review of agent edits.',
+      ),
+      'security-sar': note(
+        'Enable privacy mode; confirm no code retention; scope repo access.',
+      ),
     },
     sortOrder: 15,
   },
@@ -363,7 +440,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Salesforce',
     toolType: 'CRM / sales platform',
     category: 'SaaS',
-    summary: 'CRM holding customer records, pipeline, and contact data — typically the system of record for client information.',
+    summary:
+      'CRM holding customer records, pipeline, and contact data — typically the system of record for client information.',
     defaults: {
       toolCategory: 'SaaS application',
       dataClassification: 'Confidential',
@@ -375,10 +453,18 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       selfHosted: false,
     },
     suggested: {
-      'vendor-risk': note('Obtain SOC 2 Type II and the DPA; review the sub-processor list and change-notice terms.'),
-      'privacy-pia': note('Customer contact data in scope. Confirm retention, regional storage, and deletion on request.'),
-      'iam': note('Enforce SSO and SCIM; review profile/permission-set design and admin access.'),
-      'connector-governance': note('Inventory installed AppExchange packages and API integrations; scope each to least privilege.'),
+      'vendor-risk': note(
+        'Obtain SOC 2 Type II and the DPA; review the sub-processor list and change-notice terms.',
+      ),
+      'privacy-pia': note(
+        'Customer contact data in scope. Confirm retention, regional storage, and deletion on request.',
+      ),
+      iam: note(
+        'Enforce SSO and SCIM; review profile/permission-set design and admin access.',
+      ),
+      'connector-governance': note(
+        'Inventory installed AppExchange packages and API integrations; scope each to least privilege.',
+      ),
     },
     sortOrder: 20,
   },
@@ -389,7 +475,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Snowflake',
     toolType: 'Data platform / warehouse',
     category: 'PaaS',
-    summary: 'Cloud data warehouse concentrating analytical data — often the widest single data exposure in the estate.',
+    summary:
+      'Cloud data warehouse concentrating analytical data — often the widest single data exposure in the estate.',
     defaults: {
       toolCategory: 'PaaS / cloud service',
       dataClassification: 'Restricted',
@@ -401,10 +488,18 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       selfHosted: false,
     },
     suggested: {
-      'data-governance': note('Classify every schema; apply masking policies to personal and client data.'),
-      'iam': note('Role hierarchy and least privilege on warehouses; separate ingestion from analyst roles.'),
-      'platform-cloud': note('Confirm region, network policy, and private connectivity requirements.'),
-      'security-sar': note('Review key management, and confirm no broad ACCOUNTADMIN grants to humans.'),
+      'data-governance': note(
+        'Classify every schema; apply masking policies to personal and client data.',
+      ),
+      iam: note(
+        'Role hierarchy and least privilege on warehouses; separate ingestion from analyst roles.',
+      ),
+      'platform-cloud': note(
+        'Confirm region, network policy, and private connectivity requirements.',
+      ),
+      'security-sar': note(
+        'Review key management, and confirm no broad ACCOUNTADMIN grants to humans.',
+      ),
     },
     sortOrder: 21,
   },
@@ -415,7 +510,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Slack',
     toolType: 'Collaboration & messaging',
     category: 'SaaS',
-    summary: 'Messaging platform that accumulates unstructured sensitive content and a long tail of third-party app grants.',
+    summary:
+      'Messaging platform that accumulates unstructured sensitive content and a long tail of third-party app grants.',
     defaults: {
       toolCategory: 'SaaS application',
       dataClassification: 'Confidential',
@@ -426,9 +522,15 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       selfHosted: false,
     },
     suggested: {
-      'connector-governance': note('Review every installed app and its OAuth scopes; restrict app installation to admins.'),
-      'data-governance': note('Set message and file retention deliberately; confirm eDiscovery and export controls.'),
-      'privacy-pia': note('DMs and channels carry personal data incidentally; document retention and access.'),
+      'connector-governance': note(
+        'Review every installed app and its OAuth scopes; restrict app installation to admins.',
+      ),
+      'data-governance': note(
+        'Set message and file retention deliberately; confirm eDiscovery and export controls.',
+      ),
+      'privacy-pia': note(
+        'DMs and channels carry personal data incidentally; document retention and access.',
+      ),
     },
     sortOrder: 22,
   },
@@ -439,7 +541,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Self-hosted',
     toolType: 'Self-hosted application',
     category: 'On-premise',
-    summary: 'Self-managed source control and CI. You own the hardening, patching, runner isolation, and supply chain.',
+    summary:
+      'Self-managed source control and CI. You own the hardening, patching, runner isolation, and supply chain.',
     defaults: {
       toolCategory: 'On-premise software',
       dataClassification: 'Confidential',
@@ -449,10 +552,18 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       selfHosted: true,
     },
     suggested: {
-      'secure-sdlc': note('Runner isolation, protected branches, signed commits, and dependency scanning.'),
-      'platform-cloud': note('Hardening baseline, network placement, backup and restore tested.'),
-      'security-sar': note('Patch cadence and CVE response owner named; secrets kept out of the repo and CI logs.'),
-      'operations': note('Named owner, upgrade path, and end-of-life plan documented.'),
+      'secure-sdlc': note(
+        'Runner isolation, protected branches, signed commits, and dependency scanning.',
+      ),
+      'platform-cloud': note(
+        'Hardening baseline, network placement, backup and restore tested.',
+      ),
+      'security-sar': note(
+        'Patch cadence and CVE response owner named; secrets kept out of the repo and CI logs.',
+      ),
+      operations: note(
+        'Named owner, upgrade path, and end-of-life plan documented.',
+      ),
     },
     sortOrder: 23,
   },
@@ -463,7 +574,8 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
     platform: 'Workday',
     toolType: 'HR / people platform',
     category: 'SaaS',
-    summary: 'HR system of record holding employee personal data, compensation, and performance information.',
+    summary:
+      'HR system of record holding employee personal data, compensation, and performance information.',
     defaults: {
       toolCategory: 'SaaS application',
       dataClassification: 'Restricted',
@@ -474,14 +586,286 @@ export const TOOL_TEMPLATES: ToolTemplate[] = [
       selfHosted: false,
     },
     suggested: {
-      'privacy-pia': note('Employee personal and special-category data in scope; confirm lawful basis and retention.'),
-      'legal': note('DPA plus cross-border transfer mechanism; works-council consultation where applicable.'),
-      'iam': note('Strict role design; audit who can view compensation and performance records.'),
+      'privacy-pia': note(
+        'Employee personal and special-category data in scope; confirm lawful basis and retention.',
+      ),
+      legal: note(
+        'DPA plus cross-border transfer mechanism; works-council consultation where applicable.',
+      ),
+      iam: note(
+        'Strict role design; audit who can view compensation and performance records.',
+      ),
     },
     sortOrder: 24,
   },
 ];
 
-export const TOOL_TEMPLATE_BY_ID: Record<string, ToolTemplate> = Object.fromEntries(
-  TOOL_TEMPLATES.map((t) => [t.id, t]),
-);
+const SOURCE_URLS: Record<string, string> = {
+  'chatgpt-enterprise': 'https://openai.com/business/',
+  'm365-copilot': 'https://www.microsoft.com/microsoft-365/copilot',
+  'copilot-studio':
+    'https://www.microsoft.com/microsoft-365-copilot/microsoft-copilot-studio',
+  'gemini-enterprise': 'https://cloud.google.com/gemini-enterprise',
+  'claude-enterprise': 'https://claude.com/enterprise',
+  'azure-ai-foundry': 'https://ai.azure.com/',
+  'vertex-ai':
+    'https://cloud.google.com/products/gemini-enterprise-agent-platform',
+  'aws-bedrock': 'https://aws.amazon.com/bedrock/',
+  'claude-code-agent': 'https://claude.com/product/claude-code',
+  'codex-sandbox': 'https://openai.com/codex/',
+  'replit-workspace': 'https://replit.com/',
+  'github-copilot': 'https://github.com/features/copilot',
+  'glean-assistant': 'https://www.glean.com/',
+  'perplexity-enterprise': 'https://www.perplexity.ai/enterprise',
+  cursor: 'https://cursor.com/',
+  'salesforce-sales-cloud': 'https://www.salesforce.com/sales/',
+  snowflake: 'https://www.snowflake.com/',
+  slack: 'https://slack.com/',
+  'self-hosted-gitlab': 'https://about.gitlab.com/',
+  workday: 'https://www.workday.com/',
+};
+
+const ADDITIONAL_TOOLS: [string, string, string, string, string, string][] = [
+  [
+    'notion-ai',
+    'Notion AI',
+    'Notion',
+    'Knowledge',
+    'https://www.notion.com/product/ai',
+    'Workspace content access, agent actions, connected sources, and retention.',
+  ],
+  [
+    'grammarly',
+    'Grammarly',
+    'Grammarly',
+    'Writing',
+    'https://www.grammarly.com/business',
+    'Text captured by browser extensions, permitted sites, and writing-data retention.',
+  ],
+  [
+    'jasper',
+    'Jasper',
+    'Jasper',
+    'Writing',
+    'https://www.jasper.ai/',
+    'Marketing source data, brand permissions, factual review, and published content.',
+  ],
+  [
+    'writer',
+    'WRITER',
+    'WRITER',
+    'Agent',
+    'https://writer.com/',
+    'Agent actions, knowledge permissions, model settings, and human approval.',
+  ],
+  [
+    'otter',
+    'Otter',
+    'Otter.ai',
+    'Meetings',
+    'https://otter.ai/',
+    'Meeting consent, participant notice, recording access, and transcript deletion.',
+  ],
+  [
+    'fireflies',
+    'Fireflies',
+    'Fireflies.ai',
+    'Meetings',
+    'https://fireflies.ai/',
+    'Meeting access, recording consent, connected systems, and retention.',
+  ],
+  [
+    'canva-ai',
+    'Canva AI',
+    'Canva',
+    'Creative',
+    'https://www.canva.com/ai/',
+    'Uploaded assets, likeness consent, intellectual property, and publication review.',
+  ],
+  [
+    'adobe-firefly',
+    'Adobe Firefly',
+    'Adobe',
+    'Creative',
+    'https://www.adobe.com/products/firefly.html',
+    'Source asset rights, output provenance, approved models, and commercial terms.',
+  ],
+  [
+    'synthesia',
+    'Synthesia',
+    'Synthesia',
+    'Creative',
+    'https://www.synthesia.io/',
+    'Avatar and voice consent, script review, likeness access, and content disclosure.',
+  ],
+  [
+    'elevenlabs',
+    'ElevenLabs',
+    'ElevenLabs',
+    'Creative',
+    'https://elevenlabs.io/',
+    'Voice permissions, impersonation safeguards, generated audio, and retention.',
+  ],
+  [
+    'runway',
+    'Runway',
+    'Runway',
+    'Creative',
+    'https://runway.com/',
+    'Video source rights, likeness consent, output provenance, and distribution.',
+  ],
+  [
+    'midjourney',
+    'Midjourney',
+    'Midjourney',
+    'Creative',
+    'https://www.midjourney.com/',
+    'Image input rights, public visibility, commercial terms, and brand review.',
+  ],
+  [
+    'lovable',
+    'Lovable',
+    'Lovable',
+    'Developer',
+    'https://lovable.dev/',
+    'Generated code, database permissions, secrets, dependencies, and deployment access.',
+  ],
+  [
+    'bolt',
+    'Bolt',
+    'StackBlitz',
+    'Developer',
+    'https://bolt.new/',
+    'Code generation, dependency provenance, environment secrets, and publishing access.',
+  ],
+  [
+    'v0',
+    'v0',
+    'Vercel',
+    'Developer',
+    'https://v0.app/',
+    'Generated application code, integrations, secrets, and deployment review.',
+  ],
+  [
+    'fin',
+    'Fin',
+    'Intercom',
+    'Support',
+    'https://fin.ai/',
+    'Customer information, knowledge grounding, escalations, and customer-facing answers.',
+  ],
+  [
+    'zendesk-ai',
+    'Zendesk AI',
+    'Zendesk',
+    'Support',
+    'https://www.zendesk.com/ai/',
+    'Support-ticket data, automated actions, human escalation, and service quality.',
+  ],
+  [
+    'agentforce',
+    'Agentforce',
+    'Salesforce',
+    'Agent',
+    'https://www.salesforce.com/agentforce/',
+    'CRM permissions, agent actions, customer data, and approval boundaries.',
+  ],
+  [
+    'zapier-agents',
+    'Zapier Agents',
+    'Zapier',
+    'Automation',
+    'https://zapier.com/agents',
+    'Connected account scopes, write actions, human approval, and rollback.',
+  ],
+  [
+    'n8n',
+    'n8n',
+    'n8n',
+    'Automation',
+    'https://n8n.io/',
+    'Workflow credentials, node permissions, self-hosting choices, and action logs.',
+  ],
+];
+
+/** Catalogue summaries are review prompts, never assertions that a vendor passed a control. */
+export const TOOL_TEMPLATES: ToolTemplate[] = [
+  ...EXISTING_TEMPLATES.map((template) => ({
+    ...template,
+    ...(template.id === 'vertex-ai'
+      ? {
+          name: 'Gemini Enterprise Agent Platform (Vertex AI)',
+          platform: 'Google Cloud Agent Platform',
+        }
+      : {}),
+    summary: `Assessment starter for ${template.name}. Confirm your edition, data flows, enabled features, and vendor terms before reviewing.`,
+    defaults: {
+      ...template.defaults,
+      model: '',
+      environment: 'Sandbox' as const,
+    },
+    sourceUrl: SOURCE_URLS[template.id],
+    updatedOn: '2026-10-17',
+  })),
+  ...ADDITIONAL_TOOLS.map(
+    ([id, name, vendor, category, sourceUrl, focus], index): ToolTemplate => ({
+      id,
+      name,
+      vendor,
+      platform: name,
+      category,
+      sourceUrl,
+      updatedOn: '2026-10-17',
+      toolType: ['Agent', 'Automation'].includes(category)
+        ? 'Agentic workflow automation'
+        : category === 'Developer'
+          ? 'Coding agent'
+          : category === 'Support'
+            ? 'Client-facing AI app'
+            : 'Enterprise SaaS AI platform',
+      summary: focus,
+      defaults: {
+        toolCategory: 'AI / ML system',
+        environment: 'Sandbox',
+        externalVendor: true,
+        dataClassification: 'Confidential',
+        pii: ['Meetings', 'Support'].includes(category),
+        clientData: category === 'Support',
+        agentEnabled: ['Agent', 'Automation', 'Developer'].includes(category),
+        connectorEnabled: [
+          'Agent',
+          'Automation',
+          'Knowledge',
+          'Developer',
+        ].includes(category),
+        ragEnabled: ['Knowledge', 'Support'].includes(category),
+        useCase: `Draft review scope: ${focus} Confirm actual usage before assessment.`,
+      },
+      suggested: {
+        business: note(
+          `Confirm the owner, purpose, edition, and permitted users of ${name}.`,
+        ),
+        'vendor-risk': note(
+          `Obtain current contract, DPA, subprocessors, retention and security documentation from ${sourceUrl}. No assurance is pre-verified.`,
+        ),
+        'security-sar': note(`Review focus: ${focus}`),
+        'privacy-pia': note(
+          'Map actual data inputs, recipients, retention, and deletion. Validate lawful use with your privacy reviewer.',
+        ),
+        ...(['Agent', 'Automation', 'Developer'].includes(category)
+          ? {
+              'agent-governance': note(
+                'Inventory permitted tools, read/write privileges, human approval points, limits, and emergency stop.',
+              ),
+            }
+          : {}),
+      },
+      sortOrder: 30 + index,
+    }),
+  ),
+];
+
+export const TOOL_TEMPLATE_BY_ID: Record<string, ToolTemplate> =
+  Object.fromEntries(
+    [...TOOL_TEMPLATES, ...ASSESSMENT_TEMPLATES].map((t) => [t.id, t]),
+  );

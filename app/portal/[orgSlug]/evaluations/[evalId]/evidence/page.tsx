@@ -1,6 +1,10 @@
 import { notFound } from 'next/navigation';
 import { requireMembership } from '@/lib/auth/membership';
-import { getEvaluation, loadAssessmentMap, rowToProfile } from '@/lib/db/queries';
+import {
+  getEvaluation,
+  loadAssessmentMap,
+  rowToProfile,
+} from '@/lib/db/queries';
 import { computeScoreFromMap } from '@/workbench/engine/scoring';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 import { buildReportContext } from '@/workbench/export/reportContext';
@@ -19,7 +23,7 @@ export default async function EvidencePage({
   const { orgSlug, evalId } = await params;
   const { org, role } = await requireMembership(orgSlug);
   const row = await getEvaluation(evalId);
-  if (!row) notFound();
+  if (!row || row.org_id !== org.id) notFound();
 
   if (!hasFeature(org.plan, 'evidenceFactory')) {
     return (

@@ -1,19 +1,20 @@
 {
-  "name": "clearance-ai",
+  "name": "aegis-governance",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Clearance AI — enterprise AI onboarding readiness & governance self-evaluation platform.",
+  "description": "Aegis \u2014 AI governance readiness, evidence, and review workflows.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint app components data lib workbench scripts --ext .ts,.tsx",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "seed:templates": "tsx --env-file=.env.local scripts/seed-templates.ts",
-    "gen:types": "supabase gen types typescript --local > lib/db/types.ts"
+    "gen:types": "supabase gen types typescript --local > lib/db/types.ts",
+    "test:smoke": "node scripts/customer-smoke.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.5.2",
@@ -27,6 +28,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sonner": "^1.7.4",
+    "stripe": "^23.0.0",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
@@ -47,5 +49,8 @@
     "next": {
       "postcss": "8.5.23"
     }
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

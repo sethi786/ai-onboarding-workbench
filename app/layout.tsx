@@ -19,10 +19,19 @@ export const metadata: Metadata = {
     siteName: SITE.name,
     type: 'website',
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index:
+      process.env.LAUNCH_APPROVED === 'true' &&
+      process.env.VERCEL_ENV !== 'preview',
+    follow: true,
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>

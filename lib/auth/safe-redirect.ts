@@ -3,8 +3,11 @@
  * Blocks `javascript:` URLs, protocol-relative `//host`, and absolute URLs —
  * preventing open-redirect / client-side XSS via a crafted ?next= value.
  */
-export function safeNext(next: string | null | undefined, fallback = '/portal'): string {
-  if (!next) return fallback;
+export function safeNext(
+  next: string | null | undefined,
+  fallback = '/portal',
+): string {
+  if (!next || /[\\\u0000-\u0020\u007f]/.test(next)) return fallback;
   // Must be a root-relative path.
   if (!next.startsWith('/')) return fallback;
   // Reject protocol-relative ("//evil.com") and backslash tricks ("/\evil.com").

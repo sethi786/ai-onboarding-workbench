@@ -10,7 +10,11 @@ const fade = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, delay: i * 0.09, ease: [0.16, 1, 0.3, 1] as const },
+    transition: {
+      duration: 0.7,
+      delay: i * 0.09,
+      ease: [0.16, 1, 0.3, 1] as const,
+    },
   }),
 };
 
@@ -18,7 +22,11 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden bg-paper">
       <div className="mx-auto max-w-5xl px-5 pt-20 text-center sm:px-8 sm:pt-28">
-        <motion.div initial="hidden" animate="show" className="flex flex-col items-center">
+        <motion.div
+          initial="hidden"
+          animate="show"
+          className="flex flex-col items-center"
+        >
           <motion.span
             custom={0}
             variants={fade}
@@ -28,9 +36,13 @@ export function Hero() {
             SaaS · PaaS · On-prem · AI — governed in one place
           </motion.span>
 
-          <motion.h1 custom={1} variants={fade} className="display-xl mt-7 max-w-4xl">
-            Adopt any tool,
-            <br className="hidden sm:block" /> already cleared.
+          <motion.h1
+            custom={1}
+            variants={fade}
+            className="display-xl mt-7 max-w-4xl"
+          >
+            Know your AI risks.
+            <br className="hidden sm:block" /> Show your readiness.
           </motion.h1>
 
           <motion.p
@@ -38,9 +50,9 @@ export function Hero() {
             variants={fade}
             className="mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
           >
-            Aegis runs the security, privacy, legal, and risk review that gates every new tool —
-            SaaS, PaaS, on-prem, and AI — as one readiness workflow. Replace a months-long,
-            multi-department approval gauntlet with a single score. No enterprise review org required.
+            Bring your AI inventory, security questions, evidence, and review
+            decisions into one workspace. Start with a tool you use. Find the
+            gaps. Prepare your team to make a better-informed decision.
           </motion.p>
 
           <motion.div
@@ -60,12 +72,18 @@ export function Hero() {
               className="group inline-flex items-center gap-1.5 text-[15px] font-medium text-foreground"
             >
               See it score, live
-              <span className="text-electric transition-transform group-hover:translate-x-0.5">→</span>
+              <span className="text-electric transition-transform group-hover:translate-x-0.5">
+                →
+              </span>
             </a>
           </motion.div>
 
-          <motion.p custom={4} variants={fade} className="mt-6 text-[13px] text-muted-foreground/80">
-            No credit card · SOC 2 aligned · NIST AI RMF
+          <motion.p
+            custom={4}
+            variants={fade}
+            className="mt-6 text-[13px] text-muted-foreground/80"
+          >
+            3 free assessments · No credit card · Evidence-based readiness
           </motion.p>
         </motion.div>
       </div>

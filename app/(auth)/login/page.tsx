@@ -5,7 +5,12 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { safeNext } from '@/lib/auth/safe-redirect';
-import { AuthInput, AuthLabel, AuthError, AuthSubmit } from '@/components/auth/auth-ui';
+import {
+  AuthInput,
+  AuthLabel,
+  AuthError,
+  AuthSubmit,
+} from '@/components/auth/auth-ui';
 
 function LoginInner() {
   const router = useRouter();
@@ -22,15 +27,24 @@ function LoginInner() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(error.message);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+      router.push(next);
+      router.refresh();
+    } catch {
+      setError('We could not sign in. Please retry.');
+    } finally {
       setLoading(false);
-      return;
     }
-    router.push(next);
-    router.refresh();
   }
 
   return (
@@ -41,22 +55,44 @@ function LoginInner() {
         <AuthError message={error} />
         <div>
           <AuthLabel htmlFor="email">Work email</AuthLabel>
-          <AuthInput id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <AuthInput
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div>
           <div className="flex items-center justify-between">
             <AuthLabel htmlFor="password">Password</AuthLabel>
-            <Link href="/forgot-password" className="mb-1.5 text-xs text-electric hover:underline">
+            <Link
+              href="/forgot-password"
+              className="mb-1.5 text-xs text-electric hover:underline"
+            >
               Forgot?
             </Link>
           </div>
-          <AuthInput id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <AuthInput
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
-        <AuthSubmit disabled={loading}>{loading ? 'Signing in…' : 'Log in'}</AuthSubmit>
+        <AuthSubmit disabled={loading}>
+          {loading ? 'Signing in…' : 'Log in'}
+        </AuthSubmit>
       </form>
       <p className="mt-5 text-center text-sm text-muted-foreground">
         No account?{' '}
-        <Link href="/signup" className="text-electric hover:underline">
+        <Link
+          href={`/signup?next=${encodeURIComponent(next)}`}
+          className="text-electric hover:underline"
+        >
           Start free
         </Link>
       </p>

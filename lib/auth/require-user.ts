@@ -1,15 +1,19 @@
 import { redirect } from 'next/navigation';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
 import { createClient } from '@/lib/supabase/server';
 import type { User } from '@supabase/supabase-js';
 
 /** Returns the authenticated user or redirects to /login. Server-only. */
 export async function requireUser(nextPath?: string): Promise<User> {
+  if (!isSupabaseConfigured()) redirect('/launch-status');
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    redirect(nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : '/login');
+    redirect(
+      nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : '/login',
+    );
   }
   return user;
 }

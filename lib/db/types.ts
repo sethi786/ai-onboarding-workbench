@@ -12,6 +12,7 @@ export interface OrganizationRow {
   name: string;
   created_by: string;
   stripe_customer_id: string | null;
+  billing_observed_at?: string | null;
   plan: string;
   created_at: string;
   updated_at: string;
@@ -143,6 +144,25 @@ type TableConfig<Row> = {
 export type Database = {
   public: {
     Tables: {
+      billing_checkout_locks: TableConfig<{
+        org_id: string;
+        token: string;
+        expires_at: string;
+      }>;
+      sales_leads: TableConfig<{
+        id: string;
+        name: string;
+        email: string;
+        company: string;
+        message: string;
+        kind: string;
+        created_at: string;
+      }>;
+      billing_events: TableConfig<{
+        id: string;
+        org_id: string;
+        created_at: string;
+      }>;
       organizations: TableConfig<OrganizationRow>;
       memberships: TableConfig<MembershipRow>;
       invitations: TableConfig<{
@@ -153,6 +173,8 @@ export type Database = {
         token: string;
         invited_by: string | null;
         accepted_at: string | null;
+        expires_at: string;
+        revoked_at: string | null;
         created_at: string;
       }>;
       evaluations: TableConfig<EvaluationRow>;
@@ -164,6 +186,41 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      claim_checkout: {
+        Args: { p_org: string; p_token: string };
+        Returns: boolean;
+      };
+      apply_billing_event: {
+        Args: {
+          p_event: string;
+          p_customer: string;
+          p_plan: string;
+          p_observed_at: string;
+        };
+        Returns: boolean;
+      };
+      submit_sales_lead: {
+        Args: {
+          p_name: string;
+          p_email: string;
+          p_company: string;
+          p_message: string;
+          p_kind: string;
+        };
+        Returns: string;
+      };
+      create_workspace_invitation: {
+        Args: { p_org: string; p_email: string; p_role: OrgRole };
+        Returns: string;
+      };
+      accept_workspace_invitation: {
+        Args: { p_token: string };
+        Returns: string;
+      };
+      revoke_workspace_invitation: {
+        Args: { p_id: string };
+        Returns: undefined;
+      };
       create_organization: {
         Args: { p_name: string; p_slug: string };
         Returns: string;

@@ -1,14 +1,33 @@
 import Link from 'next/link';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
+import { redirect } from 'next/navigation';
 import { ShieldCheck, Boxes, FileCheck2 } from 'lucide-react';
 import { ShieldLogo } from '@/components/brand/ShieldLogo';
 
 const POINTS = [
-  { icon: ShieldCheck, t: '20 enterprise review lenses', d: 'Security, Privacy, Legal, Risk, Data Gov, Agent & Connector governance.' },
-  { icon: Boxes, t: 'Prefilled AI-tool library', d: 'Start from ChatGPT, Copilot, Claude, Bedrock and more — not a blank page.' },
-  { icon: FileCheck2, t: 'Evidence, ready for review', d: 'Generate draft SAR, PIA, and go/no-go packs from your assessment.' },
+  {
+    icon: ShieldCheck,
+    t: '20 enterprise review lenses',
+    d: 'Security, Privacy, Legal, Risk, Data Gov, Agent & Connector governance.',
+  },
+  {
+    icon: Boxes,
+    t: 'Prefilled AI-tool library',
+    d: 'Start from ChatGPT, Copilot, Claude, Bedrock and more — not a blank page.',
+  },
+  {
+    icon: FileCheck2,
+    t: 'Evidence, ready for review',
+    d: 'Generate draft SAR, PIA, and go/no-go packs from your assessment.',
+  },
 ];
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  if (!isSupabaseConfigured()) redirect('/launch-status');
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Value panel */}
@@ -38,7 +57,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
           <p className="relative font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500">
-            SOC 2 · ISO 27001 · HIPAA · NIST AI RMF-aligned
+            Self-assessment · Evidence · Review readiness
           </p>
         </div>
       </div>
@@ -51,7 +70,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </Link>
           {children}
           <p className="mt-8 text-center text-xs text-muted-foreground">
-            Aegis is a self-evaluation & readiness aid — it doesn’t replace formal approval.
+            Aegis is a self-evaluation & readiness aid — it doesn’t replace
+            formal approval.
           </p>
         </div>
       </div>

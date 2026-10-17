@@ -1,6 +1,10 @@
 import { notFound } from 'next/navigation';
 import { requireMembership } from '@/lib/auth/membership';
-import { getEvaluation, loadAssessmentMap, rowToProfile } from '@/lib/db/queries';
+import {
+  getEvaluation,
+  loadAssessmentMap,
+  rowToProfile,
+} from '@/lib/db/queries';
 import { computeScoreFromMap } from '@/workbench/engine/scoring';
 import { TEAM_LENSES } from '@/workbench/data/teamLenses';
 import { canEdit } from '@/lib/rbac';
@@ -15,7 +19,7 @@ export default async function LensesPage({
   const { orgSlug, evalId } = await params;
   const { org, role } = await requireMembership(orgSlug);
   const row = await getEvaluation(evalId);
-  if (!row) notFound();
+  if (!row || row.org_id !== org.id) notFound();
   const map = await loadAssessmentMap(evalId);
   const score = computeScoreFromMap(rowToProfile(row), TEAM_LENSES, map);
   const editable = canEdit(role);
@@ -27,7 +31,7 @@ export default async function LensesPage({
       </p>
       {TEAM_LENSES.map((lens) => (
         <LensCard
-            scopeRevision={row.scope_revision ?? 1}
+          scopeRevision={row.scope_revision ?? 1}
           key={lens.id}
           lens={lens}
           assessment={map[lens.id]}

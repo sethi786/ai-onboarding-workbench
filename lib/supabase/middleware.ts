@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { isSupabaseConfigured } from './env';
+import { safeNext } from '@/lib/auth/safe-redirect';
 
 /**
  * Refreshes the Supabase session cookie on every request (Server Components
@@ -23,7 +24,9 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
@@ -40,22 +43,31 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isPortal = path.startsWith('/portal');
-  const isAuthRoute = ['/login', '/signup', '/forgot-password', '/reset-password'].some((p) =>
-    path.startsWith(p),
-  );
+  const isAuthRoute = ['/login', '/signup'].some((p) => path.startsWith(p));
 
   if (isPortal && !user) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
-    url.searchParams.set('next', path);
-    return NextResponse.redirect(url);
+    url.search = '';
+    url.searchParams.set('next', path + request.nextUrl.search);
+    const redirected = NextResponse.redirect(url);
+    response.cookies
+      .getAll()
+      .forEach((cookie) => redirected.cookies.set(cookie));
+    return redirected;
   }
 
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/portal';
-    url.search = '';
-    return NextResponse.redirect(url);
+    const target = new URL(
+      safeNext(request.nextUrl.searchParams.get('next')),
+      request.url,
+    );
+    const redirected = NextResponse.redirect(target);
+    response.cookies
+      .getAll()
+      .forEach((cookie) => redirected.cookies.set(cookie));
+    return redirected;
   }
 
   return response;

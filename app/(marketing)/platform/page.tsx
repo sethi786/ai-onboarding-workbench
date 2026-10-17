@@ -1,6 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Gauge, Layers, FileCheck2, GitBranch, Boxes, LayoutDashboard, ArrowRight } from 'lucide-react';
+import {
+  Gauge,
+  Layers,
+  FileCheck2,
+  GitBranch,
+  Boxes,
+  LayoutDashboard,
+  ArrowRight,
+} from 'lucide-react';
 import { PageHero } from '@/components/marketing/PageHero';
 import { Reveal } from '@/components/motion/Reveal';
 import { ProductPreview } from '@/components/marketing/ProductPreview';
@@ -16,9 +24,14 @@ const MODULES = [
     id: 'engine',
     icon: Gauge,
     eyebrow: 'Readiness Engine',
-    title: 'A single score for a months-long decision',
-    body: 'A weighted engine turns each self-assessment into a 0–100 readiness score, a Low→Critical risk grade, and a go/no-go recommendation. Complete the required controls and evidence and the score climbs; a single critical blocker forces it to zero. It’s the same math for every tool, so decisions are consistent and defensible.',
-    points: ['0–100 readiness score', 'Low → Critical risk grade', 'Go / conditional / no-go call', 'Hard blockers override the score'],
+    title: 'One consistent view of review readiness',
+    body: 'A weighted engine turns each self-assessment into a 0–100 readiness score, a Low→Critical risk grade, and a go/no-go recommendation. Complete the required controls and evidence and the score climbs; a critical blocker prevents a ready recommendation while preserving progress. It’s the same math for every tool, so decisions are consistent and defensible.',
+    points: [
+      '0–100 readiness score',
+      'Low → Critical risk grade',
+      'Go / conditional / no-go call',
+      'Hard blockers override the score',
+    ],
   },
   {
     id: 'lenses',
@@ -26,7 +39,12 @@ const MODULES = [
     eyebrow: '20 Review Lenses',
     title: 'Every department’s review, in one place',
     body: 'Each lens mirrors a real review team — Architecture, Security, Privacy, Legal, Risk, Data Governance, Identity, Platform, Agent Governance, and more. For every lens you get the purpose, the checklist, the required controls, the evidence, and the criteria that pass, condition, or block. Only the lenses a tool actually needs are required.',
-    points: ['Purpose, scope & checklist per lens', 'Required controls & evidence', 'Pass / conditional / blocker criteria', 'Auto-scoped to each tool profile'],
+    points: [
+      'Purpose, scope & checklist per lens',
+      'Required controls & evidence',
+      'Pass / conditional / blocker criteria',
+      'Auto-scoped to each tool profile',
+    ],
   },
   {
     id: 'evidence',
@@ -34,23 +52,38 @@ const MODULES = [
     eyebrow: 'Evidence Factory',
     title: 'Walk into review already prepared',
     body: 'Generate draft Security Assessment Reports, Privacy Impact Assessments, architecture summaries, and go/no-go packs directly from your assessment data. Every artifact is clearly marked as a draft for official review — a starting point that saves days, not a rubber stamp.',
-    points: ['Draft SAR, PIA & architecture packs', 'Go/no-go decision pack', 'Prefilled from your assessment', 'Marked “Draft — requires official review”'],
+    points: [
+      'Draft SAR, PIA & architecture packs',
+      'Go/no-go decision pack',
+      'Prefilled from your assessment',
+      'Marked “Draft — requires official review”',
+    ],
   },
   {
     id: 'workflow',
     icon: GitBranch,
     eyebrow: 'Workflow & Approvals',
     title: 'From intake to retirement, tracked',
-    body: 'A 25-stage onboarding lifecycle takes each tool from first intake through pilot, review, approval, go-live, and eventual retirement — with owners, due dates, and sign-offs at every gate. No more lost email threads or “who’s blocking this?”',
-    points: ['25-stage lifecycle', 'Owners & due dates', 'Approval sign-offs', 'Full decision history'],
+    body: 'A 25-stage onboarding lifecycle takes each tool from first intake through pilot, review, approval, go-live, and eventual retirement — with owners, due dates, and recorded decisions. No more lost email threads or “who’s blocking this?”',
+    points: [
+      '25-stage lifecycle',
+      'Owners & due dates',
+      'Self-reported review decisions',
+      'Current decision record',
+    ],
   },
   {
     id: 'library',
     icon: Boxes,
     eyebrow: 'Tool Library',
-    title: 'Start at 60%, not zero',
-    body: 'Instantiate common tools — SaaS apps, cloud platforms, and AI tools — as pre-populated evaluations with suggested answers and the right lenses already selected. Clone, adjust to your context, and you’re most of the way through the review before you start.',
-    points: ['Prefilled SaaS, PaaS & AI templates', 'Suggested answers & lenses', 'Clone and customize', 'Your own reusable templates'],
+    title: 'Start with a useful review scope',
+    body: 'Instantiate common tools — SaaS apps, cloud platforms, and AI tools — as pre-populated evaluations with suggested answers and the right lenses already selected. Adjust suggested scope to your context, then review every control and evidence requirement.',
+    points: [
+      'Prefilled SaaS, PaaS & AI templates',
+      'Suggested questions & scope',
+      'Clone and customize',
+      'Custom tool profiles',
+    ],
   },
   {
     id: 'tower',
@@ -58,7 +91,12 @@ const MODULES = [
     eyebrow: 'Governance Control Tower',
     title: 'The whole portfolio at a glance',
     body: 'One dashboard shows every tool in flight, its readiness, its risk, and its blockers — for the AI program, Security, Privacy, Legal, Risk, Platform, and leadership. Shared truth instead of a dozen spreadsheets.',
-    points: ['Portfolio readiness view', 'Risk & blocker rollups', 'Role-based access', 'Leadership-ready reporting'],
+    points: [
+      'Portfolio readiness view',
+      'Risk & blocker rollups',
+      'Role-based access',
+      'Leadership-ready reporting',
+    ],
   },
 ];
 
@@ -96,8 +134,12 @@ export default function PlatformPage() {
                   <span className="mt-5 block text-[12px] font-semibold uppercase tracking-[0.16em] text-electric">
                     {m.eyebrow}
                   </span>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-[28px]">{m.title}</h2>
-                  <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">{m.body}</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-[28px]">
+                    {m.title}
+                  </h2>
+                  <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+                    {m.body}
+                  </p>
                 </div>
                 <ul className="grid gap-3">
                   {m.points.map((p) => (
@@ -117,8 +159,12 @@ export default function PlatformPage() {
 
         <div className="mt-14 flex flex-wrap items-center justify-between gap-6 rounded-2xl bg-ink px-8 py-10 sm:px-10">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-white">See it run on your stack</h2>
-            <p className="mt-2 text-white/65">Start free, or watch the readiness engine score a live example.</p>
+            <h2 className="text-2xl font-semibold tracking-tight text-white">
+              See it run on your stack
+            </h2>
+            <p className="mt-2 text-white/65">
+              Start free, or watch the readiness engine score a live example.
+            </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link

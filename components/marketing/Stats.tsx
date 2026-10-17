@@ -1,12 +1,17 @@
 'use client';
 
+import { TOOL_TEMPLATES } from '@/data/tool-templates';
 import { CountUp } from '@/components/motion/CountUp';
 
 const STATS = [
   { value: 20, suffix: '', label: 'Enterprise review lenses' },
   { value: 150, suffix: '+', label: 'Controls & evidence items' },
   { value: 25, suffix: '', label: 'Onboarding workflow stages' },
-  { value: 15, suffix: '+', label: 'Prefilled AI tools' },
+  {
+    value: TOOL_TEMPLATES.length,
+    suffix: '',
+    label: 'Tool assessment starters',
+  },
 ];
 
 export function Stats() {
@@ -18,7 +23,9 @@ export function Stats() {
             <div className="text-5xl font-semibold tracking-[-0.04em] text-foreground sm:text-6xl">
               <CountUp value={s.value} suffix={s.suffix} />
             </div>
-            <div className="mx-auto mt-3 max-w-[14ch] text-sm text-muted-foreground">{s.label}</div>
+            <div className="mx-auto mt-3 max-w-[14ch] text-sm text-muted-foreground">
+              {s.label}
+            </div>
           </div>
         ))}
       </div>
