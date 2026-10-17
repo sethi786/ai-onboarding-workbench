@@ -4,25 +4,39 @@ import { useState, useTransition } from 'react';
 import { createOrganization } from '@/lib/actions/organizations';
 import { Button } from '@/components/ui/button';
 import { Input, Label } from '@/components/ui/input';
+import { unstable_rethrow } from 'next/navigation';
 
 export function CreateOrgForm({ template = '' }: { template?: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState('');
 
   return (
     <form
-      action={(fd) =>
+      onSubmit={(event) => {
+        event.preventDefault();
+        const fd = new FormData(event.currentTarget);
         startTransition(async () => {
           setError(null);
-          const res = await createOrganization(fd);
-          if (res?.error) setError(res.error);
-        })
-      }
+          try {
+            const res = await createOrganization(fd);
+            if (res?.error) setError(res.error);
+          } catch (error) {
+            unstable_rethrow(error);
+            setError(
+              'We couldn’t create your workspace. Your details are still here; please retry.',
+            );
+          }
+        });
+      }}
       className="space-y-4"
     >
       <input type="hidden" name="template" value={template} />
       {error && (
-        <div className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+        <div
+          role="alert"
+          className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
+        >
           {error}
         </div>
       )}
@@ -31,6 +45,8 @@ export function CreateOrgForm({ template = '' }: { template?: string }) {
         <Input
           id="name"
           name="name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
           placeholder="Acme Financial"
           maxLength={120}
           required

@@ -3,6 +3,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { safeNext } from '@/lib/auth/safe-redirect';
+import { emailRedirect } from '@/lib/auth/email-flow';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -29,10 +30,10 @@ function SignupInner() {
     try {
       const supabase = createClient();
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+          emailRedirectTo: emailRedirect(window.location.origin, next),
         },
       });
       if (error) {
@@ -62,10 +63,16 @@ function SignupInner() {
           Check your email
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          We sent a confirmation link to{' '}
-          <span className="text-foreground">{email}</span>. Click it to activate
-          your account, then log in.
+          If registration is available for this address, a confirmation link is
+          on its way to <span className="text-foreground">{email}</span>. Click
+          it to activate your account. Check your spam folder too.
         </p>
+        <Link
+          href={`/resend-confirmation?next=${encodeURIComponent(next)}`}
+          className="mt-6 block text-center text-sm font-medium text-electric underline"
+        >
+          Resend confirmation email
+        </Link>
         <Link
           href={`/login?next=${encodeURIComponent(next)}`}
           className="mt-6 block text-center text-sm text-electric hover:underline"

@@ -11,12 +11,15 @@ export default function robots(): MetadataRoute.Robots {
       disallow: live
         ? [
             '/portal/',
+            '/admin',
+            '/auth/',
             '/api/',
             '/invite/',
             '/login',
             '/signup',
             '/reset-password',
             '/forgot-password',
+            '/resend-confirmation',
           ]
         : '/',
     },

@@ -5,8 +5,11 @@ import {
   Grid3x3,
   Settings,
   History,
+  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
+import type { OrgRole } from '@/lib/db/types';
+import { canManageOrg } from '@/lib/rbac';
 
 export interface PortalNavItem {
   href: string;
@@ -15,7 +18,10 @@ export interface PortalNavItem {
 }
 
 /** Single source of truth for portal navigation (desktop sidebar + mobile drawer). */
-export function portalNav(orgSlug: string): PortalNavItem[] {
+export function portalNav(
+  orgSlug: string,
+  role: OrgRole = 'viewer',
+): PortalNavItem[] {
   const base = `/portal/${orgSlug}`;
   return [
     { href: `${base}/dashboard`, label: 'Dashboard', icon: LayoutDashboard },
@@ -23,6 +29,9 @@ export function portalNav(orgSlug: string): PortalNavItem[] {
     { href: `${base}/library`, label: 'Tool Library', icon: Boxes },
     { href: `${base}/matrix`, label: 'Platform Matrix', icon: Grid3x3 },
     { href: `${base}/activity`, label: 'Activity', icon: History },
+    ...(canManageOrg(role)
+      ? [{ href: `${base}/admin`, label: 'Administration', icon: ShieldCheck }]
+      : []),
     {
       href: `${base}/settings/organization`,
       label: 'Settings',

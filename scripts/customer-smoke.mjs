@@ -27,6 +27,7 @@ const routes = new Set([
   '/platform',
   '/about',
   '/launch-status',
+  '/auth/error',
   '/robots.txt',
   '/sitemap.xml',
 ]);
@@ -52,7 +53,7 @@ for (const path of routes) {
       const target = new URL(match[1].replaceAll('&amp;', '&'), origin);
       if (
         target.origin !== origin ||
-        /^\/(portal|auth|api|login|signup|forgot-password|reset-password|invite)(\/|$)/.test(
+        /^\/(portal|admin|auth|api|login|signup|forgot-password|reset-password|resend-confirmation|invite)(\/|$)/.test(
           target.pathname,
         )
       )
@@ -103,6 +104,12 @@ for (const path of [
   '/login',
   '/portal',
   '/portal/start?template=lovable',
+  '/portal/account',
+  '/admin',
+  '/resend-confirmation',
+  '/reset-password',
+  '/auth/callback?code=example',
+  '/auth/confirm?token_hash=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&type=email',
 ]) {
   const response = await fetch(`${origin}${path}`, { redirect: 'manual' });
   assert.ok([200, 307, 308].includes(response.status), path);
@@ -113,6 +120,24 @@ for (const path of [
     `Unavailable auth safely redirects: ${path}`,
   );
 }
+const confirmation = await fetch(`${origin}/auth/error`);
+assert.equal(confirmation.headers.get('referrer-policy'), 'no-referrer');
+assert.ok(confirmation.headers.get('cache-control').includes('no-store'));
+assert.equal(
+  (
+    await fetch(`${origin}/auth/verify`, {
+      method: 'POST',
+      headers: { origin: 'https://untrusted.example' },
+      body: '',
+    })
+  ).status,
+  403,
+);
+assert.equal(
+  (await fetch(`${origin}/auth/verify`)).status,
+  405,
+  'GET never consumes an email token',
+);
 for (const path of [
   '/api/leads',
   '/api/billing/checkout',

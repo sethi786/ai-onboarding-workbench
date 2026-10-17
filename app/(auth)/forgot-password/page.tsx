@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { emailRedirect } from '@/lib/auth/email-flow';
 import {
   AuthInput,
   AuthLabel,
@@ -22,9 +23,12 @@ export default function ForgotPasswordPage() {
     setError(null);
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        {
+          redirectTo: emailRedirect(window.location.origin, '/reset-password'),
+        },
+      );
       if (error) setError(error.message);
       else setSent(true);
       setLoading(false);
@@ -69,6 +73,7 @@ export default function ForgotPasswordPage() {
           <AuthInput
             id="email"
             type="email"
+            autoComplete="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}

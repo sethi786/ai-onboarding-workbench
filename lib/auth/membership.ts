@@ -17,7 +17,8 @@ export async function listMyOrganizations(): Promise<OrgMembership[]> {
     .select('role, organizations(*)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true });
-  if (error) throw new Error('Could not load workspace memberships. Please retry.');
+  if (error)
+    throw new Error('Could not load workspace memberships. Please retry.');
   if (!data) return [];
   return data
     .filter((m) => m.organizations)
@@ -28,7 +29,9 @@ export async function listMyOrganizations(): Promise<OrgMembership[]> {
 }
 
 /** Resolve an org by slug for the current user, or notFound(). */
-export async function requireMembership(orgSlug: string): Promise<OrgMembership> {
+export async function requireMembership(
+  orgSlug: string,
+): Promise<OrgMembership> {
   const user = await requireUser();
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -37,7 +40,9 @@ export async function requireMembership(orgSlug: string): Promise<OrgMembership>
     .eq('user_id', user.id)
     .eq('organizations.slug', orgSlug)
     .maybeSingle();
-  if (error || !data || !data.organizations) notFound();
+  if (error)
+    throw new Error('Workspace access could not be checked. Please retry.');
+  if (!data || !data.organizations) notFound();
   return {
     role: data.role as OrgRole,
     org: data.organizations as unknown as OrganizationRow,

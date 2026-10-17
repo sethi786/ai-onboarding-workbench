@@ -21,6 +21,8 @@ const POINTS = [
     d: 'Generate draft SAR, PIA, and go/no-go packs from your assessment.',
   },
 ];
+export const dynamic = 'force-dynamic';
+export const metadata = { robots: { index: false, follow: false } };
 
 export default function AuthLayout({
   children,

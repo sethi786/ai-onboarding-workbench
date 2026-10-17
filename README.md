@@ -80,14 +80,14 @@ The **marketing site runs with no backend**. The portal requires Supabase (below
    supabase/migrations/0006_governance_integrity.sql
    supabase/migrations/0007_launch_commerce.sql
    supabase/migrations/0008_workspace_operations.sql
+   supabase/migrations/0009_database_access.sql
    ```
-4. In **Authentication → URL Configuration**, add `http://localhost:3000/auth/callback` (and your prod
-   URL) as a redirect URL.
+4. Configure email confirmation, custom SMTP, allowed callback URLs and the supplied confirmation/recovery templates using [Authentication setup](docs/authentication-setup.md). Production public environment changes require a new build.
 5. (Optional) Seed the tool-template table: `npm run seed:templates`. The library also renders from the
    static module, so this is only needed if you later query/extend templates in the DB.
 6. `npm run dev`, sign up, create a workspace, and start an evaluation.
 
-For existing installations, back up first and apply only unapplied migrations through 0008 before deploying this version.
+For existing installations, back up first and apply only unapplied migrations through 0009 before deploying this version.
 Existing notes and links are retained; earlier assessments and unassigned legacy
 references require review before they contribute to readiness. See the methodology
 document for upgrade behavior and staging verification steps.

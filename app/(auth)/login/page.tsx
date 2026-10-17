@@ -19,7 +19,11 @@ function LoginInner() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(
-    params.get('error') ? 'Authentication failed. Please try again.' : null,
+    params.get('error') === 'unavailable'
+      ? 'The account service could not be reached. Please retry shortly.'
+      : params.get('error')
+        ? 'Authentication failed. Please try again.'
+        : null,
   );
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +34,7 @@ function LoginInner() {
     try {
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
       if (error) {
@@ -53,6 +57,14 @@ function LoginInner() {
       <p className="mt-1 text-sm text-muted-foreground">Welcome back.</p>
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <AuthError message={error} />
+        {error && (
+          <Link
+            href={`/resend-confirmation?next=${encodeURIComponent(next)}`}
+            className="block text-sm underline"
+          >
+            Need to confirm your email?
+          </Link>
+        )}
         <div>
           <AuthLabel htmlFor="email">Work email</AuthLabel>
           <AuthInput

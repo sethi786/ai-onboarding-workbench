@@ -34,6 +34,21 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: '/auth/:path*',
+        headers: [
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+          { key: 'Cache-Control', value: 'private, no-store' },
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      {
+        source: '/admin/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'private, no-store' },
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      {
         source: '/invite/:path*',
         headers: [
           { key: 'Referrer-Policy', value: 'no-referrer' },

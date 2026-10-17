@@ -2,6 +2,8 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 const mock = vi.hoisted(() => ({
   user: { id: 'signed-in' } as { id: string } | null,
+  fail: false,
+  calls: 0,
 }));
 vi.mock('@supabase/ssr', () => ({
   createServerClient: (
@@ -11,6 +13,8 @@ vi.mock('@supabase/ssr', () => ({
   ) => ({
     auth: {
       getUser: async () => {
+        mock.calls++;
+        if (mock.fail) throw new Error('Provider unavailable');
         options.cookies.setAll([
           { name: 'test-refresh', value: 'new', options: { path: '/' } },
         ]);
@@ -24,6 +28,41 @@ beforeEach(() => {
   vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://db.example.test');
   vi.stubEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', 'test-only');
   mock.user = { id: 'signed-in' };
+  mock.fail = false;
+  mock.calls = 0;
+});
+it('leaves public pages independent of auth provider uptime', async () => {
+  mock.fail = true;
+  expect(
+    (await updateSession(new NextRequest('https://example.test/pricing')))
+      .status,
+  ).toBe(200);
+  expect(mock.calls).toBe(0);
+});
+it('does not cache session-refresh responses', async () => {
+  const response = await updateSession(
+    new NextRequest('https://example.test/portal/account'),
+  );
+  expect(response.headers.get('cache-control')).toBe('private, no-store');
+  expect(response.cookies.get('test-refresh')?.value).toBe('new');
+});
+it('protects the operator route and preserves the destination through login', async () => {
+  mock.user = null;
+  const response = await updateSession(
+    new NextRequest('https://example.test/admin'),
+  );
+  expect(
+    new URL(response.headers.get('location')!).searchParams.get('next'),
+  ).toBe('/admin');
+});
+it('handles a thrown provider outage without an unhandled middleware error', async () => {
+  mock.fail = true;
+  const response = await updateSession(
+    new NextRequest('https://example.test/portal/account'),
+  );
+  expect(response.headers.get('location')).toBe(
+    'https://example.test/login?error=unavailable',
+  );
 });
 afterEach(() => vi.unstubAllEnvs());
 it('allows authenticated users to reach password recovery instead of redirecting away', async () => {

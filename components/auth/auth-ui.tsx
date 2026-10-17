@@ -1,7 +1,10 @@
 import { cn } from '@/lib/utils';
 
 /** Light-surface input + label for the auth form. */
-export function AuthInput({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+export function AuthInput({
+  className,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       className={cn(
@@ -13,9 +16,18 @@ export function AuthInput({ className, ...props }: React.InputHTMLAttributes<HTM
   );
 }
 
-export function AuthLabel({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
+export function AuthLabel({
+  children,
+  htmlFor,
+}: {
+  children: React.ReactNode;
+  htmlFor?: string;
+}) {
   return (
-    <label htmlFor={htmlFor} className="mb-1.5 block text-xs font-medium text-muted-foreground">
+    <label
+      htmlFor={htmlFor}
+      className="mb-1.5 block text-xs font-medium text-muted-foreground"
+    >
       {children}
     </label>
   );
@@ -24,13 +36,19 @@ export function AuthLabel({ children, htmlFor }: { children: React.ReactNode; ht
 export function AuthError({ message }: { message?: string | null }) {
   if (!message) return null;
   return (
-    <div className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+    <div
+      role="alert"
+      className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+    >
       {message}
     </div>
   );
 }
 
-export function AuthSubmit({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+export function AuthSubmit({
+  children,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       className="h-11 w-full rounded-lg bg-electric text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"

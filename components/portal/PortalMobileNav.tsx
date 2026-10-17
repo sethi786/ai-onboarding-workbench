@@ -80,7 +80,7 @@ export function PortalMobileNav({
             <p className="mt-1 text-xs capitalize text-white/50">{role}</p>
           </div>
           <nav aria-label="Workspace" className="space-y-1 p-3">
-            {portalNav(orgSlug).map((item) => {
+            {portalNav(orgSlug, role).map((item) => {
               const active =
                 pathname === item.href || pathname.startsWith(item.href + '/');
               return (
