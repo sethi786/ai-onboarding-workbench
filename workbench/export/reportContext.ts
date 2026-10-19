@@ -37,7 +37,7 @@ export function buildReportContext(
       .filter((b) => a.activeBlockers[b.id])
       .map((b) => b.label + (b.critical ? ' (critical)' : ''));
     const missingEvidence = lens.evidenceRequired
-      .filter((e) => !a.checkedEvidence[e.id])
+      .filter((e) => ts.missingEvidenceIds.includes(e.id))
       .map((e) => e.label);
     return {
       lens,

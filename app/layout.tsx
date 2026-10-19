@@ -4,6 +4,7 @@ import { GeistMono } from 'geist/font/mono';
 import { Toaster } from 'sonner';
 import './globals.css';
 import { SITE } from '@/lib/site';
+import { MotionPreferences } from '@/components/motion/MotionPreferences';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -19,14 +20,23 @@ export const metadata: Metadata = {
     siteName: SITE.name,
     type: 'website',
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index:
+      process.env.LAUNCH_APPROVED === 'true' &&
+      process.env.VERCEL_ENV !== 'preview',
+    follow: true,
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
-        {children}
+        <MotionPreferences>{children}</MotionPreferences>
         <Toaster
           richColors
           position="top-right"

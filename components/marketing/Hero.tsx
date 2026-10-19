@@ -1,85 +1,77 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, Check } from 'lucide-react';
 import { ProductPreview } from './ProductPreview';
 
-const fade = {
-  hidden: { opacity: 0, y: 16 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, delay: i * 0.09, ease: [0.16, 1, 0.3, 1] as const },
-  }),
-};
-
-export function Hero() {
+export function Hero({
+  accountsAvailable = true,
+}: {
+  accountsAvailable?: boolean;
+}) {
   return (
     <section className="relative overflow-hidden bg-paper">
-      <div className="mx-auto max-w-5xl px-5 pt-20 text-center sm:px-8 sm:pt-28">
-        <motion.div initial="hidden" animate="show" className="flex flex-col items-center">
-          <motion.span
-            custom={0}
-            variants={fade}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-[12.5px] font-medium text-muted-foreground shadow-soft"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-electric" />
-            SaaS · PaaS · On-prem · AI — governed in one place
-          </motion.span>
-
-          <motion.h1 custom={1} variants={fade} className="display-xl mt-7 max-w-4xl">
-            Adopt any tool,
-            <br className="hidden sm:block" /> already cleared.
-          </motion.h1>
-
-          <motion.p
-            custom={2}
-            variants={fade}
-            className="mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
-          >
-            Aegis runs the security, privacy, legal, and risk review that gates every new tool —
-            SaaS, PaaS, on-prem, and AI — as one readiness workflow. Replace a months-long,
-            multi-department approval gauntlet with a single score. No enterprise review org required.
-          </motion.p>
-
-          <motion.div
-            custom={3}
-            variants={fade}
-            className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-5"
-          >
-            <Link
-              href="/signup"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-ink px-7 text-[15px] font-medium text-paper transition-transform hover:scale-[1.03] active:scale-100"
-            >
-              Start free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <a
-              href="#demo"
-              className="group inline-flex items-center gap-1.5 text-[15px] font-medium text-foreground"
-            >
-              See it score, live
-              <span className="text-electric transition-transform group-hover:translate-x-0.5">→</span>
-            </a>
-          </motion.div>
-
-          <motion.p custom={4} variants={fade} className="mt-6 text-[13px] text-muted-foreground/80">
-            No credit card · SOC 2 aligned · NIST AI RMF
-          </motion.p>
-        </motion.div>
-      </div>
-
-      {/* Product shot floating on the warm canvas */}
-      <div className="mx-auto mt-16 max-w-5xl px-5 pb-24 sm:mt-20 sm:px-8 sm:pb-32">
-        <motion.div
-          initial={{ opacity: 0, y: 48 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="shadow-float rounded-2xl"
-        >
-          <ProductPreview />
-        </motion.div>
+      <div className="mx-auto max-w-6xl px-5 pb-16 pt-14 sm:px-8 sm:pb-24 sm:pt-24">
+        <div className="grid items-end gap-8 lg:grid-cols-[1.35fr_1fr] lg:gap-16">
+          <div>
+            <p className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-electric">
+              <span className="h-2 w-2 rounded-full bg-electric" />A workspace
+              for AI governance
+            </p>
+            <h1 className="display-xl max-w-3xl">
+              Move AI forward.
+              <br />
+              <span className="text-electric">With evidence.</span>
+            </h1>
+          </div>
+          <div className="pb-1">
+            <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Turn scattered AI reviews into a clear, shared process. Know what
+              you use, see what needs attention, and bring the right evidence to
+              every decision.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href={accountsAvailable ? '/signup' : '/demo'}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-6 text-sm font-medium text-paper"
+              >
+                {accountsAvailable
+                  ? 'Start an assessment'
+                  : 'Try a sample assessment'}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href={accountsAvailable ? '/demo' : '/tools'}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-border px-6 text-sm font-medium hover:bg-muted"
+              >
+                {accountsAvailable
+                  ? 'Explore the demo'
+                  : 'Browse the tool catalogue'}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <p className="mt-4 text-xs text-muted-foreground">
+              {accountsAvailable
+                ? '3 free evaluations. No credit card required.'
+                : 'Interactive preview. No account or credit card required.'}
+            </p>
+          </div>
+        </div>
+        <div className="mt-12 rounded-2xl bg-sage p-3 sm:mt-16 sm:p-6 lg:p-8">
+          <div className="shadow-float rounded-xl">
+            <ProductPreview />
+          </div>
+        </div>
+        <div className="mt-7 flex flex-wrap justify-center gap-x-8 gap-y-3 text-xs text-muted-foreground">
+          {[
+            '20 review lenses',
+            'Evidence linked to each control',
+            'Clear ownership and next actions',
+          ].map((item) => (
+            <span className="inline-flex items-center gap-2" key={item}>
+              <Check className="h-3.5 w-3.5 text-electric" />
+              {item}
+            </span>
+          ))}
+        </div>
       </div>
     </section>
   );

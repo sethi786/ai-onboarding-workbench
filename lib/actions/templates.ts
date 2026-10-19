@@ -2,11 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import { requireUser } from '@/lib/auth/require-user';
+import { authorizeWorkspace } from '@/lib/auth/evaluation-access';
 import { assertEvaluationQuota, assertFeature } from '@/lib/auth/entitlements';
 import { profilePatchToRow, assessmentPatchToRow } from '@/lib/db/mappers';
-import { makeDefaultWorkflow } from '@/workbench/data/workflowStages';
 import { makeEmptyAssessment } from '@/workbench/types';
 import type { TeamId } from '@/workbench/types';
 import { TOOL_TEMPLATE_BY_ID } from '@/data/tool-templates';
@@ -17,20 +15,11 @@ export async function instantiateTemplate(
   orgSlug: string,
   templateId: string,
 ): Promise<{ error?: string }> {
-  const user = await requireUser();
+  const access = await authorizeWorkspace(orgId, orgSlug);
+  if ('error' in access) return { error: access.error };
+  const { user, supabase, org } = access;
   const tpl = TOOL_TEMPLATE_BY_ID[templateId];
   if (!tpl) return { error: 'Unknown template.' };
-
-  const supabase = await createClient();
-
-  // Plan gates: the tool library is a paid feature, and instantiating consumes
-  // an evaluation slot. RLS limits this read to orgs the caller belongs to.
-  const { data: org } = await supabase
-    .from('organizations')
-    .select('plan')
-    .eq('id', orgId)
-    .maybeSingle();
-  if (!org) return { error: 'Workspace not found.' };
 
   const featureError = assertFeature(org.plan, 'toolLibrary');
   if (featureError) return { error: featureError };
@@ -55,19 +44,6 @@ export async function instantiateTemplate(
 
   const evalId = created.id;
 
-  // Seed the 25 workflow stages
-  await supabase.from('workflow_stages').insert(
-    makeDefaultWorkflow().map((s) => ({
-      org_id: orgId,
-      evaluation_id: evalId,
-      stage_key: s.id,
-      ordinal: s.order,
-      name: s.name,
-      status: s.status,
-      decision: s.decision,
-    })),
-  );
-
   // Seed suggested lens assessments (starter notes/controls)
   const suggestedRows = Object.entries(tpl.suggested).map(([teamId, patch]) => {
     const base = makeEmptyAssessment(teamId as TeamId);
@@ -78,7 +54,10 @@ export async function instantiateTemplate(
       ...assessmentPatchToRow({ ...base, ...patch }),
     };
   });
-  if (suggestedRows.length) await supabase.from('team_assessments').insert(suggestedRows);
+  if (suggestedRows.length) {
+    const { error: seedError } = await supabase.from('team_assessments').insert(suggestedRows);
+    if (seedError) return { error: `Evaluation ${evalId} was created, but starter assessments failed. Open it from Evaluations; do not create a duplicate.` };
+  }
 
   revalidatePath(`/portal/${orgSlug}/evaluations`);
   redirect(`/portal/${orgSlug}/evaluations/${evalId}`);

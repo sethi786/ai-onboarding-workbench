@@ -36,8 +36,8 @@ describe('toPlanId', () => {
 describe('hasFeature', () => {
   it('locks paid features on free', () => {
     expect(hasFeature('free', 'evidenceFactory')).toBe(false);
-    expect(hasFeature('free', 'exports')).toBe(false);
-    expect(hasFeature('free', 'toolLibrary')).toBe(false);
+    expect(hasFeature('free', 'exports')).toBe(true);
+    expect(hasFeature('free', 'toolLibrary')).toBe(true);
   });
 
   it('includes workflow on every plan', () => {
@@ -52,15 +52,15 @@ describe('hasFeature', () => {
     expect(hasFeature('team', 'approvals')).toBe(true);
   });
 
-  it('reserves SSO and custom lenses for enterprise', () => {
+  it('does not sell unimplemented SSO or custom lenses', () => {
     expect(hasFeature('team', 'sso')).toBe(false);
     expect(hasFeature('team', 'customLenses')).toBe(false);
-    expect(hasFeature('enterprise', 'sso')).toBe(true);
-    expect(hasFeature('enterprise', 'customLenses')).toBe(true);
+    expect(hasFeature('enterprise', 'sso')).toBe(false);
+    expect(hasFeature('enterprise', 'customLenses')).toBe(false);
   });
 
   it('treats an unknown plan as free', () => {
-    expect(hasFeature('bogus', 'exports')).toBe(false);
+    expect(hasFeature('bogus', 'evidenceFactory')).toBe(false);
   });
 });
 

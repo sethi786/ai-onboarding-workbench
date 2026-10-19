@@ -1,8 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createClient } from '@/lib/supabase/server';
-import { requireUser } from '@/lib/auth/require-user';
+import { authorizeEvaluation } from '@/lib/auth/evaluation-access';
 
 export async function saveReport(
   evalId: string,
@@ -10,8 +9,10 @@ export async function saveReport(
   orgSlug: string,
   report: { title: string; kind: string; content: string },
 ): Promise<{ error?: string }> {
-  const user = await requireUser();
-  const supabase = await createClient();
+  if (!report || typeof report.title !== 'string' || !report.title.trim() || report.title.length > 200 || typeof report.kind !== 'string' || report.kind.length > 100 || typeof report.content !== 'string' || report.content.length > 500000) return { error: 'Invalid report.' };
+  const access = await authorizeEvaluation(evalId, orgSlug, orgId);
+  if ('error' in access) return { error: access.error };
+  const { supabase, user } = access;
   const { error } = await supabase.from('generated_reports').insert({
     org_id: orgId,
     evaluation_id: evalId,

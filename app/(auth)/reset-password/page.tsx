@@ -1,43 +1,28 @@
-'use client';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
+import { ResetPasswordForm } from '@/components/auth/ResetPasswordForm';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { AuthInput, AuthLabel, AuthError, AuthSubmit } from '@/components/auth/auth-ui';
-
-export default function ResetPasswordPage() {
-  const router = useRouter();
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-    router.push('/portal');
-    router.refresh();
-  }
-
-  return (
-    <div>
-      <h1 className="text-lg font-semibold text-foreground">Set a new password</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Choose a strong password to finish.</p>
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
-        <AuthError message={error} />
-        <div>
-          <AuthLabel htmlFor="password">New password</AuthLabel>
-          <AuthInput id="password" type="password" autoComplete="new-password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
-        <AuthSubmit disabled={loading}>{loading ? 'Saving…' : 'Update password'}</AuthSubmit>
-      </form>
-    </div>
-  );
+export default async function ResetPasswordPage() {
+  const client = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await client.auth.getUser();
+  if (!user || error)
+    return (
+      <div>
+        <h1 className="text-2xl font-semibold">Request a fresh reset link</h1>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+          Open the link in your password-reset email before choosing a new
+          password. If it expired, request another.
+        </p>
+        <Link
+          className="mt-6 block rounded-lg bg-electric px-4 py-3 text-center text-sm font-medium text-white"
+          href="/forgot-password"
+        >
+          Send a new reset link
+        </Link>
+      </div>
+    );
+  return <ResetPasswordForm />;
 }

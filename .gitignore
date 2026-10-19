@@ -5,6 +5,7 @@
 
 # next.js
 /.next/
+/supabase/.temp/
 /out/
 next-env.d.ts
 

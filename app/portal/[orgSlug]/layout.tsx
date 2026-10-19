@@ -17,8 +17,13 @@ export default async function OrgLayout({
   const orgs = await listMyOrganizations();
 
   return (
-    <OrgProvider value={{ orgId: org.id, orgSlug: org.slug, orgName: org.name, role }}>
+    <OrgProvider
+      value={{ orgId: org.id, orgSlug: org.slug, orgName: org.name, role }}
+    >
       <div className="grid min-h-screen grid-cols-[248px_1fr] bg-muted/30 max-md:grid-cols-1">
+        <a href="#main-content" className="skip-link">
+          Skip to workspace
+        </a>
         <PortalSidebar orgSlug={org.slug} role={role} />
         <div className="flex min-w-0 flex-col">
           <PortalHeader
@@ -28,7 +33,13 @@ export default async function OrgLayout({
             role={role}
             userEmail={user.email ?? ''}
           />
-          <main className="flex-1 p-4 sm:p-6">{children}</main>
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="min-w-0 flex-1 p-4 sm:p-6"
+          >
+            {children}
+          </main>
         </div>
       </div>
     </OrgProvider>

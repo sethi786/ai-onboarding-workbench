@@ -1,8 +1,15 @@
-import Link from 'next/link';
-import { Check, Minus, ArrowRight } from 'lucide-react';
+import { billingConfigured } from '@/lib/billing/config';
+import { BillingActions } from '@/components/portal/BillingActions';
+import { Check, Minus } from 'lucide-react';
 import { requireMembership } from '@/lib/auth/membership';
 import { getEvaluationQuota, getMemberQuota } from '@/lib/auth/entitlements';
-import { PLANS, FEATURE_LABELS, getPlan, type FeatureKey, type QuotaState } from '@/lib/plans';
+import {
+  PLANS,
+  FEATURE_LABELS,
+  getPlan,
+  type FeatureKey,
+  type QuotaState,
+} from '@/lib/plans';
 import { Badge } from '@/components/ui/badge';
 
 const FEATURE_ORDER: FeatureKey[] = [
@@ -11,20 +18,27 @@ const FEATURE_ORDER: FeatureKey[] = [
   'exports',
   'toolLibrary',
   'approvals',
-  'customLenses',
-  'sso',
 ];
 
 function UsageBar({ label, quota }: { label: string; quota: QuotaState }) {
   const pct =
-    quota.limit === null ? 0 : Math.min(100, Math.round((quota.used / Math.max(1, quota.limit)) * 100));
+    quota.limit === null
+      ? 0
+      : Math.min(
+          100,
+          Math.round((quota.used / Math.max(1, quota.limit)) * 100),
+        );
   const atLimit = !quota.allowed;
 
   return (
     <div>
       <div className="flex items-baseline justify-between text-sm">
         <span className="font-medium">{label}</span>
-        <span className={atLimit ? 'font-medium text-danger' : 'text-muted-foreground'}>
+        <span
+          className={
+            atLimit ? 'font-medium text-danger' : 'text-muted-foreground'
+          }
+        >
           {quota.used}
           {quota.limit === null ? ' · unlimited' : ` of ${quota.limit}`}
         </span>
@@ -46,15 +60,20 @@ function UsageBar({ label, quota }: { label: string; quota: QuotaState }) {
 
 export default async function BillingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ orgSlug: string }>;
+  searchParams: Promise<{ checkout?: string }>;
 }) {
   const { orgSlug } = await params;
-  const { org } = await requireMembership(orgSlug);
+  const { checkout } = await searchParams;
+  const { org, role } = await requireMembership(orgSlug);
 
   const current = getPlan(org.plan);
-  const evalQuota = await getEvaluationQuota(org.id, org.plan);
-  const seatQuota = await getMemberQuota(org.id, org.plan);
+  const [evalQuota, seatQuota] = await Promise.all([
+    getEvaluationQuota(org.id, org.plan),
+    getMemberQuota(org.id, org.plan),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -64,12 +83,18 @@ export default async function BillingPage({
           <div>
             <div className="flex items-center gap-2.5">
               <h2 className="font-semibold">Current plan</h2>
-              <Badge tone={current.id === 'free' ? 'neutral' : 'success'}>{current.name}</Badge>
+              <Badge tone={current.id === 'free' ? 'neutral' : 'success'}>
+                {current.name}
+              </Badge>
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">{current.blurb}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {current.blurb}
+            </p>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-semibold tracking-tight">{current.price}</div>
+            <div className="text-2xl font-semibold tracking-tight">
+              {current.price}
+            </div>
           </div>
         </div>
 
@@ -91,7 +116,9 @@ export default async function BillingPage({
           <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="p-4 font-medium text-muted-foreground">Feature</th>
+                <th className="p-4 font-medium text-muted-foreground">
+                  Feature
+                </th>
                 {Object.values(PLANS).map((p) => (
                   <th
                     key={p.id}
@@ -152,28 +179,16 @@ export default async function BillingPage({
         </div>
       </section>
 
-      {/* Upgrade — honest about the current state */}
       <section className="rounded-xl border border-border bg-card p-6">
-        <h2 className="font-semibold">Change plan</h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Self-serve checkout isn’t connected yet — we haven’t wired a payment provider. To change
-          your plan today, get in touch and we’ll move your workspace over manually. The entitlement
-          system above is live, so limits and features apply as soon as your plan changes.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <Link
-            href="/contact"
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-ink px-5 text-sm font-medium text-paper transition-opacity hover:opacity-90"
-          >
-            Contact us to upgrade <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/pricing"
-            className="inline-flex h-10 items-center rounded-lg border border-border px-5 text-sm font-medium transition-colors hover:bg-muted"
-          >
-            See pricing
-          </Link>
-        </div>
+        <h2 className="mb-4 font-semibold">Subscription</h2>
+        <BillingActions
+          orgId={org.id}
+          configured={billingConfigured()}
+          owner={role === 'owner'}
+          customer={Boolean(org.stripe_customer_id)}
+          plan={current.id}
+          outcome={checkout}
+        />
       </section>
     </div>
   );

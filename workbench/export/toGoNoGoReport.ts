@@ -1,3 +1,4 @@
+import { METHODOLOGY_NOTE } from '../engine/scoring';
 import type { ReportContext } from './reportContext';
 import { DRAFT_BANNER } from '../data/constants';
 
@@ -5,10 +6,13 @@ export function toGoNoGoReport(ctx: ReportContext): string {
   const { profile, score, teams } = ctx;
   const req = teams.filter((t) => t.required);
   const blocked = req.filter((t) => t.hasCriticalBlocker || t.activeBlockerLabels.length > 0);
-  const notReady = req.filter((t) => t.normalized < 70 && !t.hasCriticalBlocker);
+  const notReady = req.filter((t) => !score.perTeam[t.lens.id].readyForReview);
 
   const lines: string[] = [];
   lines.push('# Go / No-Go Decision Pack');
+  lines.push('');
+  lines.push(`Methodology: ${ctx.score.methodologyVersion} · Evaluated: ${ctx.score.evaluatedAt}`);
+  lines.push(METHODOLOGY_NOTE);
   lines.push('');
   lines.push(`> ${DRAFT_BANNER}`);
   lines.push('');
@@ -21,7 +25,7 @@ export function toGoNoGoReport(ctx: ReportContext): string {
   lines.push('');
   lines.push(`- Overall Readiness: **${score.readiness}/100**`);
   lines.push(`- Overall Risk: **${score.risk}**`);
-  lines.push(`- Evidence Complete: **${score.evidenceCompleteness}%**`);
+  lines.push(`- Evidence supported: **${score.evidenceCompleteness}%**`);
   lines.push(`- Required teams: ${score.requiredTeams} · Ready: ${score.teamsReady} · Blocked: ${score.teamsBlocked}`);
   lines.push('');
 
@@ -36,10 +40,10 @@ export function toGoNoGoReport(ctx: ReportContext): string {
   }
   lines.push('');
 
-  lines.push('## Teams Not Yet Ready (< 70%)');
+  lines.push('## Teams Not Yet Ready for Review');
   lines.push('');
   if (notReady.length === 0) {
-    lines.push('All required teams are at or above the conditional-approval threshold.');
+    lines.push('All required teams meet the readiness checks. Formal sign-off remains external.');
   } else {
     for (const t of notReady) {
       lines.push(`- ${t.lens.title}: ${t.normalized}% ready`);
@@ -47,7 +51,7 @@ export function toGoNoGoReport(ctx: ReportContext): string {
   }
   lines.push('');
 
-  lines.push('## Required Sign-Off Snapshot');
+  lines.push('## Self-Reported Decision Snapshot');
   lines.push('');
   lines.push('| Team | Decision | Readiness |');
   lines.push('|---|---|---|');
@@ -55,5 +59,6 @@ export function toGoNoGoReport(ctx: ReportContext): string {
     lines.push(`| ${t.lens.title} | ${t.assessment.decision} | ${t.normalized}% |`);
   }
   lines.push('');
+  lines.push('## Next actions', '', ...score.gateReasons.map((reason) => `- ${reason}`), '');
   return lines.join('\n');
 }

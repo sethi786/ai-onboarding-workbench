@@ -29,7 +29,7 @@ export function Reveal({
       className={className}
       custom={index}
       variants={variants}
-      initial="hidden"
+      initial={false}
       whileInView="show"
       viewport={{ once: true, margin: '-80px' }}
     >

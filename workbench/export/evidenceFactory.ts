@@ -1,3 +1,4 @@
+import { METHODOLOGY_NOTE } from '../engine/scoring';
 import type { ReportContext, TeamReportRow } from './reportContext';
 import type { TeamId } from '../types';
 import { DRAFT_BANNER } from '../data/constants';
@@ -12,6 +13,9 @@ function header(title: string, ctx: ReportContext): string[] {
     `**Profile:** ${ctx.profile.name} — ${ctx.profile.platform}`,
     `**Environment:** ${ctx.profile.environment} · **Classification:** ${ctx.profile.dataClassification}`,
     `**Generated:** ${ctx.generatedAt}`,
+    `**Scope revision:** ${ctx.profile.scopeRevision ?? 1}`,
+    `Methodology: ${ctx.score.methodologyVersion} · Evaluated: ${ctx.score.evaluatedAt}`,
+    METHODOLOGY_NOTE,
     '',
   ];
 }
@@ -31,8 +35,11 @@ function teamArtifact(ctx: ReportContext, teamId: TeamId, title: string): string
 
   lines.push('## Self-Assessment Snapshot');
   lines.push('');
+  lines.push(`Methodology: ${ctx.score.methodologyVersion} · Evaluated: ${ctx.score.evaluatedAt}`);
+  lines.push(METHODOLOGY_NOTE);
+  lines.push('');
   lines.push(`- Readiness score: ${a.score < 0 ? 'Not scored' : a.score + '/5'} (${t.normalized}% weighted)`);
-  lines.push(`- Decision: ${a.decision}`);
+  lines.push(`- Self-reported decision: ${a.decision}${ctx.score.perTeam[teamId].scopeCurrent ? "" : " (earlier scope; requires review)"}`);
   lines.push(`- Owner: ${a.owner || '—'} · Due: ${a.dueDate || '—'}`);
   lines.push(`- Controls complete: ${t.controlsComplete}/${t.controlsTotal}`);
   lines.push(`- Evidence attached: ${t.evidenceComplete}/${t.evidenceTotal}`);
@@ -43,14 +50,14 @@ function teamArtifact(ctx: ReportContext, teamId: TeamId, title: string): string
   lines.push('## Required Controls');
   lines.push('');
   for (const c of t.lens.requiredControls) {
-    lines.push(`- [${a.checkedControls[c.id] ? 'x' : ' '}] ${c.label}${c.critical ? ' (critical)' : ''}`);
+    lines.push(`- [${ctx.score.perTeam[teamId].scopeCurrent && a.checkedControls[c.id] ? 'x' : ' '}] ${c.label}${c.critical ? ' (critical)' : ''}`);
   }
   lines.push('');
 
   lines.push('## Evidence Checklist');
   lines.push('');
   for (const e of t.lens.evidenceRequired) {
-    lines.push(`- [${a.checkedEvidence[e.id] ? 'x' : ' '}] ${e.label}`);
+    lines.push(`- [${!ctx.score.perTeam[teamId].missingEvidenceIds.includes(e.id) ? 'x' : ' '}] ${e.label}`);
   }
   lines.push('');
 
@@ -137,9 +144,9 @@ function executiveDashboardReport(ctx: ReportContext): string {
   lines.push('');
   lines.push(`- Overall Readiness: **${score.readiness}/100**`);
   lines.push(`- Overall Risk: **${score.risk}**`);
-  lines.push(`- Approval Status: **${score.approvalStatus}**`);
+  lines.push(`- Self-reported decision status: **${score.approvalStatus}**`);
   lines.push(`- Recommendation: **${score.recommendation}**`);
-  lines.push(`- Evidence Complete: **${score.evidenceCompleteness}%**`);
+  lines.push(`- Evidence supported: **${score.evidenceCompleteness}%**`);
   lines.push(`- Blockers: **${score.blockersCount}**`);
   lines.push(`- Controls Complete / Remaining: **${score.controlsComplete} / ${score.controlsRemaining}**`);
   lines.push(`- Teams Ready / Blocked: **${score.teamsReady} / ${score.teamsBlocked}** (of ${score.requiredTeams})`);

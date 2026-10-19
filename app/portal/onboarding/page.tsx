@@ -4,7 +4,12 @@ import { listMyOrganizations } from '@/lib/auth/membership';
 import { ShieldLogo } from '@/components/brand/ShieldLogo';
 import { CreateOrgForm } from '@/components/portal/CreateOrgForm';
 
-export default async function OnboardingPage() {
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ template?: string }>;
+}) {
+  const { template } = await searchParams;
   await requireUser('/portal/onboarding');
   const orgs = await listMyOrganizations();
 
@@ -18,16 +23,20 @@ export default async function OnboardingPage() {
       <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <h1 className="text-lg font-semibold">Create your workspace</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          A workspace holds your organization’s AI tool evaluations. You’ll be the owner.
+          A workspace holds your organization’s AI tool evaluations. You’ll be
+          the owner.
         </p>
         <div className="mt-6">
-          <CreateOrgForm />
+          <CreateOrgForm template={template} />
         </div>
       </div>
       {orgs.length > 0 && (
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Or go to{' '}
-          <Link href={`/portal/${orgs[0].org.slug}/dashboard`} className="text-electric hover:underline">
+          <Link
+            href={`/portal/${orgs[0].org.slug}/dashboard`}
+            className="text-electric hover:underline"
+          >
             {orgs[0].org.name}
           </Link>
         </p>

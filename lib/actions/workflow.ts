@@ -1,8 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createClient } from '@/lib/supabase/server';
-import { requireUser } from '@/lib/auth/require-user';
+import { authorizeEvaluation } from '@/lib/auth/evaluation-access';
+import { validateWorkflowPatch } from '@/lib/validation/governance';
+import { makeDefaultWorkflow } from '@/workbench/data/workflowStages';
 import type { WorkflowStage } from '@/workbench/types';
 
 export async function updateWorkflowStage(
@@ -11,8 +12,12 @@ export async function updateWorkflowStage(
   stageKey: string,
   patch: Partial<Pick<WorkflowStage, 'status' | 'owner' | 'dueDate' | 'evidence' | 'notes' | 'blocker' | 'decision'>>,
 ): Promise<{ error?: string }> {
-  await requireUser();
-  const supabase = await createClient();
+  const invalid = validateWorkflowPatch(patch);
+  if (invalid) return { error: invalid };
+  if (!makeDefaultWorkflow().some((s) => s.id === stageKey)) return { error: 'Unknown workflow stage.' };
+  const access = await authorizeEvaluation(evalId, orgSlug);
+  if ('error' in access) return { error: access.error };
+  const { supabase } = access;
   const row: Record<string, unknown> = {};
   if (patch.status !== undefined) row.status = patch.status;
   if (patch.owner !== undefined) row.owner = patch.owner;
@@ -22,12 +27,12 @@ export async function updateWorkflowStage(
   if (patch.blocker !== undefined) row.blocker = patch.blocker;
   if (patch.decision !== undefined) row.decision = patch.decision;
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('workflow_stages')
     .update(row)
     .eq('evaluation_id', evalId)
-    .eq('stage_key', stageKey);
-  if (error) return { error: error.message };
+    .eq('stage_key', stageKey).select('id');
+  if (error || !data?.length) return { error: error?.message ?? 'Workflow change was not saved. Reload and retry.' };
   revalidatePath(`/portal/${orgSlug}/evaluations/${evalId}/workflow`);
   return {};
 }

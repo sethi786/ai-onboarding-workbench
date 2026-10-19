@@ -4,7 +4,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
-export function EvalTabs({ orgSlug, evalId }: { orgSlug: string; evalId: string }) {
+export function EvalTabs({
+  orgSlug,
+  evalId,
+}: {
+  orgSlug: string;
+  evalId: string;
+}) {
   const pathname = usePathname();
   const base = `/portal/${orgSlug}/evaluations/${evalId}`;
   const tabs = [
@@ -15,18 +21,28 @@ export function EvalTabs({ orgSlug, evalId }: { orgSlug: string; evalId: string 
     { href: `${base}/evidence`, label: 'Evidence Factory' },
     { href: `${base}/exports`, label: 'Exports' },
     { href: `${base}/edit`, label: 'Edit' },
+    {
+      href: `/portal/${orgSlug}/activity?evaluation=${evalId}`,
+      label: 'History',
+    },
   ];
 
   return (
-    <nav className="mt-4 flex flex-wrap gap-1 border-b border-border">
+    <nav
+      aria-label="Evaluation sections"
+      className="mt-4 flex gap-1 overflow-x-auto border-b border-border pb-px"
+    >
       {tabs.map((t) => {
-        const active = t.exact ? pathname === t.href : pathname.startsWith(t.href);
+        const active = t.exact
+          ? pathname === t.href
+          : pathname.startsWith(t.href);
         return (
           <Link
             key={t.href}
             href={t.href}
+            aria-current={active ? 'page' : undefined}
             className={cn(
-              '-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+              '-mb-px shrink-0 border-b-2 px-3 py-3 text-sm font-medium transition-colors',
               active
                 ? 'border-electric text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground',

@@ -6,6 +6,9 @@
  * always happen server-side; the UI only mirrors what this module says.
  */
 
+export const TEAM_MONTHLY_CENTS = 9900;
+export const BILLING_CURRENCY = 'USD';
+
 export type PlanId = 'free' | 'team' | 'enterprise';
 
 /** Feature keys that can be gated. */
@@ -21,7 +24,7 @@ export type FeatureKey =
 export interface PlanDefinition {
   id: PlanId;
   name: string;
-  /** Display price; billing itself is not wired yet. */
+  /** USD per workspace, before any applicable taxes. */
   price: string;
   blurb: string;
   /** null = unlimited */
@@ -40,8 +43,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
     maxMembers: 1,
     features: {
       evidenceFactory: false,
-      exports: false,
-      toolLibrary: false,
+      exports: true,
+      toolLibrary: true,
       workflow: true,
       approvals: false,
       customLenses: false,
@@ -51,7 +54,7 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
   team: {
     id: 'team',
     name: 'Team',
-    price: '$499/mo',
+    price: `US$${TEAM_MONTHLY_CENTS / 100}/mo`,
     blurb: 'For governance and AI program teams.',
     maxEvaluations: null,
     maxMembers: 25,
@@ -78,8 +81,8 @@ export const PLANS: Record<PlanId, PlanDefinition> = {
       toolLibrary: true,
       workflow: true,
       approvals: true,
-      customLenses: true,
-      sso: true,
+      customLenses: false,
+      sso: false,
     },
   },
 };
@@ -111,7 +114,10 @@ export function getPlan(raw: string | null | undefined): PlanDefinition {
   return PLANS[toPlanId(raw)];
 }
 
-export function hasFeature(raw: string | null | undefined, feature: FeatureKey): boolean {
+export function hasFeature(
+  raw: string | null | undefined,
+  feature: FeatureKey,
+): boolean {
   return getPlan(raw).features[feature];
 }
 
@@ -124,16 +130,24 @@ export interface QuotaState {
   remaining: number | null;
 }
 
-export function evaluationQuota(raw: string | null | undefined, used: number): QuotaState {
+export function evaluationQuota(
+  raw: string | null | undefined,
+  used: number,
+): QuotaState {
   const limit = getPlan(raw).maxEvaluations;
-  if (limit === null) return { used, limit: null, allowed: true, remaining: null };
+  if (limit === null)
+    return { used, limit: null, allowed: true, remaining: null };
   const remaining = Math.max(0, limit - used);
   return { used, limit, allowed: used < limit, remaining };
 }
 
-export function memberQuota(raw: string | null | undefined, used: number): QuotaState {
+export function memberQuota(
+  raw: string | null | undefined,
+  used: number,
+): QuotaState {
   const limit = getPlan(raw).maxMembers;
-  if (limit === null) return { used, limit: null, allowed: true, remaining: null };
+  if (limit === null)
+    return { used, limit: null, allowed: true, remaining: null };
   const remaining = Math.max(0, limit - used);
   return { used, limit, allowed: used < limit, remaining };
 }

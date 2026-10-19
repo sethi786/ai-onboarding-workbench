@@ -1,3 +1,4 @@
+import { METHODOLOGY_NOTE } from '../engine/scoring';
 import type { ReportContext } from './reportContext';
 import { DISCLAIMER } from '../data/constants';
 
@@ -7,6 +8,9 @@ export function toMarkdownReport(ctx: ReportContext): string {
 
   const lines: string[] = [];
   lines.push('# AI Onboarding Self-Evaluation Report');
+  lines.push('');
+  lines.push(`Methodology: ${ctx.score.methodologyVersion} · Evaluated: ${ctx.score.evaluatedAt}`);
+  lines.push(METHODOLOGY_NOTE);
   lines.push('');
   lines.push(`> ${DISCLAIMER}`);
   lines.push('');
@@ -42,9 +46,9 @@ export function toMarkdownReport(ctx: ReportContext): string {
   lines.push('');
   lines.push(`- **Overall Readiness:** ${score.readiness}/100`);
   lines.push(`- **Overall Risk:** ${score.risk}`);
-  lines.push(`- **Approval Status:** ${score.approvalStatus}`);
+  lines.push(`- **Self-reported decision status:** ${score.approvalStatus}`);
   lines.push(`- **Final Recommendation:** ${score.recommendation}`);
-  lines.push(`- **Evidence Complete:** ${score.evidenceCompleteness}%`);
+  lines.push(`- **Evidence supported:** ${score.evidenceCompleteness}%`);
   lines.push(`- **Blockers:** ${score.blockersCount}`);
   lines.push(
     `- **Teams Ready / Blocked:** ${score.teamsReady} / ${score.teamsBlocked} (of ${score.requiredTeams} required)`,
@@ -70,7 +74,7 @@ export function toMarkdownReport(ctx: ReportContext): string {
   lines.push('## Missing Evidence');
   lines.push('');
   if (missing.length === 0) {
-    lines.push('All required evidence marked complete.');
+    lines.push('All required evidence items have current references. Document content has not been independently verified.');
   } else {
     for (const t of missing) {
       lines.push(`- **${t.lens.title}:** ${t.missingEvidence.join(', ')}`);
@@ -79,7 +83,7 @@ export function toMarkdownReport(ctx: ReportContext): string {
   lines.push('');
 
   const remediation = req.filter(
-    (t) => t.activeBlockerLabels.length > 0 || t.assessment.needsRemediation,
+    (t) => score.perTeam[t.lens.id].gateReasons.length > 0,
   );
   lines.push('## Remediation Plan');
   lines.push('');
@@ -88,6 +92,7 @@ export function toMarkdownReport(ctx: ReportContext): string {
   } else {
     for (const t of remediation) {
       lines.push(`### ${t.lens.title}`);
+      lines.push(...score.perTeam[t.lens.id].gateReasons.map((reason) => `- ${reason}`));
       if (t.activeBlockerLabels.length)
         lines.push(`- Active blockers: ${t.activeBlockerLabels.join(', ')}`);
       if (t.assessment.owner) lines.push(`- Owner: ${t.assessment.owner}`);
@@ -101,5 +106,6 @@ export function toMarkdownReport(ctx: ReportContext): string {
   lines.push('');
   lines.push(`**${score.recommendation}**`);
   lines.push('');
+  lines.push('## Next actions', '', ...score.gateReasons.map((reason) => `- ${reason}`), '');
   return lines.join('\n');
 }
