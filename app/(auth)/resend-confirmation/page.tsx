@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { emailRedirect } from '@/lib/auth/email-flow';
 import { safeNext } from '@/lib/auth/safe-redirect';
+import { authErrorMessage } from '@/lib/auth/errors';
 import {
   AuthInput,
   AuthLabel,
@@ -39,7 +40,12 @@ function ResendForm() {
         },
       });
       if (error)
-        setError('Could not send a link. Please wait a minute and try again.');
+        setError(
+          authErrorMessage(
+            error,
+            'Could not send a link. Please wait a minute and try again.',
+          ),
+        );
       else {
         setSent(true);
         setCooldown(60);
@@ -59,7 +65,7 @@ function ResendForm() {
         Request another confirmation email. Check your spam folder if it doesn’t
         arrive.
       </p>
-      <form onSubmit={submit} className="mt-6 space-y-4">
+      <form onSubmit={submit} aria-busy={busy} className="mt-6 space-y-4">
         <AuthError message={error} />
         {sent && (
           <p role="status" className="rounded-lg bg-electric/10 p-3 text-sm">
@@ -73,6 +79,9 @@ function ResendForm() {
             id="email"
             type="email"
             autoComplete="email"
+            autoCapitalize="none"
+            spellCheck={false}
+            disabled={busy}
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}

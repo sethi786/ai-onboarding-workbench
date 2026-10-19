@@ -1,10 +1,9 @@
 import { Hero } from '@/components/marketing/Hero';
-import { LiveDemo } from '@/components/marketing/LiveDemo';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
 import {
   FeatureGrid,
   HowItWorks,
   Pricing,
-  ReviewerQuestions,
   FAQ,
   FinalCTA,
 } from '@/components/marketing/LandingSections';
@@ -12,11 +11,9 @@ import {
 export default function HomePage() {
   return (
     <>
-      <Hero />
+      <Hero accountsAvailable={isSupabaseConfigured()} />
       <FeatureGrid />
       <HowItWorks />
-      <LiveDemo />
-      <ReviewerQuestions />
       <Pricing />
       <FAQ />
       <FinalCTA />

@@ -18,7 +18,7 @@ export function PortalSidebar({
   const nav = portalNav(orgSlug, role);
 
   return (
-    <aside className="flex flex-col border-r border-border bg-navy-deep text-slate-300 max-md:hidden">
+    <aside className="sticky top-0 flex h-dvh flex-col overflow-y-auto border-r border-border bg-navy-deep text-slate-300 max-md:hidden">
       <div className="border-b border-white/10 px-5 py-4">
         <Link href={`/portal/${orgSlug}/dashboard`}>
           <ShieldLogo tone="light" />
@@ -35,7 +35,7 @@ export function PortalSidebar({
               href={n.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                'flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 active
                   ? 'bg-electric text-white'
                   : 'text-slate-300 hover:bg-white/5 hover:text-white',

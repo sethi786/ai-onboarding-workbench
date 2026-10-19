@@ -4,6 +4,7 @@ const mock = vi.hoisted(() => ({
   user: { id: 'signed-in' } as { id: string } | null,
   fail: false,
   calls: 0,
+  error: null as null | { status: number; code: string },
 }));
 vi.mock('@supabase/ssr', () => ({
   createServerClient: (
@@ -18,7 +19,7 @@ vi.mock('@supabase/ssr', () => ({
         options.cookies.setAll([
           { name: 'test-refresh', value: 'new', options: { path: '/' } },
         ]);
-        return { data: { user: mock.user } };
+        return { data: { user: mock.user }, error: mock.error };
       },
     },
   }),
@@ -30,6 +31,7 @@ beforeEach(() => {
   mock.user = { id: 'signed-in' };
   mock.fail = false;
   mock.calls = 0;
+  mock.error = null;
 });
 it('leaves public pages independent of auth provider uptime', async () => {
   mock.fail = true;
@@ -61,8 +63,22 @@ it('handles a thrown provider outage without an unhandled middleware error', asy
     new NextRequest('https://example.test/portal/account'),
   );
   expect(response.headers.get('location')).toBe(
-    'https://example.test/login?error=unavailable',
+    'https://example.test/login?error=unavailable&next=%2Fportal%2Faccount',
   );
+});
+it('handles returned provider outages and preserves intent and refresh cookies', async () => {
+  mock.user = null;
+  mock.error = { status: 503, code: 'unexpected_failure' };
+  const response = await updateSession(
+    new NextRequest('https://example.test/portal/start?template=lovable'),
+  );
+  const target = new URL(response.headers.get('location')!);
+  expect(target.searchParams.get('error')).toBe('unavailable');
+  expect(target.searchParams.get('next')).toBe(
+    '/portal/start?template=lovable',
+  );
+  expect(response.cookies.get('test-refresh')?.value).toBe('new');
+  expect(response.headers.get('cache-control')).toBe('private, no-store');
 });
 afterEach(() => vi.unstubAllEnvs());
 it('allows authenticated users to reach password recovery instead of redirecting away', async () => {

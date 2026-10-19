@@ -116,8 +116,13 @@ for (const path of [
   const body = await response.text();
   assert.ok(
     response.headers.get('location')?.includes('/launch-status') ||
-      body.includes('/launch-status'),
+      body.includes('/launch-status') ||
+      body.includes('Account access is temporarily unavailable.'),
     `Unavailable auth safely redirects: ${path}`,
+  );
+  assert.ok(
+    !body.includes('type="password"'),
+    'Unavailable auth does not collect credentials',
   );
 }
 const confirmation = await fetch(`${origin}/auth/error`);

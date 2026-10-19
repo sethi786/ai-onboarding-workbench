@@ -174,7 +174,7 @@ export default function PlatformPage() {
               Start free <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/#demo"
+              href="/demo"
               className="inline-flex h-12 items-center rounded-full border border-white/20 px-7 text-[15px] font-medium text-white transition-colors hover:bg-white/10"
             >
               Try the live demo

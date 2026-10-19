@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { isSupabaseConfigured } from './env';
 import { safeNext } from '@/lib/auth/safe-redirect';
+import { isAuthServiceError } from '@/lib/auth/errors';
 
 /**
  * Refreshes the Supabase session cookie on account/workspace requests (Server Components
@@ -56,13 +57,18 @@ export async function updateSession(request: NextRequest) {
   let user;
   try {
     const result = await supabase.auth.getUser();
+    if (isAuthServiceError(result.error)) throw new Error('Auth unavailable');
     user = result.data.user;
   } catch {
     if (isPortal || isAdmin) {
-      const unavailable = NextResponse.redirect(
-        new URL('/login?error=unavailable', request.url),
-      );
+      const target = new URL('/login', request.url);
+      target.searchParams.set('error', 'unavailable');
+      target.searchParams.set('next', path + request.nextUrl.search);
+      const unavailable = NextResponse.redirect(target);
       unavailable.headers.set('Cache-Control', 'private, no-store');
+      response.cookies
+        .getAll()
+        .forEach((cookie) => unavailable.cookies.set(cookie));
       return unavailable;
     }
     return response;

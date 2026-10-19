@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { authErrorMessage } from '@/lib/auth/errors';
 import {
-  AuthInput,
+  AuthPasswordInput,
   AuthLabel,
   AuthError,
   AuthSubmit,
@@ -20,6 +21,7 @@ export function ResetPasswordForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     if (password !== confirmation) {
       setError(
         'The passwords don’t match. Please enter the same password twice.',
@@ -32,7 +34,12 @@ export function ResetPasswordForm() {
       const supabase = createClient();
       const { error } = await supabase.auth.updateUser({ password });
       if (error) {
-        setError(error.message);
+        setError(
+          authErrorMessage(
+            error,
+            'We could not update your password. Please try again shortly.',
+          ),
+        );
         setLoading(false);
         return;
       }
@@ -73,14 +80,14 @@ export function ResetPasswordForm() {
       <p className="mt-1 text-sm text-muted-foreground">
         Choose a strong password to finish.
       </p>
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <form onSubmit={onSubmit} aria-busy={loading} className="mt-6 space-y-4">
         <AuthError message={error} />
         <div>
           <AuthLabel htmlFor="password">New password</AuthLabel>
-          <AuthInput
+          <AuthPasswordInput
             id="password"
-            type="password"
             autoComplete="new-password"
+            disabled={loading}
             minLength={8}
             required
             value={password}
@@ -89,9 +96,9 @@ export function ResetPasswordForm() {
         </div>
         <div>
           <AuthLabel htmlFor="confirm-password">Confirm new password</AuthLabel>
-          <AuthInput
+          <AuthPasswordInput
             id="confirm-password"
-            type="password"
+            disabled={loading}
             autoComplete="new-password"
             minLength={8}
             required

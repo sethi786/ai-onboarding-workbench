@@ -4,19 +4,21 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { safeNext } from '@/lib/auth/safe-redirect';
 import { emailRedirect } from '@/lib/auth/email-flow';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { navigateAfterSignIn } from '@/lib/auth/navigation';
+import { authErrorMessage } from '@/lib/auth/errors';
 import { createClient } from '@/lib/supabase/client';
 import {
   AuthInput,
   AuthLabel,
   AuthError,
   AuthSubmit,
+  AuthPasswordInput,
 } from '@/components/auth/auth-ui';
 
 function SignupInner() {
   const params = useSearchParams();
   const next = safeNext(params.get('next'));
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +27,7 @@ function SignupInner() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError(null);
     try {
@@ -37,14 +40,18 @@ function SignupInner() {
         },
       });
       if (error) {
-        setError(error.message);
+        setError(
+          authErrorMessage(
+            error,
+            'We could not create your account. Please try again shortly.',
+          ),
+        );
         setLoading(false);
         return;
       }
       // If email confirmation is enabled, there is no active session yet.
       if (data.session) {
-        router.push(next);
-        router.refresh();
+        navigateAfterSignIn(next);
       } else {
         setNeedsConfirm(true);
         setLoading(false);
@@ -85,13 +92,13 @@ function SignupInner() {
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-foreground">
+      <h1 className="text-3xl font-semibold tracking-tight">
         Create your account
       </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">
         Start with three free tool assessments.
       </p>
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <form onSubmit={onSubmit} aria-busy={loading} className="mt-8 space-y-5">
         <AuthError message={error} />
         <div>
           <AuthLabel htmlFor="email">Work email</AuthLabel>
@@ -99,6 +106,9 @@ function SignupInner() {
             id="email"
             type="email"
             autoComplete="email"
+            disabled={loading}
+            autoCapitalize="none"
+            spellCheck={false}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -106,10 +116,10 @@ function SignupInner() {
         </div>
         <div>
           <AuthLabel htmlFor="password">Password</AuthLabel>
-          <AuthInput
+          <AuthPasswordInput
             id="password"
-            type="password"
             autoComplete="new-password"
+            disabled={loading}
             minLength={8}
             required
             value={password}
@@ -149,7 +159,7 @@ function SignupInner() {
 
 export default function SignupPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<p role="status">Loading account setup…</p>}>
       <SignupInner />
     </Suspense>
   );

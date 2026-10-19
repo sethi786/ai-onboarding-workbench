@@ -2,6 +2,8 @@
 
 Prepared October 17, 2026. Scope: `sethi786/ai-onboarding-workbench`, extending draft PR #7.
 
+**October 19 customer issue update:** Fixed blank authentication buttons, stale post-sign-in navigation and actionable error recovery; improved account screens, mobile controls and workspace navigation. See [customer issue fixes](customer-issue-fixes.md) for current validation and the remaining hosted access blockers. Earlier test counts below describe earlier releases.
+
 **Latest hosted update:** Supabase staging now has migrations 0001–0009, 40 tool templates, and passing basic SQL/anonymous API checks. Additional hardening is locally tested but pending after provider request-expiry errors. Vercel access, browser authentication, SMTP and payments remain unverified. The [hosted acceptance record](hosted-acceptance.md) supersedes earlier infrastructure-status notes below. Include `20261017162202_hosted_database_hardening.sql` after 0009 in the deployment sequence.
 
 **Release decision: ready for hosted acceptance testing; not yet cleared to accept production customers or payments.** Local tests establish code behavior. They do not establish that the hosted database, payment account, email, backups, or legal terms are configured.

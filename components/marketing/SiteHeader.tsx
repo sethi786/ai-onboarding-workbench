@@ -79,7 +79,11 @@ const NAV = [
   },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({
+  accountsAvailable = true,
+}: {
+  accountsAvailable?: boolean;
+}) {
   const [open, setOpen] = useState<string | null>(null);
   const [mobile, setMobile] = useState(false);
   const header = useRef<HTMLElement>(null);
@@ -121,7 +125,10 @@ export function SiteHeader() {
         }
       }}
       onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+        if (
+          event.relatedTarget &&
+          !event.currentTarget.contains(event.relatedTarget as Node)
+        )
           close();
       }}
     >
@@ -191,10 +198,10 @@ export function SiteHeader() {
             Log in
           </Link>
           <Link
-            href="/signup"
+            href={accountsAvailable ? '/signup' : '/demo'}
             className="inline-flex min-h-11 items-center rounded-full bg-ink px-4 text-sm font-medium text-paper sm:px-5"
           >
-            Start free
+            {accountsAvailable ? 'Start free' : 'Try the demo'}
             <span className="ml-2 hidden sm:inline" aria-hidden>
               ↗
             </span>

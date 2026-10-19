@@ -1,8 +1,8 @@
 # Hosted setup and acceptance record
 
-Updated 17 October 2026. Product: Aegis. Repository: `sethi786/ai-onboarding-workbench`.
+Updated 19 October 2026. Product: Aegis. Repository: `sethi786/ai-onboarding-workbench`.
 
-**Release decision: do not enable paid production yet.** Staging database installation and basic hosted SQL checks pass. The website is not connected to this project; browser/email/payment acceptance remains outstanding.
+**Release decision: do not enable paid production yet.** Staging database installation and basic hosted SQL checks pass. We have not connected the website to this project or inspected its current hosting variables; browser/email/payment acceptance remains outstanding. See the [customer issue fixes](customer-issue-fixes.md) for the latest login defects and code changes.
 
 ## Staging project
 
@@ -30,15 +30,15 @@ MCP records its own timestamp versions. Match migration **names and SQL** agains
 
 ## Audit findings and pending fix
 
-`20261017162202_hosted_database_hardening.sql` is locally verified but **not installed**. Two application attempts returned `McpServerError: Invalid or expired requestState`. Migration history subsequently confirmed absence. Do not mark hosted findings resolved until application and re-audit succeed.
+`20261017162202_hosted_database_hardening.sql` is locally verified but **not installed**. Application attempts returned `McpServerError: Invalid or expired requestState`, including the latest retry completed on October 19. Migration history subsequently confirmed absence. Do not mark hosted findings resolved until application and re-audit succeed.
 
 The migration fixes two function lookup paths ([guidance](https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable)); revokes inherited client invocation privileges on internal trigger functions, including direct Supabase `anon` grants ([guidance](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable)); splits write policies to avoid duplicated SELECT checks while preserving tenant/role predicates ([guidance](https://supabase.com/docs/guides/database/database-linter?lint=0006_multiple_permissive_policies)); and adds eight foreign-key indexes ([guidance](https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys)). Revocation does not prevent installed triggers from running.
 
 The seven authorized application RPCs/helpers intentionally remain callable by authenticated users and retain identity/input/role checks ([security-definer review](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)). Three service-only tables intentionally have RLS with no customer policies ([deny-by-default guidance](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy)). Unused-index notices on an empty project are not grounds to remove indexes ([guidance](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index)).
 
-Local validation: all 270 automated tests passed, including 43 database tests and regressions reproducing Supabase default function grants and checking viewer boundaries across all four assessment child tables. Existing CRUD/trigger tests also run with the hardened privileges. The latest billing tests cover paid invoice evidence, delayed payments, renewal preparation, compatible session reuse, and sandbox/live isolation. This does not change the hosted migration's pending status or establish provider purchase acceptance.
+Local validation: all 286 automated tests passed, including 43 database tests and regressions reproducing Supabase default function grants and checking viewer boundaries across all four assessment child tables. Existing CRUD/trigger tests also run with the hardened privileges. Billing tests cover paid invoice evidence, delayed payments, renewal preparation, compatible session reuse, and sandbox/live isolation. New authentication regressions cover visible action labels, pending requests, session-dependent navigation, retryable errors and confirmation recovery. This does not change the hosted migration's pending status or establish provider purchase acceptance.
 
-TypeScript, ESLint, the optimized production build, and HTTP smoke checks across 85 public routes and three section links also passed. The production dependency audit found zero vulnerabilities. The build retains the previously documented Supabase Realtime dynamic-require warning. Browser visual and authenticated customer acceptance remain outstanding.
+TypeScript, ESLint, the optimized production build, and HTTP smoke checks across 85 public routes and their internal navigation also passed. The smoke check found two stale homepage-demo links; both now target the dedicated demo page. The production dependency audit found zero vulnerabilities. The build retains the previously documented Supabase Realtime dynamic-require warning. Browser visual and authenticated customer acceptance remain outstanding.
 
 ## Stripe connection
 

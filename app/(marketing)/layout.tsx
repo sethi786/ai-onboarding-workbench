@@ -1,5 +1,6 @@
 import { SiteHeader } from '@/components/marketing/SiteHeader';
 import { SiteFooter } from '@/components/marketing/SiteFooter';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
 
 export default function MarketingLayout({
   children,
@@ -11,7 +12,7 @@ export default function MarketingLayout({
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <SiteHeader />
+      <SiteHeader accountsAvailable={isSupabaseConfigured()} />
       <main id="main-content" tabIndex={-1} className="flex-1">
         {children}
       </main>

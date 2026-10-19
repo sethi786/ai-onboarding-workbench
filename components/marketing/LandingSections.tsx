@@ -16,6 +16,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { Reveal } from '@/components/motion/Reveal';
+import { isSupabaseConfigured } from '@/lib/supabase/env';
 
 /* --------------------------------------------------------------- Statement band */
 export function StatementBand() {
@@ -272,6 +273,7 @@ const PLANS = [
 ];
 
 export function Pricing() {
+  const accountsAvailable = isSupabaseConfigured();
   return (
     <section id="pricing" className="border-y border-border bg-surface">
       <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
@@ -340,12 +342,20 @@ export function Pricing() {
                   ))}
                 </ul>
                 <Link
-                  href={p.name === 'Enterprise' ? '/contact' : '/signup'}
+                  href={
+                    p.name === 'Enterprise'
+                      ? '/contact'
+                      : accountsAvailable
+                        ? '/signup'
+                        : '/demo'
+                  }
                   className={`mt-8 inline-flex h-12 items-center justify-center rounded-full px-5 text-sm font-medium transition-transform hover:scale-[1.02] ${
                     p.highlight ? 'bg-paper text-ink' : 'bg-ink text-paper'
                   }`}
                 >
-                  {p.cta}
+                  {p.name === 'Enterprise' || accountsAvailable
+                    ? p.cta
+                    : 'Explore the demo'}
                 </Link>
               </div>
             </Reveal>
@@ -430,6 +440,7 @@ export function FAQ() {
 
 /* ------------------------------------------------------------------ Final CTA */
 export function FinalCTA() {
+  const accountsAvailable = isSupabaseConfigured();
   return (
     <section className="bg-ink">
       <div className="mx-auto max-w-5xl px-5 py-28 text-center sm:px-8 sm:py-36">
@@ -442,16 +453,17 @@ export function FinalCTA() {
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link
-            href="/signup"
+            href={accountsAvailable ? '/signup' : '/demo'}
             className="inline-flex h-12 items-center gap-2 rounded-full bg-paper px-7 text-[15px] font-medium text-ink transition-transform hover:scale-[1.03]"
           >
-            Start free <ArrowRight className="h-4 w-4" />
+            {accountsAvailable ? 'Start free' : 'Try a sample assessment'}{' '}
+            <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
-            href="/book"
+            href="/tools"
             className="inline-flex h-12 items-center rounded-full border border-white/20 px-7 text-[15px] font-medium text-white transition-colors hover:bg-white/10"
           >
-            Book a demo
+            Explore AI tools
           </Link>
         </div>
       </div>

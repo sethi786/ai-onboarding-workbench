@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { emailRedirect } from '@/lib/auth/email-flow';
+import { authErrorMessage } from '@/lib/auth/errors';
 import {
   AuthInput,
   AuthLabel,
@@ -19,6 +20,7 @@ export default function ForgotPasswordPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError(null);
     try {
@@ -29,7 +31,13 @@ export default function ForgotPasswordPage() {
           redirectTo: emailRedirect(window.location.origin, '/reset-password'),
         },
       );
-      if (error) setError(error.message);
+      if (error)
+        setError(
+          authErrorMessage(
+            error,
+            'We could not send a reset link. Please try again shortly.',
+          ),
+        );
       else setSent(true);
       setLoading(false);
     } catch {
@@ -66,7 +74,7 @@ export default function ForgotPasswordPage() {
       <p className="mt-1 text-sm text-muted-foreground">
         We’ll email you a reset link.
       </p>
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <form onSubmit={onSubmit} aria-busy={loading} className="mt-6 space-y-4">
         <AuthError message={error} />
         <div>
           <AuthLabel htmlFor="email">Work email</AuthLabel>
@@ -74,6 +82,9 @@ export default function ForgotPasswordPage() {
             id="email"
             type="email"
             autoComplete="email"
+            autoCapitalize="none"
+            spellCheck={false}
+            disabled={loading}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}

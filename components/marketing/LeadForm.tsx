@@ -53,7 +53,7 @@ export function LeadForm({
           tool catalogue while we finish setup.
         </p>
         <div className="mt-5 flex flex-wrap gap-4">
-          <Link className="text-electric underline" href="/#demo">
+          <Link className="text-electric underline" href="/demo">
             Try the demo
           </Link>
           <Link className="text-electric underline" href="/tools">

@@ -2,18 +2,20 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { safeNext } from '@/lib/auth/safe-redirect';
+import { authErrorMessage, needsEmailConfirmation } from '@/lib/auth/errors';
+import { navigateAfterSignIn } from '@/lib/auth/navigation';
 import {
   AuthInput,
   AuthLabel,
   AuthError,
   AuthSubmit,
+  AuthPasswordInput,
 } from '@/components/auth/auth-ui';
 
 function LoginInner() {
-  const router = useRouter();
   const params = useSearchParams();
   const next = safeNext(params.get('next'));
   const [email, setEmail] = useState('');
@@ -26,24 +28,37 @@ function LoginInner() {
         : null,
   );
   const [loading, setLoading] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError(null);
+    setConfirmEmail(false);
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
       if (error) {
-        setError(error.message);
-        setLoading(false);
+        setError(
+          authErrorMessage(
+            error,
+            'We could not sign you in. Check your details and try again.',
+          ),
+        );
+        setConfirmEmail(needsEmailConfirmation(error));
         return;
       }
-      router.push(next);
-      router.refresh();
+      if (!data.session) {
+        setError(
+          'We could not start your session. Please try signing in again.',
+        );
+        return;
+      }
+      navigateAfterSignIn(next);
     } catch {
       setError('We could not sign in. Please retry.');
     } finally {
@@ -53,11 +68,13 @@ function LoginInner() {
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-foreground">Log in to Aegis</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Welcome back.</p>
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <h1 className="text-3xl font-semibold tracking-tight">Welcome back.</h1>
+      <p className="mt-3 text-sm leading-6 text-muted-foreground">
+        Sign in to your Aegis workspace to continue your AI reviews.
+      </p>
+      <form onSubmit={onSubmit} aria-busy={loading} className="mt-8 space-y-5">
         <AuthError message={error} />
-        {error && (
+        {confirmEmail && (
           <Link
             href={`/resend-confirmation?next=${encodeURIComponent(next)}`}
             className="block text-sm underline"
@@ -71,6 +88,9 @@ function LoginInner() {
             id="email"
             type="email"
             autoComplete="email"
+            disabled={loading}
+            autoCapitalize="none"
+            spellCheck={false}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -81,15 +101,15 @@ function LoginInner() {
             <AuthLabel htmlFor="password">Password</AuthLabel>
             <Link
               href="/forgot-password"
-              className="mb-1.5 text-xs text-electric hover:underline"
+              className="mb-2 inline-flex min-h-11 items-center text-sm text-electric hover:underline"
             >
-              Forgot?
+              Forgot password?
             </Link>
           </div>
-          <AuthInput
+          <AuthPasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
+            disabled={loading}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -114,7 +134,7 @@ function LoginInner() {
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<p role="status">Loading sign-in…</p>}>
       <LoginInner />
     </Suspense>
   );

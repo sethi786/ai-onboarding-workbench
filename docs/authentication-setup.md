@@ -1,5 +1,7 @@
 # Authentication, database and administration setup
 
+The October 19 [customer issue fixes](customer-issue-fixes.md) document the reproduced blank-button defect and current sign-in behavior. Successful password authentication requires a returned session and requests a fresh document, so prefetched guest content is not reused. Missing public configuration displays a credential-free unavailable screen; this fallback is not a substitute for connecting the hosted service.
+
 These are deployment requirements, not evidence that the complete customer journey passes. A free Supabase staging project now has migrations 0001–0009 installed and basic hosted SQL checks passing. An additional hardening migration remains pending after provider request-expiry errors. Vercel access is still blocked by a 403. No real signup, email delivery or payment was verified. See the current [hosted acceptance record](hosted-acceptance.md).
 
 ## Connect the existing services

@@ -2,7 +2,11 @@ import Link from 'next/link';
 import { ArrowUpRight, ArrowRight, Check } from 'lucide-react';
 import { ProductPreview } from './ProductPreview';
 
-export function Hero() {
+export function Hero({
+  accountsAvailable = true,
+}: {
+  accountsAvailable?: boolean;
+}) {
   return (
     <section className="relative overflow-hidden bg-paper">
       <div className="mx-auto max-w-6xl px-5 pb-16 pt-14 sm:px-8 sm:pb-24 sm:pt-24">
@@ -26,22 +30,28 @@ export function Hero() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
-                href="/signup"
+                href={accountsAvailable ? '/signup' : '/demo'}
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-ink px-6 text-sm font-medium text-paper"
               >
-                Start an assessment
+                {accountsAvailable
+                  ? 'Start an assessment'
+                  : 'Try a sample assessment'}
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/demo"
+                href={accountsAvailable ? '/demo' : '/tools'}
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-border px-6 text-sm font-medium hover:bg-muted"
               >
-                Explore the demo
+                {accountsAvailable
+                  ? 'Explore the demo'
+                  : 'Browse the tool catalogue'}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
             <p className="mt-4 text-xs text-muted-foreground">
-              3 free evaluations. No credit card required.
+              {accountsAvailable
+                ? '3 free evaluations. No credit card required.'
+                : 'Interactive preview. No account or credit card required.'}
             </p>
           </div>
         </div>

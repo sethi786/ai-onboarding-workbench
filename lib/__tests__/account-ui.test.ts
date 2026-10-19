@@ -82,7 +82,10 @@ it('keeps password inputs on a connection failure and permits a successful retry
   expect(container.querySelector<HTMLInputElement>('#password')!.value).toBe(
     'A test password',
   );
-  expect(container.querySelector('button')!.disabled).toBe(false);
+  expect(
+    container.querySelector<HTMLButtonElement>('button[type="submit"]')!
+      .disabled,
+  ).toBe(false);
   await submit();
   expect(container.querySelector('[role="status"]')?.textContent).toContain(
     'new password',
